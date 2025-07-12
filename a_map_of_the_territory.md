@@ -12,15 +12,16 @@ the mountain. We transform this higher-level representation down to successively
 lower-level forms to get closer and closer to something we know how to make the
 CPU actually execute.
 
-__Our program__
+```
 `var average = (min + max) / 2;`
+```
 
 ## Step 1: Scanning (or Lexing, aka Lexical Analysis)
 
 The process where the language's scanner takes in a linear stream of characters
 and chunks them together into a series of "words", or, more formally, "tokens".
 
-__Our program scanned__
+```
 - var
 - average
 - =
@@ -32,6 +33,7 @@ __Our program scanned__
 - /
 - 2
 - ;
+```
 
 ## Step 2: Parsing
 
@@ -42,6 +44,7 @@ mirrors the nested nature of the grammar.
 
 This trees are called parse trees or abstract syntax trees (ASTs)
 
+```
         Stmt.Var [average]
                      |
         Expr.Binary [/]
@@ -49,5 +52,6 @@ This trees are called parse trees or abstract syntax trees (ASTs)
       Expr.Binary [+] [2] Expr.Literal
                   /     \
  Expr.Variable [min]   [max] Expr.Variable
+```
 
 A parser should also be able to report syntax errors.
