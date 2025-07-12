@@ -32,3 +32,22 @@ __Our program scanned__
 - /
 - 2
 - ;
+
+## Step 2: Parsing
+
+This is where our syntax gets a grammer -- the ability to compose larger
+expressions and statementss out of smaller parts. At this stage, the languge's
+parser takes the flat sequence of tokens and builds a tree structure that
+mirrors the nested nature of the grammar.
+
+This trees are called parse trees or abstract syntax trees (ASTs)
+
+        Stmt.Var [average]
+                     |
+        Expr.Binary [/]
+                    / \
+      Expr.Binary [+] [2] Expr.Literal
+                  /     \
+ Expr.Variable [min]   [max] Expr.Variable
+
+A parser should also be able to report syntax errors.
