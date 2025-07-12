@@ -55,3 +55,17 @@ This trees are called parse trees or abstract syntax trees (ASTs)
 ```
 
 A parser should also be able to report syntax errors.
+
+## Step 3: Static Analysis
+
+The analysis of a program without executing it. This involves binding/resolution
+or identifiers, determination of scope, type validation (in typed languages),
+etc. The semantic insight gained is then stored in any of the following:
+
+- As attributes on the syntax tree itself (extra fields in the nodes that aren't
+initialized during parsing but get filled in later
+- A lookup table (a symbol table)
+- Transforming the tree into an entirely new data structure that more directly
+expresses the semantics of the code
+
+#### NOTE Everthing up to this point is considered the frontend of a language.
