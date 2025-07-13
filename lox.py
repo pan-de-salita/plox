@@ -8,7 +8,7 @@ class Lox:
     def main(args: list[str]) -> None:
         if len(args) > 1:
             print("Usage: jlox [script]")
-            sys.exit(64)  # UNIX/POSIX convention for command line usage error
+            sys.exit(64)  # UNIX/POSIX convention for command line usage error.
         elif len(args) == 1:
             Lox.__run_file(args[0])
         else:
@@ -20,7 +20,7 @@ class Lox:
             bytes = file.read()
             Lox.__run(bytes)
             if Lox.had_error:
-                sys.exit(65)  # UNIX/POSIX convention for data format error
+                sys.exit(65)  # UNIX/POSIX convention for data format error.
 
     @staticmethod
     def __run_prompt() -> None:
@@ -33,7 +33,7 @@ class Lox:
 
     @staticmethod
     def __run(source: str) -> None:
-        scanner = Scanner(source)  # TODO: Define Scanner class
+        scanner = Scanner(source)  # TODO: Define Scanner class.
         tokens = scanner.scan_tokens()
 
         for token in tokens:
