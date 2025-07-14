@@ -47,10 +47,14 @@ class LoxScanner:
                 self.add_token(LoxTokenType.SEMICOLON)
             case "*":
                 self.add_token(LoxTokenType.STAR)
+            case " ":
+                pass
             case "\n":
                 self.line += 1
             case _:
-                pass
+                from lox import Lox
+
+                Lox.error(self.line, "Unexpected character")
 
     def is_at_end(self) -> bool:
         return self.current >= len(self.source)
