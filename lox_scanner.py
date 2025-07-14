@@ -20,8 +20,45 @@ class LoxScanner:
         self.tokens += [LoxToken(LoxTokenType.EOF, "", None, self.line)]
         return self.tokens
 
+    def scan_token(self) -> None:
+        char: str = self.advance()
+
+        match char:
+            case "(":
+                self.add_token(LoxTokenType.LEFT_PAREN)
+            case ")":
+                self.add_token(LoxTokenType.RIGHT_PAREN)
+            case "{":
+                self.add_token(LoxTokenType.LEFT_BRACE)
+            case "}":
+                self.add_token(LoxTokenType.RIGHT_PAREN)
+            case ",":
+                self.add_token(LoxTokenType.COMMA)
+            case ".":
+                self.add_token(LoxTokenType.DOT)
+            case "-":
+                self.add_token(LoxTokenType.MINUS)
+            case "+":
+                self.add_token(LoxTokenType.PLUS)
+            case ";":
+                self.add_token(LoxTokenType.SEMICOLON)
+            case "*":
+                self.add_token(LoxTokenType.STAR)
+            case "\n":
+                self.line += 1
+            case _:
+                pass
+
     def is_at_end(self) -> bool:
         return self.current >= len(self.source)
 
-    def scan_token() -> None:
-        return None
+    def advance(self) -> str:
+        char: str = self.source[self.current]
+        self.current += 1
+        return char
+
+    def add_token(self, type: LoxTokenType, literal: str | None = None) -> None:
+        # self.current will be incremented to the right index because of
+        # self.advance()
+        text: str = self.source[self.start : self.current]
+        self.tokens += [LoxToken(type, text, literal, self.line)]

@@ -12,4 +12,4 @@ class LoxToken:
     line: int
 
     def __str__(self) -> str:
-        return f"{self.type} {self.lexeme} {self.literal}"
+        return f"Type: {self.type.name}, Lexeme: {self.lexeme}, Literal: {self.literal if self.literal else 'None'}, Line: {self.line}"
