@@ -1,6 +1,6 @@
 import sys
 
-from scanner import Scanner
+from lox_scanner import LoxScanner
 
 
 class Lox:
@@ -35,12 +35,12 @@ class Lox:
 
     @staticmethod
     def __run(source: str) -> None:
-        scanner = Scanner(source)
-        tokens = scanner.scan_tokens()
-
-        for token in tokens:
-            print(token)
-            # Handle errors here?
+        scanner = LoxScanner(source)
+        # tokens = scanner.scan_tokens()
+        #
+        # for token in tokens:
+        #     print(token)
+        #     # Handle errors here?
 
     # NOTE: Separate the code that generates the errors from the code that reports them. Separate
     # phases of the front end will detect errors, but it's not really their job to know how to
