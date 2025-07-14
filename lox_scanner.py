@@ -1,3 +1,5 @@
+import json
+
 from dataclasses import dataclass, field
 
 from lox_token import LoxToken
@@ -13,6 +15,9 @@ class LoxScanner:
     line: int = 1
 
     def scan_tokens(self) -> list[LoxToken]:
+        # For inspection purposes.
+        # print(json.dumps(self.source))
+
         while not self.is_at_end():
             self.start = self.current
             self.scan_token()
@@ -59,6 +64,6 @@ class LoxScanner:
 
     def add_token(self, type: LoxTokenType, literal: str | None = None) -> None:
         # self.current will be incremented to the right index because of
-        # self.advance()
+        # self.advance().
         text: str = self.source[self.start : self.current]
         self.tokens += [LoxToken(type, text, literal, self.line)]
