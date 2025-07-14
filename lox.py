@@ -42,10 +42,6 @@ class Lox:
         #     print(token)
         #     # Handle errors here?
 
-    # NOTE: Separate the code that generates the errors from the code that reports them. Separate
-    # phases of the front end will detect errors, but it's not really their job to know how to
-    # present that to a user.
-
     @staticmethod
     def error(line: int, message: str) -> None:
         Lox.__report(line, "", message)
