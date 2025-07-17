@@ -1,3 +1,6 @@
 // this is a comment
-(( )){} // grouping stuff
+(("string
+  continued"
+)){} // grouping stuff
 !*+-/=<> <= == // operators
+"word

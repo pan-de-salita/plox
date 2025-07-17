@@ -25,7 +25,6 @@ class LoxScanner:
 
     def __scan_token(self) -> None:
         char: str = self.__advance()
-        print(repr(char))
 
         match char:
             case "(":
@@ -78,6 +77,8 @@ class LoxScanner:
                 pass
             case "\n":
                 self.line += 1
+            case '"':
+                self.__string()
             case _:
                 from lox import Lox
 
@@ -100,7 +101,7 @@ class LoxScanner:
         if self.__is_at_end():
             return False
 
-        if self.source[self.current] == expected:
+        if self.source[self.current] != expected:
             return False
 
         self.current += 1
@@ -111,3 +112,38 @@ class LoxScanner:
             return "\0"
 
         return self.source[self.current]
+
+    def __string(self):
+        while self.__peek() != '"' and not self.__is_at_end():
+            if self.__peek() == "\n":
+                self.line += 1
+            self.__advance()
+
+        if self.__is_at_end():
+            from lox import Lox
+
+            Lox.error(self.line, "Unterminated string.")
+            return
+
+        self.__advance()
+
+        string: str = self.source[self.start + 1 : self.current - 1]
+        self.__add_token(LoxTokenType.STRING, string)
+
+    # Own version
+    # Less explicit about advancing to consume second quote
+    # def __string(self):
+    #     while not self.__match('"') and not self.__is_at_end():
+    #         if self.__peek() == "\n":
+    #             self.line += 1
+    #         self.__advance()
+    #
+    #     if self.__is_at_end():
+    #         from lox import Lox
+    #
+    #         Lox.error(self.line, "Unterminated string.")
+    #         return
+    #
+    #     self.__add_token(
+    #         LoxTokenType.STRING, self.source[self.start + 1 : self.current - 1]
+    #     )
