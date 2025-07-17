@@ -37,10 +37,8 @@ class Lox:
     def __run(source: str) -> None:
         scanner = LoxScanner(source)
         tokens = scanner.scan_tokens()
-
         for token in tokens:
             print(token)
-            # Handle errors here?
 
     @staticmethod
     def error(line: int, message: str) -> None:
@@ -48,7 +46,7 @@ class Lox:
 
     @staticmethod
     def __report(line: int, where: str, message: str) -> None:
-        print(f"[line {line}] Error {where}: {message}")
+        print(f"[line {line}] Error{where}: {message}")
         Lox.had_error = True
 
 

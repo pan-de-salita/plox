@@ -47,6 +47,26 @@ class LoxScanner:
                 self.add_token(LoxTokenType.SEMICOLON)
             case "*":
                 self.add_token(LoxTokenType.STAR)
+            case "!":
+                self.add_token(
+                    LoxTokenType.BANG_EQUAL if self.__match("=") else LoxTokenType.BANG
+                )
+            case "=":
+                self.add_token(
+                    LoxTokenType.EQUAL_EQUAL
+                    if self.__match("=")
+                    else LoxTokenType.EQUAL
+                )
+            case "<":
+                self.add_token(
+                    LoxTokenType.LESS_EQUAL if self.__match("=") else LoxTokenType.LESS
+                )
+            case ">":
+                self.add_token(
+                    LoxTokenType.GREATER_EQUAL
+                    if self.__match("=")
+                    else LoxTokenType.GREATER
+                )
             case " ":
                 pass
             case "\n":
@@ -54,7 +74,7 @@ class LoxScanner:
             case _:
                 from lox import Lox
 
-                Lox.error(self.line, "Unexpected character")
+                Lox.error(self.line, "Unexpected character.")
 
     def is_at_end(self) -> bool:
         return self.current >= len(self.source)
@@ -68,3 +88,13 @@ class LoxScanner:
         # self.advance().
         text: str = self.source[self.start : self.current]
         self.tokens += [LoxToken(type, text, literal, self.line)]
+
+    def __match(self, expected: str) -> bool:
+        if self.is_at_end():
+            return False
+
+        if self.source[self.current] == expected:
+            return False
+
+        self.current += 1
+        return True
