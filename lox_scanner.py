@@ -16,58 +16,65 @@ class LoxScanner:
         # For inspection purposes.
         print(repr(self.source))
 
-        while not self.is_at_end():
+        while not self.__is_at_end():
             self.start = self.current
-            self.scan_token()
+            self.__scan_token()
 
         self.tokens += [LoxToken(LoxTokenType.EOF, "", None, self.line)]
         return self.tokens
 
-    def scan_token(self) -> None:
-        char: str = self.advance()
+    def __scan_token(self) -> None:
+        char: str = self.__advance()
+        print(repr(char))
 
         match char:
             case "(":
-                self.add_token(LoxTokenType.LEFT_PAREN)
+                self.__add_token(LoxTokenType.LEFT_PAREN)
             case ")":
-                self.add_token(LoxTokenType.RIGHT_PAREN)
+                self.__add_token(LoxTokenType.RIGHT_PAREN)
             case "{":
-                self.add_token(LoxTokenType.LEFT_BRACE)
+                self.__add_token(LoxTokenType.LEFT_BRACE)
             case "}":
-                self.add_token(LoxTokenType.RIGHT_PAREN)
+                self.__add_token(LoxTokenType.RIGHT_PAREN)
             case ",":
-                self.add_token(LoxTokenType.COMMA)
+                self.__add_token(LoxTokenType.COMMA)
             case ".":
-                self.add_token(LoxTokenType.DOT)
+                self.__add_token(LoxTokenType.DOT)
             case "-":
-                self.add_token(LoxTokenType.MINUS)
+                self.__add_token(LoxTokenType.MINUS)
             case "+":
-                self.add_token(LoxTokenType.PLUS)
+                self.__add_token(LoxTokenType.PLUS)
             case ";":
-                self.add_token(LoxTokenType.SEMICOLON)
+                self.__add_token(LoxTokenType.SEMICOLON)
             case "*":
-                self.add_token(LoxTokenType.STAR)
+                self.__add_token(LoxTokenType.STAR)
             case "!":
-                self.add_token(
+                self.__add_token(
                     LoxTokenType.BANG_EQUAL if self.__match("=") else LoxTokenType.BANG
                 )
             case "=":
-                self.add_token(
+                self.__add_token(
                     LoxTokenType.EQUAL_EQUAL
                     if self.__match("=")
                     else LoxTokenType.EQUAL
                 )
             case "<":
-                self.add_token(
+                self.__add_token(
                     LoxTokenType.LESS_EQUAL if self.__match("=") else LoxTokenType.LESS
                 )
             case ">":
-                self.add_token(
+                self.__add_token(
                     LoxTokenType.GREATER_EQUAL
                     if self.__match("=")
                     else LoxTokenType.GREATER
                 )
-            case " ":
+            case "/":
+                if self.__match("/"):
+                    while self.__peek() != "\n" and not self.__is_at_end():
+                        self.__advance()
+                else:
+                    self.__add_token(LoxTokenType.SLASH)
+            case " " | "\r" | "\t":
                 pass
             case "\n":
                 self.line += 1
@@ -76,21 +83,21 @@ class LoxScanner:
 
                 Lox.error(self.line, "Unexpected character.")
 
-    def is_at_end(self) -> bool:
+    def __is_at_end(self) -> bool:
         return self.current >= len(self.source)
 
-    def advance(self) -> str:
+    def __advance(self) -> str:
         self.current += 1
         return self.source[self.current - 1]
 
-    def add_token(self, type: LoxTokenType, literal: str | None = None) -> None:
+    def __add_token(self, type: LoxTokenType, literal: str | None = None) -> None:
         # NOTE: self.current will be incremented to the right index because of
         # self.advance().
         text: str = self.source[self.start : self.current]
         self.tokens += [LoxToken(type, text, literal, self.line)]
 
     def __match(self, expected: str) -> bool:
-        if self.is_at_end():
+        if self.__is_at_end():
             return False
 
         if self.source[self.current] == expected:
@@ -98,3 +105,9 @@ class LoxScanner:
 
         self.current += 1
         return True
+
+    def __peek(self) -> str:
+        if self.__is_at_end():
+            return "\0"
+
+        return self.source[self.current]
