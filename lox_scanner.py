@@ -125,8 +125,10 @@ class LoxScanner:
             Lox.error(self.line, "Unterminated string.")
             return
 
+        # Consume the closing ".
         self.__advance()
 
+        # Trim the surrounding quotes.
         string: str = self.source[self.start + 1 : self.current - 1]
         self.__add_token(LoxTokenType.STRING, string)
 
