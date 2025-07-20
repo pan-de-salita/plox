@@ -113,7 +113,7 @@ class LoxScanner:
 
         return self.source[self.current]
 
-    def __string(self):
+    def __string(self) -> None:
         while self.__peek() != '"' and not self.__is_at_end():
             if self.__peek() == "\n":
                 self.line += 1
