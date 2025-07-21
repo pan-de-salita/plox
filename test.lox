@@ -1,1 +1,6 @@
-1
+// this is a comment
+(("string
+  continued"
+)){} // grouping stuff
+!*+-/=<> <= == // operators
+word orchid or for "word" 3.14 fun
