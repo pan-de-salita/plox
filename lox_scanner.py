@@ -161,7 +161,7 @@ class LoxScanner:
         while self.__is_digit(self.__peek()):
             self.__advance()
 
-        if not self.__is_at_end() and self.__is_digit(self.__peek_next()):
+        if self.__peek() == "." and self.__is_digit(self.__peek_next()):
             self.__advance()
 
             while self.__is_digit(self.__peek()):
@@ -172,7 +172,7 @@ class LoxScanner:
         )
 
     def __peek_next(self) -> str:
-        if self.__is_at_end():
+        if self.current + 1 >= len(self.source):
             return "\0"
 
         return self.source[self.current + 1]
