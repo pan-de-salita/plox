@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Any
 
 from lox_token import LoxToken
 from lox_token_type import LoxTokenType
@@ -80,9 +81,12 @@ class LoxScanner:
             case '"':
                 self.__string()
             case _:
-                from lox import Lox
+                if self.__is_digit(char):
+                    self.__number()
+                else:
+                    from lox import Lox
 
-                Lox.error(self.line, "Unexpected character.")
+                    Lox.error(self.line, "Unexpected character.")
 
     def __is_at_end(self) -> bool:
         return self.current >= len(self.source)
@@ -91,7 +95,7 @@ class LoxScanner:
         self.current += 1
         return self.source[self.current - 1]
 
-    def __add_token(self, type: LoxTokenType, literal: str | None = None) -> None:
+    def __add_token(self, type: LoxTokenType, literal: Any = None) -> None:
         # NOTE: self.current will be incremented to the right index because of
         # self.advance().
         text: str = self.source[self.start : self.current]
@@ -149,3 +153,26 @@ class LoxScanner:
     #     self.__add_token(
     #         LoxTokenType.STRING, self.source[self.start + 1 : self.current - 1]
     #     )
+
+    def __is_digit(self, c: str) -> bool:
+        return c >= "0" and c <= "9"
+
+    def __number(self) -> None:
+        while self.__is_digit(self.__peek()):
+            self.__advance()
+
+        if not self.__is_at_end() and self.__is_digit(self.__peek_next()):
+            self.__advance()
+
+            while self.__is_digit(self.__peek()):
+                self.__advance()
+
+        self.__add_token(
+            LoxTokenType.NUMBER, float(self.source[self.start : self.current])
+        )
+
+    def __peek_next(self) -> str:
+        if self.__is_at_end():
+            return "\0"
+
+        return self.source[self.current + 1]
