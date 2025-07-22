@@ -333,8 +333,8 @@ class LoxScanner:
                 open_block_comments -= 1
 
             # Advance by one character only if no /* or */ registered.
-            # Use of __peek() is more defensive.
             else:
+                # NOTE: Use of __peek() is more defensive than self.source[self.current].
                 if self.__peek() == "\n":
                     self.line += 1  # Track line number.
 
