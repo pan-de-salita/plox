@@ -13,28 +13,27 @@ class LoxScanner:
     start: int = 0
     current: int = 0
     line: int = 1
+
+    _KEYWORDS = [
+        LoxTokenType.AND,
+        LoxTokenType.CLASS,
+        LoxTokenType.ELSE,
+        LoxTokenType.FALSE,
+        LoxTokenType.FOR,
+        LoxTokenType.FUN,
+        LoxTokenType.IF,
+        LoxTokenType.NIL,
+        LoxTokenType.OR,
+        LoxTokenType.PRINT,
+        LoxTokenType.RETURN,
+        LoxTokenType.SUPER,
+        LoxTokenType.THIS,
+        LoxTokenType.TRUE,
+        LoxTokenType.VAR,
+        LoxTokenType.WHILE,
+    ]
     keywords: MappingProxyType[str, LoxTokenType] = MappingProxyType(
-        {
-            keyword.name.lower(): keyword
-            for keyword in [
-                LoxTokenType.AND,
-                LoxTokenType.CLASS,
-                LoxTokenType.ELSE,
-                LoxTokenType.FALSE,
-                LoxTokenType.FOR,
-                LoxTokenType.FUN,
-                LoxTokenType.IF,
-                LoxTokenType.NIL,
-                LoxTokenType.OR,
-                LoxTokenType.PRINT,
-                LoxTokenType.RETURN,
-                LoxTokenType.SUPER,
-                LoxTokenType.THIS,
-                LoxTokenType.TRUE,
-                LoxTokenType.VAR,
-                LoxTokenType.WHILE,
-            ]
-        }
+        {keyword.name.lower(): keyword for keyword in _KEYWORDS}
     )
 
     def scan_tokens(self) -> list[LoxToken]:
