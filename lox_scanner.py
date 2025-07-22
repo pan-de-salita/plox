@@ -104,7 +104,7 @@ class LoxScanner:
                     while self.__peek() != "\n" and not self.__is_at_end():
                         self.__advance()
                 elif self.__match("*"):
-                    self.__block_comment()
+                    self.__block_comments()
                 else:
                     self.__add_token(LoxTokenType.SLASH)
             case " " | "\r" | "\t":
@@ -307,9 +307,9 @@ class LoxScanner:
     #     return self.__peek() + self.__peek_next() == "*/"
 
     # Iter 2:
-    def __block_comment(self) -> None:
+    def __block_comments(self) -> None:
         """
-        Check for block comment.
+        Check for block comments.
         """
         # Track open block comments.
         open_block_comments: int = 1
