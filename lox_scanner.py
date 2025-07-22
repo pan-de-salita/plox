@@ -302,6 +302,9 @@ class LoxScanner:
 
     # Iter 2:
     def __block_comment(self) -> None:
+        """
+        Checks for block comment.
+        """
         # Loop until we find */ or reach end.
         while self.current + 1 < len(self.source):
             if self.__peek() + self.__peek_next() == "*/":
