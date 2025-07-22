@@ -10,4 +10,14 @@ word orchid or for "word" 3.14 fun
 1 2 3 /*
           An unterminated block comment?
       * /
-/*/
+
+/*
+  /*
+    Nope. A nested block comment.
+  */
+*/
+
+*
+
+
+/**/*/

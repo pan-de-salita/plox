@@ -41,7 +41,9 @@ class LoxScanner:
         Scans tokens from source.
         """
         # For inspection purposes.
-        print(repr(self.source))
+        print(f"Source length: {len(self.source)}")
+        print("Source:")
+        print(repr(self.source) + "\n")
 
         while not self.__is_at_end():
             self.start = self.current
@@ -309,19 +311,37 @@ class LoxScanner:
         """
         Checks for block comment.
         """
-        # Loop until we find */ or reach end.
-        while self.current + 1 < len(self.source):
-            if self.__peek() + self.__peek_next() == "*/":
+        # Track open block comments.
+        open_block_comments: int = 1
+
+        # Loop until we find last */ or reach end.
+        while open_block_comments > 0 and self.current + 1 < len(self.source):
+            # Check for new depth.
+            if self.__peek() + self.__peek_next() == "/*":
+                self.__advance()  # Consume /.
+                self.__advance()  # Consume *.
+                open_block_comments += 1
+
+            # Check for closing */.
+            elif self.__peek() + self.__peek_next() == "*/":
                 self.__advance()  # Consume *.
                 self.__advance()  # Consume /.
-                return
+                open_block_comments -= 1
 
+            # Advance by one character only if no /* or */ registered.
             # Use of __peek() is more defensive.
-            if self.__peek() == "\n":
-                self.line += 1  # Track line number.
+            else:
+                if self.__peek() == "\n":
+                    self.line += 1  # Track line number.
 
-            self.__advance()
+                self.__advance()
 
-        from lox import Lox
+        # For inspection purposes.
+        print(f"Open block comments: {open_block_comments}")
+        print("Block comment:")
+        print(self.source[self.start : self.current] + "\n")
 
-        Lox.error(self.line, "Unterminated block comment.")
+        if open_block_comments != 0:
+            from lox import Lox
+
+            Lox.error(self.line, "Unterminated block comment.")
