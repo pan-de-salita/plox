@@ -302,7 +302,7 @@ class LoxScanner:
 
             # Advance by one character only if no /* or */ registered.
             else:
-                # NOTE: Use of __peek() is more defensive than self.source[self.current].
+                # NOTE: Use of self.__peek() is more defensive than self.source[self.current].
                 if self.__peek() == "\n":
                     self.line += 1  # Track line number.
 
