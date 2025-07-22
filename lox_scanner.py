@@ -102,6 +102,8 @@ class LoxScanner:
                 if self.__match("/"):
                     while self.__peek() != "\n" and not self.__is_at_end():
                         self.__advance()
+                elif self.__match("*"):
+                    self.__block_comment()
                 else:
                     self.__add_token(LoxTokenType.SLASH)
             case " " | "\r" | "\t":
@@ -272,3 +274,48 @@ class LoxScanner:
         import string
 
         return char in string.ascii_letters + "_"
+
+    # Iter 1:
+    # def __block_comment(self) -> None:
+    #     while (
+    #         not self.__is_two_chars_before_end() and not self.__is_block_comment_close()
+    #     ):
+    #         self.__advance()
+    #
+    #     if not self.__is_two_chars_before_end() and self.__is_block_comment_close():
+    #         self.__advance()
+    #         self.__advance()
+    #         return
+    #     else:
+    #         from lox import Lox
+    #
+    #         Lox.error(self.line, "Unterminated block comment.")
+    #         print(
+    #             "Unterminated block comment: " + self.source[self.start : self.current]
+    #         )
+    #
+    # def __is_two_chars_before_end(self) -> bool:
+    #     return self.current + 1 == len(self.source)
+    #
+    # def __is_block_comment_close(self) -> bool:
+    #     return self.__peek() + self.__peek_next() == "*/"
+
+    # Iter 2:
+    def __block_comment(self) -> None:
+        # Loop until we find */ or reach end.
+        while self.current + 1 < len(self.source):
+            if self.__peek() + self.__peek_next() == "*/":
+                self.__advance()  # Consume *.
+                self.__advance()  # Consume /.
+                print(self.source[self.start : self.current])
+                return
+
+            # Use of __peek() is more defensive.
+            if self.__peek() == "\n":
+                self.line += 1  # Track line number.
+
+            self.__advance()
+
+        from lox import Lox
+
+        Lox.error(self.line, "Unterminated block comment.")
