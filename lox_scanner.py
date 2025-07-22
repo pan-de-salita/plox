@@ -309,7 +309,7 @@ class LoxScanner:
     # Iter 2:
     def __block_comment(self) -> None:
         """
-        Checks for block comment.
+        Check for block comment.
         """
         # Track open block comments.
         open_block_comments: int = 1
