@@ -314,16 +314,20 @@ class LoxScanner:
         # Track open block comments.
         open_block_comments: int = 1
 
-        # Loop until we find last */ or reach end.
+        # Loop until:
+        # - No more open block comments
+        # - Fewer then two characters to scan
         while open_block_comments > 0 and self.current + 1 < len(self.source):
+            two_chars_ahead = self.__peek() + self.__peek_next()
+
             # Check for new depth.
-            if self.__peek() + self.__peek_next() == "/*":
+            if two_chars_ahead == "/*":
                 self.__advance()  # Consume /.
                 self.__advance()  # Consume *.
                 open_block_comments += 1
 
             # Check for closing */.
-            elif self.__peek() + self.__peek_next() == "*/":
+            elif two_chars_ahead == "*/":
                 self.__advance()  # Consume *.
                 self.__advance()  # Consume /.
                 open_block_comments -= 1
@@ -337,7 +341,7 @@ class LoxScanner:
                 self.__advance()
 
         # For inspection purposes.
-        print(f"Open block comments: {open_block_comments}")
+        print(f"Open block comments remaining: {open_block_comments}")
         print("Block comment:")
         print(self.source[self.start : self.current] + "\n")
 
