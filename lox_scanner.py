@@ -65,7 +65,7 @@ class LoxScanner:
             case "{":
                 self.__add_token(LoxTokenType.LEFT_BRACE)
             case "}":
-                self.__add_token(LoxTokenType.RIGHT_PAREN)
+                self.__add_token(LoxTokenType.RIGHT_BRACE)
             case ",":
                 self.__add_token(LoxTokenType.COMMA)
             case ".":
