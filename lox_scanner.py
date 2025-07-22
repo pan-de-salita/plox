@@ -213,7 +213,12 @@ class LoxScanner:
         """
         Checks if char is a digit.
         """
-        return char in map(str, range(0, 10))
+        # Iter 1:
+        # return char in map(str, range(0, 10))
+
+        # Iter 2:
+        # Slightly faster than map/range.
+        return "0" <= char <= "9"
 
     def __number(self) -> None:
         """
