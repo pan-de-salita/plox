@@ -123,21 +123,6 @@ class LoxScanner:
 
                     Lox.error(self.line, "Unexpected character.")
 
-    def __is_at_end(self) -> bool:
-        """
-        Checks if current points to the end of source. Useful for preventing
-        IndexError.
-        """
-        return self.current >= len(self.source)
-
-    def __advance(self) -> str:
-        """
-        Advances current.
-        Returns current scanned character in source.
-        """
-        self.current += 1
-        return self.source[self.current - 1]
-
     def __add_token(self, type: LoxTokenType, literal: Any = None) -> None:
         """
         Adds a token to self.tokens.
@@ -146,6 +131,14 @@ class LoxScanner:
         # self.advance().
         text: str = self.source[self.start : self.current]
         self.tokens += [LoxToken(type, text, literal, self.line)]
+
+    def __advance(self) -> str:
+        """
+        Advances current.
+        Returns current scanned character in source.
+        """
+        self.current += 1
+        return self.source[self.current - 1]
 
     def __match(self, expected: str) -> bool:
         """
@@ -324,6 +317,13 @@ class LoxScanner:
             from lox import Lox
 
             Lox.error(self.line, "Unterminated block comment.")
+
+    def __is_at_end(self) -> bool:
+        """
+        Checks if current points to the end of source. Useful for preventing
+        IndexError.
+        """
+        return self.current >= len(self.source)
 
     def __is_alpha_numeric(self, char: str) -> bool:
         """
