@@ -307,7 +307,6 @@ class LoxScanner:
             if self.__peek() + self.__peek_next() == "*/":
                 self.__advance()  # Consume *.
                 self.__advance()  # Consume /.
-                print(self.source[self.start : self.current])
                 return
 
             # Use of __peek() is more defensive.
