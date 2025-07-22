@@ -179,6 +179,24 @@ class LoxScanner:
 
         return self.source[self.current + 1]
 
+    # Iter 1 (own version).
+    # Less explicit about advancing to consume second quote.
+    # def __string(self):
+    #     while not self.__match('"') and not self.__is_at_end():
+    #         if self.__peek() == "\n":
+    #             self.line += 1
+    #         self.__advance()
+    #
+    #     if self.__is_at_end():
+    #         from lox import Lox
+    #
+    #         Lox.error(self.line, "Unterminated string.")
+    #         return
+    #
+    #     self.__add_token(
+    #         LoxTokenType.STRING, self.source[self.start + 1 : self.current - 1]
+    #     )
+
     def __string(self) -> None:
         """
         Produces a string token.
@@ -201,35 +219,6 @@ class LoxScanner:
         # Trim the surrounding quotes.
         string: str = self.source[self.start + 1 : self.current - 1]
         self.__add_token(LoxTokenType.STRING, string)
-
-    # Own version.
-    # Less explicit about advancing to consume second quote.
-    # def __string(self):
-    #     while not self.__match('"') and not self.__is_at_end():
-    #         if self.__peek() == "\n":
-    #             self.line += 1
-    #         self.__advance()
-    #
-    #     if self.__is_at_end():
-    #         from lox import Lox
-    #
-    #         Lox.error(self.line, "Unterminated string.")
-    #         return
-    #
-    #     self.__add_token(
-    #         LoxTokenType.STRING, self.source[self.start + 1 : self.current - 1]
-    #     )
-
-    def __is_digit(self, char: str) -> bool:
-        """
-        Checks if char is a digit.
-        """
-        # Iter 1:
-        # return char in map(str, range(0, 10))
-
-        # Iter 2:
-        # Slightly faster than map/range.
-        return "0" <= char <= "9"
 
     def __number(self) -> None:
         """
@@ -266,20 +255,6 @@ class LoxScanner:
             self.__add_token(keyword)
         else:
             self.__add_token(LoxTokenType.IDENTIFIER)
-
-    def __is_alpha_numeric(self, char: str) -> bool:
-        """
-        Checks if char is alphanumeric.
-        """
-        return self.__is_alpha(char) or self.__is_digit(char)
-
-    def __is_alpha(self, char: str) -> bool:
-        """
-        Checks if char is alphabetical or an underscore.
-        """
-        import string
-
-        return char in string.ascii_letters + "_"
 
     # Iter 1:
     # def __block_comment(self) -> None:
@@ -349,3 +324,28 @@ class LoxScanner:
             from lox import Lox
 
             Lox.error(self.line, "Unterminated block comment.")
+
+    def __is_alpha_numeric(self, char: str) -> bool:
+        """
+        Checks if char is alphanumeric.
+        """
+        return self.__is_alpha(char) or self.__is_digit(char)
+
+    def __is_alpha(self, char: str) -> bool:
+        """
+        Checks if char is alphabetical or an underscore.
+        """
+        import string
+
+        return char in string.ascii_letters + "_"
+
+    def __is_digit(self, char: str) -> bool:
+        """
+        Checks if char is a digit.
+        """
+        # Iter 1:
+        # return char in map(str, range(0, 10))
+
+        # Iter 2:
+        # Slightly faster than map/range.
+        return "0" <= char <= "9"
