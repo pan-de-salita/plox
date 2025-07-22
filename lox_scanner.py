@@ -170,6 +170,15 @@ class LoxScanner:
 
         return self.source[self.current]
 
+    def __peek_next(self) -> str:
+        """
+        Looks ahead by two characters in source.
+        """
+        if self.current + 1 >= len(self.source):
+            return "\0"
+
+        return self.source[self.current + 1]
+
     def __string(self) -> None:
         """
         Produces a string token.
@@ -238,15 +247,6 @@ class LoxScanner:
         self.__add_token(
             LoxTokenType.NUMBER, float(self.source[self.start : self.current])
         )
-
-    def __peek_next(self) -> str:
-        """
-        Looks ahead by two characters in source.
-        """
-        if self.current + 1 >= len(self.source):
-            return "\0"
-
-        return self.source[self.current + 1]
 
     def __identifier(self) -> None:
         """
