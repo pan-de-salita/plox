@@ -316,7 +316,7 @@ class LoxScanner:
 
         # Loop until:
         # - No more open block comments
-        # - Fewer then two characters to scan
+        # - Fewer than two characters to scan
         while open_block_comments > 0 and self.current + 1 < len(self.source):
             two_chars_ahead = self.__peek() + self.__peek_next()
 
