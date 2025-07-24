@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import Any
+from typing import Any, ClassVar
 
 from lox_token import LoxToken
 from lox_token_type import LoxTokenType
@@ -8,12 +8,6 @@ from lox_token_type import LoxTokenType
 
 @dataclass()
 class LoxScanner:
-    source: str
-    tokens: list[LoxToken] = field(default_factory=list)
-    start: int = 0
-    current: int = 0
-    line: int = 1
-
     _KEYWORDS = [
         LoxTokenType.AND,
         LoxTokenType.CLASS,
@@ -32,9 +26,15 @@ class LoxScanner:
         LoxTokenType.VAR,
         LoxTokenType.WHILE,
     ]
-    keywords: MappingProxyType[str, LoxTokenType] = MappingProxyType(
+    keywords: ClassVar[MappingProxyType[str, LoxTokenType]] = MappingProxyType(
         {keyword.name.lower(): keyword for keyword in _KEYWORDS}
     )
+
+    source: str
+    tokens: list[LoxToken] = field(default_factory=list)
+    start: int = 0
+    current: int = 0
+    line: int = 1
 
     def scan_tokens(self) -> list[LoxToken]:
         """
