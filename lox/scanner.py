@@ -2,41 +2,41 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import Any, ClassVar
 
-from lox_token import LoxToken
-from lox_token_type import LoxTokenType
+from .token import Token
+from .token_type import TokenType
 
 
 @dataclass()
-class LoxScanner:
+class Scanner:
     _KEYWORDS = [
-        LoxTokenType.AND,
-        LoxTokenType.CLASS,
-        LoxTokenType.ELSE,
-        LoxTokenType.FALSE,
-        LoxTokenType.FOR,
-        LoxTokenType.FUN,
-        LoxTokenType.IF,
-        LoxTokenType.NIL,
-        LoxTokenType.OR,
-        LoxTokenType.PRINT,
-        LoxTokenType.RETURN,
-        LoxTokenType.SUPER,
-        LoxTokenType.THIS,
-        LoxTokenType.TRUE,
-        LoxTokenType.VAR,
-        LoxTokenType.WHILE,
+        TokenType.AND,
+        TokenType.CLASS,
+        TokenType.ELSE,
+        TokenType.FALSE,
+        TokenType.FOR,
+        TokenType.FUN,
+        TokenType.IF,
+        TokenType.NIL,
+        TokenType.OR,
+        TokenType.PRINT,
+        TokenType.RETURN,
+        TokenType.SUPER,
+        TokenType.THIS,
+        TokenType.TRUE,
+        TokenType.VAR,
+        TokenType.WHILE,
     ]
-    keywords: ClassVar[MappingProxyType[str, LoxTokenType]] = MappingProxyType(
+    keywords: ClassVar[MappingProxyType[str, TokenType]] = MappingProxyType(
         {keyword.name.lower(): keyword for keyword in _KEYWORDS}
     )
 
     source: str
-    tokens: list[LoxToken] = field(default_factory=list)
+    tokens: list[Token] = field(default_factory=list)
     start: int = 0
     current: int = 0
     line: int = 1
 
-    def scan_tokens(self) -> list[LoxToken]:
+    def scan_tokens(self) -> list[Token]:
         """
         Scans tokens from source.
         """
@@ -49,7 +49,7 @@ class LoxScanner:
             self.start = self.current
             self.__scan_token()
 
-        self.tokens += [LoxToken(LoxTokenType.EOF, "", None, self.line)]
+        self.tokens += [Token(TokenType.EOF, "", None, self.line)]
         return self.tokens
 
     def __scan_token(self) -> None:
@@ -60,44 +60,40 @@ class LoxScanner:
 
         match char:
             case "(":
-                self.__add_token(LoxTokenType.LEFT_PAREN)
+                self.__add_token(TokenType.LEFT_PAREN)
             case ")":
-                self.__add_token(LoxTokenType.RIGHT_PAREN)
+                self.__add_token(TokenType.RIGHT_PAREN)
             case "{":
-                self.__add_token(LoxTokenType.LEFT_BRACE)
+                self.__add_token(TokenType.LEFT_BRACE)
             case "}":
-                self.__add_token(LoxTokenType.RIGHT_BRACE)
+                self.__add_token(TokenType.RIGHT_BRACE)
             case ",":
-                self.__add_token(LoxTokenType.COMMA)
+                self.__add_token(TokenType.COMMA)
             case ".":
-                self.__add_token(LoxTokenType.DOT)
+                self.__add_token(TokenType.DOT)
             case "-":
-                self.__add_token(LoxTokenType.MINUS)
+                self.__add_token(TokenType.MINUS)
             case "+":
-                self.__add_token(LoxTokenType.PLUS)
+                self.__add_token(TokenType.PLUS)
             case ";":
-                self.__add_token(LoxTokenType.SEMICOLON)
+                self.__add_token(TokenType.SEMICOLON)
             case "*":
-                self.__add_token(LoxTokenType.STAR)
+                self.__add_token(TokenType.STAR)
             case "!":
                 self.__add_token(
-                    LoxTokenType.BANG_EQUAL if self.__match("=") else LoxTokenType.BANG
+                    TokenType.BANG_EQUAL if self.__match("=") else TokenType.BANG
                 )
             case "=":
                 self.__add_token(
-                    LoxTokenType.EQUAL_EQUAL
-                    if self.__match("=")
-                    else LoxTokenType.EQUAL
+                    TokenType.EQUAL_EQUAL if self.__match("=") else TokenType.EQUAL
                 )
             case "<":
                 self.__add_token(
-                    LoxTokenType.LESS_EQUAL if self.__match("=") else LoxTokenType.LESS
+                    TokenType.LESS_EQUAL if self.__match("=") else TokenType.LESS
                 )
             case ">":
                 self.__add_token(
-                    LoxTokenType.GREATER_EQUAL
-                    if self.__match("=")
-                    else LoxTokenType.GREATER
+                    TokenType.GREATER_EQUAL if self.__match("=") else TokenType.GREATER
                 )
             case "/":
                 if self.__match("/"):
@@ -106,7 +102,7 @@ class LoxScanner:
                 elif self.__match("*"):
                     self.__block_comments()
                 else:
-                    self.__add_token(LoxTokenType.SLASH)
+                    self.__add_token(TokenType.SLASH)
             case " " | "\r" | "\t":
                 pass
             case "\n":
@@ -119,18 +115,18 @@ class LoxScanner:
                 elif self.__is_alpha(char):
                     self.__identifier()
                 else:
-                    from lox import Lox
+                    from .lox import Lox
 
                     Lox.error(self.line, "Unexpected character.")
 
-    def __add_token(self, type: LoxTokenType, literal: Any = None) -> None:
+    def __add_token(self, type: TokenType, literal: Any = None) -> None:
         """
         Adds a token to self.tokens.
         """
         # NOTE: self.current will be incremented to the right index because of
         # self.advance().
         text: str = self.source[self.start : self.current]
-        self.tokens += [LoxToken(type, text, literal, self.line)]
+        self.tokens += [Token(type, text, literal, self.line)]
 
     def __advance(self) -> str:
         """
@@ -181,13 +177,13 @@ class LoxScanner:
     #         self.__advance()
     #
     #     if self.__is_at_end():
-    #         from lox import Lox
+    #         from .lox import Lox
     #
     #         Lox.error(self.line, "Unterminated string.")
     #         return
     #
     #     self.__add_token(
-    #         LoxTokenType.STRING, self.source[self.start + 1 : self.current - 1]
+    #         TokenType.STRING, self.source[self.start + 1 : self.current - 1]
     #     )
 
     def __string(self) -> None:
@@ -201,7 +197,7 @@ class LoxScanner:
             self.__advance()
 
         if self.__is_at_end():
-            from lox import Lox
+            from .lox import Lox
 
             Lox.error(self.line, "Unterminated string.")
             return
@@ -211,7 +207,7 @@ class LoxScanner:
 
         # Trim the surrounding quotes.
         string: str = self.source[self.start + 1 : self.current - 1]
-        self.__add_token(LoxTokenType.STRING, string)
+        self.__add_token(TokenType.STRING, string)
 
     def __number(self) -> None:
         """
@@ -227,7 +223,7 @@ class LoxScanner:
                 self.__advance()
 
         self.__add_token(
-            LoxTokenType.NUMBER, float(self.source[self.start : self.current])
+            TokenType.NUMBER, float(self.source[self.start : self.current])
         )
 
     def __identifier(self) -> None:
@@ -247,7 +243,7 @@ class LoxScanner:
         if keyword:
             self.__add_token(keyword)
         else:
-            self.__add_token(LoxTokenType.IDENTIFIER)
+            self.__add_token(TokenType.IDENTIFIER)
 
     # Iter 1:
     # def __block_comment(self) -> None:
@@ -314,7 +310,7 @@ class LoxScanner:
         print(self.source[self.start : self.current] + "\n")
 
         if open_block_comments != 0:
-            from lox import Lox
+            from .lox import Lox
 
             Lox.error(self.line, "Unterminated block comment.")
 

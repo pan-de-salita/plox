@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from typing import Any
 
-from lox_token_type import LoxTokenType
+from .token_type import TokenType
 
 
 @dataclass(frozen=True)
-class LoxToken:
-    type: LoxTokenType
+class Token:
+    type: TokenType
     lexeme: str
     literal: Any
     line: int

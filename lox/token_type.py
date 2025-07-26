@@ -1,7 +1,7 @@
 from enum import Enum, auto
 
 
-class LoxTokenType(Enum):
+class TokenType(Enum):
     # Single-character tokens.
     LEFT_PAREN = auto()
     RIGHT_PAREN = auto()
