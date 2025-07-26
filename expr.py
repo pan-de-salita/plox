@@ -1,3 +1,8 @@
+from abc import ABC
+from dataclasses import dataclass
+
+from lox_token import LoxToken
+
 # Lox's grammar as per ch2
 #
 # expr -> literals
@@ -35,3 +40,15 @@
 # 11. ("1" "+" "2") "!=" literal
 # 12. ("1" "+" "2") "!=" NUMBER
 # 13. ("1" "+" "2") "!=" "4"
+
+
+@dataclass(frozen=True)
+class Expr(ABC):
+    pass
+
+
+@dataclass(frozen=True)
+class Binary(Expr):
+    left: Expr
+    operator: LoxToken
+    right: Expr
