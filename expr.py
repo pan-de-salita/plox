@@ -1,7 +1,7 @@
 from abc import ABC
 from dataclasses import dataclass
 
-from lox_token import LoxToken
+from lox.token import Token
 
 # Lox's grammar as per ch2
 #
@@ -50,5 +50,5 @@ class Expr(ABC):
 @dataclass(frozen=True)
 class Binary(Expr):
     left: Expr
-    operator: LoxToken
+    operator: Token
     right: Expr
