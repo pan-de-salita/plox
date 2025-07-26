@@ -9,7 +9,7 @@ class Lox:
     @staticmethod
     def main(args: list[str]) -> None:
         if len(args) > 1:
-            print("Usage: jlox [script]")
+            print("Usage: jlox [script]", file=sys.stderr)
             sys.exit(64)  # UNIX/POSIX convention for command line usage error.
         elif len(args) == 1:
             Lox.__run_file(args[0])
@@ -46,7 +46,7 @@ class Lox:
 
     @staticmethod
     def __report(line: int, where: str, message: str) -> None:
-        print(f"[line {line}] Error{where}: {message}")
+        print(f"[line {line}] Error{where}: {message}", sys.stderr)
         Lox.had_error = True
 
 
