@@ -1,5 +1,6 @@
 import sys
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Iterator
 
@@ -47,6 +48,7 @@ class GenerateAst:
         body: Iterator[str] = map(
             lambda line: line + "\n",
             [
+                *GenerateAst.__generate_documentation(),
                 *GenerateAst.__generate_imports(),
                 *GenerateAst.__generate_base_class(base_name),
                 *GenerateAst.__generate_child_classes(base_name, type_definitions),
@@ -95,6 +97,16 @@ class GenerateAst:
             type_definitions.append(TypeDefinition(name=name, attributes=attributes))
 
         return type_definitions
+
+    @staticmethod
+    def __generate_documentation() -> list[str]:
+        """
+        Generate documentation.
+        """
+        return [
+            f"# Generated from GenerateAst class ({datetime.now()}).",
+            "",
+        ]
 
     @staticmethod
     def __generate_imports() -> list[str]:
