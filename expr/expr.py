@@ -1,7 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass
 
-
 from lox.token import Token
 
 

@@ -1,14 +1,25 @@
 import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterator
+
+TAB = "    "
+
+
+@dataclass()
+class TypeDefinition:
+    name: str
+    attributes: list[tuple[str, str]]
 
 
 class GenerateAst:
     @staticmethod
-    def main(args: list[str]) -> None:
+    def main(args: list) -> None:
         if len(args) != 1:
             print("Usage: generate_ast <output directory>", file=sys.stderr)
             sys.exit(64)
 
-        output_dir: str = args[0]
+        output_dir: Path = Path(args[0])
         GenerateAst.__define_ast(
             output_dir,
             "Expr",
@@ -21,59 +32,109 @@ class GenerateAst:
         )
 
     @staticmethod
-    def __define_ast(output_dir: str, base_name: str, types: list[str]) -> None:
-        TAB = "    "
-
+    def __define_ast(output_dir: Path, base_name: str, types: list[str]) -> None:
+        """
+        Generate AST classes from type definitions.
+        """
+        output_dir.mkdir(
+            parents=True,  # Create any missing parent dirs.
+            exist_ok=True,  # Don't error if dir exists.
+        )
         path: str = f"{output_dir}/{base_name.lower()}.py"
+        type_definitions: list[TypeDefinition] = (
+            GenerateAst.__generate_type_definitions(types)
+        )
+        body: Iterator[str] = map(
+            lambda line: line + "\n",
+            [
+                *GenerateAst.__generate_imports(),
+                *GenerateAst.__generate_base_class(base_name),
+                *GenerateAst.__generate_child_classes(base_name, type_definitions),
+            ],
+        )
+
         with open(path, "w", encoding="utf-8") as writer:
-            # Import builtin libraries.
-            writer.write("from abc import ABC")
-            writer.write("\n")
-            writer.write("from dataclasses import dataclass")
-            writer.write("\n")
-            writer.write("\n")
-            writer.write("\n")
+            writer.writelines(body)
 
-            # Import custom libraries.
-            writer.write("from lox.token import Token")
-            writer.write("\n")
-            writer.write("\n")
-            writer.write("\n")
+    @staticmethod
+    def __generate_type_definitions(types: list[str]) -> list[TypeDefinition]:
+        type_definitions: list[TypeDefinition] = []
+        for type in types:
+            if ":" not in type:
+                print(f"Failed to generate type definition. Missing colon: {type}")
+                sys.exit(64)
 
-            # Write parent Expr class.
-            writer.write("@dataclass(frozen=True)")
-            writer.write("\n")
-            writer.write(f"class {base_name}(ABC):")
-            writer.write("\n")
-            writer.write(f"{TAB}pass")
-            writer.write("\n")
-            writer.write("\n")
-            writer.write("\n")
+            name_part, attrs_part = type.split(":", 1)
+            name: str = name_part.strip()
 
-            # Write child classes.
-            for idx, expr in enumerate(types):
-                expr_parts: list[str] = [elem.strip() for elem in expr.split(":")]
-                expr_name: str = expr_parts[0]
-                writer.write("@dataclass(frozen=True)")
-                writer.write("\n")
-                writer.write(f"class {expr_name}({base_name}):")
-                writer.write("\n")
-
-                expr_attrs: list[str] = [
-                    attr.strip() for attr in expr_parts[1].split(",")
+            attributes: list[tuple[str, str]] = []
+            if not attrs_part.strip():
+                print(f"Failed to generate type definition. Missing attributes: {type}")
+                sys.exit(64)
+            else:
+                attr_strings: list[str] = [
+                    attr.strip() for attr in attrs_part.split(",")
                 ]
-                for attr in expr_attrs:
-                    attr_parts: list[str] = [elem.strip() for elem in attr.split(" ")]
-                    attr_name: str = attr_parts[1]
-                    attr_type: str = attr_parts[0]
-                    writer.write(f"{TAB}{attr_name}: {attr_type}")
-                    writer.write("\n")
+                for attr_str in attr_strings:
+                    attr_parts: list[str] = attr_str.split()
+                    if len(attr_parts) != 2:
+                        print(f"Invalid type: {type}")
+                        sys.exit(64)
+                    attr_type, attr_name = attr_parts
+                    attributes.append((attr_type, attr_name))
 
-                # Add new lines to the end of the child class's definition only
-                # if not final child class to written.
-                if idx != len(types) - 1:
-                    writer.write("\n")
-                    writer.write("\n")
+            type_definitions.append(TypeDefinition(name=name, attributes=attributes))
+
+        return type_definitions
+
+    @staticmethod
+    def __generate_imports() -> list[str]:
+        return [
+            "from abc import ABC",
+            "from dataclasses import dataclass",
+            "",
+            "from lox.token import Token",
+            "",
+            "",
+        ]
+
+    @staticmethod
+    def __generate_base_class(base_name: str) -> list[str]:
+        return [
+            "@dataclass(frozen=True)",
+            f"class {base_name}(ABC):",
+            f"{TAB}pass",
+            "",
+            "",
+        ]
+
+    @staticmethod
+    def __generate_child_classes(
+        base_name: str, type_definitions: list[TypeDefinition]
+    ) -> list[str]:
+        child_classes: list[str] = []
+        for index, type_definition in enumerate(type_definitions):
+            child_classes.extend(
+                GenerateAst.__generate_child_class(base_name, type_definition)
+            )
+
+            if index != len(type_definitions) - 1:
+                child_classes.extend(["", ""])
+
+        return child_classes
+
+    @staticmethod
+    def __generate_child_class(
+        base_name: str, type_definition: TypeDefinition
+    ) -> list[str]:
+        return [
+            "@dataclass(frozen=True)",
+            f"class {type_definition.name}({base_name}):",
+            *[
+                f"{TAB}{attr_name}: {attr_type}"
+                for attr_type, attr_name in type_definition.attributes
+            ],
+        ]
 
 
 if __name__ == "__main__":
