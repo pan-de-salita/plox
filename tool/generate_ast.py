@@ -62,12 +62,12 @@ class GenerateAst:
         Generate type definitions.
         """
         type_definitions: list[TypeDefinition] = []
-        for type in types:
-            if ":" not in type:
+        for type_spec in types:
+            if ":" not in type_spec:
                 print(f"Failed to generate type definition. Missing colon: {type}")
                 sys.exit(64)
 
-            name_part, attrs_part = type.split(":", 1)
+            name_part, attrs_part = type_spec.split(":", 1)
             name: str = name_part.strip()
 
             attributes: list[tuple[str, str]] = []
