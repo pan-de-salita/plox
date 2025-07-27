@@ -40,7 +40,7 @@ class GenerateAst:
             parents=True,  # Create any missing parent dirs.
             exist_ok=True,  # Don't error if dir exists.
         )
-        path: str = f"{output_dir}/{base_name.lower()}.py"
+        path: Path = output_dir / f"{base_name.lower()}.py"
         type_definitions: list[TypeDefinition] = (
             GenerateAst.__generate_type_definitions(types)
         )
