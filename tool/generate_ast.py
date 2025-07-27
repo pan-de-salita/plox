@@ -77,9 +77,13 @@ class GenerateAst:
                 ]
                 for attr_str in attr_strings:
                     attr_parts: list[str] = attr_str.split()
+
                     if len(attr_parts) != 2:
-                        print(f"Invalid type: {type}")
+                        print(
+                            f"Unable to generate type definition. Incomplete attribute: {attr_str}"
+                        )
                         sys.exit(64)
+
                     attr_type, attr_name = attr_parts
                     attributes.append((attr_type, attr_name))
 
