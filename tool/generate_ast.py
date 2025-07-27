@@ -58,6 +58,9 @@ class GenerateAst:
 
     @staticmethod
     def __generate_type_definitions(types: list[str]) -> list[TypeDefinition]:
+        """
+        Generate type definitions.
+        """
         type_definitions: list[TypeDefinition] = []
         for type in types:
             if ":" not in type:
@@ -93,6 +96,9 @@ class GenerateAst:
 
     @staticmethod
     def __generate_imports() -> list[str]:
+        """
+        Generate imports.
+        """
         return [
             "from abc import ABC",
             "from dataclasses import dataclass",
@@ -104,6 +110,9 @@ class GenerateAst:
 
     @staticmethod
     def __generate_base_class(base_name: str) -> list[str]:
+        """
+        Generate base class.
+        """
         return [
             "@dataclass(frozen=True)",
             f"class {base_name}(ABC):",
@@ -116,6 +125,9 @@ class GenerateAst:
     def __generate_child_classes(
         base_name: str, type_definitions: list[TypeDefinition]
     ) -> list[str]:
+        """
+        Generate child classes based on type definitions.
+        """
         child_classes: list[str] = []
         for index, type_definition in enumerate(type_definitions):
             child_classes.extend(
@@ -131,6 +143,9 @@ class GenerateAst:
     def __generate_child_class(
         base_name: str, type_definition: TypeDefinition
     ) -> list[str]:
+        """
+        Generate single child class based on type definition.
+        """
         return [
             "@dataclass(frozen=True)",
             f"class {type_definition.name}({base_name}):",
