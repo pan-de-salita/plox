@@ -38,7 +38,7 @@ class Scanner:
 
     def scan_tokens(self) -> list[Token]:
         """
-        Scans tokens from source.
+        Scan tokens from source.
         """
         # For inspection purposes.
         print(f"Source length: {len(self.source)}")
@@ -121,7 +121,7 @@ class Scanner:
 
     def __add_token(self, type: TokenType, literal: Any = None) -> None:
         """
-        Adds a token to self.tokens.
+        Add a token to self.tokens.
         """
         # NOTE: self.current will be incremented to the right index because of
         # self.advance().
@@ -130,16 +130,16 @@ class Scanner:
 
     def __advance(self) -> str:
         """
-        Advances current.
-        Returns current scanned character in source.
+        Advance current.
+        Return current scanned character in source.
         """
         self.current += 1
         return self.source[self.current - 1]
 
     def __match(self, expected: str) -> bool:
         """
-        Checks if expected matches the current character being scanned.
-        Advances current if True.
+        Check if expected matches the current character being scanned.
+        Advance current if True.
         """
         if self.__is_at_end():
             return False
@@ -152,7 +152,7 @@ class Scanner:
 
     def __peek(self) -> str:
         """
-        Looks ahead by one character in source.
+        Look ahead by one character in source.
         """
         if self.__is_at_end():
             return "\0"
@@ -161,7 +161,7 @@ class Scanner:
 
     def __peek_next(self) -> str:
         """
-        Looks ahead by two characters in source.
+        Look ahead by two characters in source.
         """
         if self.current + 1 >= len(self.source):
             return "\0"
@@ -188,7 +188,7 @@ class Scanner:
 
     def __string(self) -> None:
         """
-        Produces a string token.
+        Produce a string token.
         """
         # Use of self.__is_at_end() needed to avoid IndexError.
         while self.__peek() != '"' and not self.__is_at_end():
@@ -211,7 +211,7 @@ class Scanner:
 
     def __number(self) -> None:
         """
-        Produces a number token.
+        Produce a number token.
         """
         while self.__is_digit(self.__peek()):
             self.__advance()
@@ -228,7 +228,7 @@ class Scanner:
 
     def __identifier(self) -> None:
         """
-        Produces an identifier token.
+        Produce an identifier token.
 
         NOTE: An identifier can be:
         - An identifier proper
@@ -316,20 +316,20 @@ class Scanner:
 
     def __is_at_end(self) -> bool:
         """
-        Checks if current points to the end of source. Useful for preventing
+        Check if current points to the end of source. Useful for preventing
         IndexError.
         """
         return self.current >= len(self.source)
 
     def __is_alpha_numeric(self, char: str) -> bool:
         """
-        Checks if char is alphanumeric.
+        Check if char is alphanumeric.
         """
         return self.__is_alpha(char) or self.__is_digit(char)
 
     def __is_alpha(self, char: str) -> bool:
         """
-        Checks if char is alphabetical or an underscore.
+        Check if char is alphabetical or an underscore.
         """
         import string
 
@@ -337,7 +337,7 @@ class Scanner:
 
     def __is_digit(self, char: str) -> bool:
         """
-        Checks if char is a digit.
+        Check if char is a digit.
         """
         # Iter 1:
         # return char in map(str, range(0, 10))
