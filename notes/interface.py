@@ -154,3 +154,32 @@ EmlParserNew.__mro__
 
 pdf_parser = PdfParserNew()
 eml_parser = EmlParserNew()  # Raises Exception.
+
+
+# Crafting Interpreters Visitor Pattern example with pastries.
+
+
+class Pastry(ABC):
+    @abstractmethod
+    def accept(self, visitor: "PastryVisitor"):
+        pass
+
+
+class Beignet(Pastry):
+    def accept(self, visitor: "PastryVisitor"):
+        visitor.visit_beignet(self)
+
+
+class Cruller(Pastry):
+    def accept(self, visitor: "PastryVisitor"):
+        visitor.visit_cruller(self)
+
+
+class PastryVisitor(ABC):
+    @abstractmethod
+    def visit_beignet(self, beignet: Beignet):
+        pass
+
+    @abstractmethod
+    def visit_cruller(self, cruller: Cruller):
+        pass
