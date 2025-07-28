@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 
 
@@ -161,17 +163,17 @@ eml_parser = EmlParserNew()  # Raises Exception.
 
 class Pastry(ABC):
     @abstractmethod
-    def accept(self, visitor: "PastryVisitor"):
+    def accept(self, visitor: PastryVisitor):
         pass
 
 
 class Beignet(Pastry):
-    def accept(self, visitor: "PastryVisitor"):
+    def accept(self, visitor: PastryVisitor):
         visitor.visit_beignet(self)
 
 
 class Cruller(Pastry):
-    def accept(self, visitor: "PastryVisitor"):
+    def accept(self, visitor: PastryVisitor):
         visitor.visit_cruller(self)
 
 
