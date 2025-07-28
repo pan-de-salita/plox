@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-07-27 23:49:28.845593).
+# Generated from GenerateAst class (2025-07-28 22:40:54.624208).
 
 from abc import ABC
 from dataclasses import dataclass

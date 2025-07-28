@@ -25,10 +25,10 @@ class GenerateAst:
             output_dir,
             "Expr",
             [
-                "Binary   : Expr left, Token operator, Expr right",
-                "Grouping : Expr expression",
-                "Literal  : object value",
-                "Unary    : Token operator, Expr right",
+                "Binary   : left Expr, operator Token, right Expr",
+                "Grouping : expression Expr",
+                "Literal  : value object",
+                "Unary    : operator Token, right Expr",
             ],
         )
 
@@ -91,8 +91,8 @@ class GenerateAst:
                         )
                         sys.exit(64)
 
-                    attr_type, attr_name = attr_parts
-                    attributes.append((attr_type, attr_name))
+                    attr_name, attr_type = attr_parts
+                    attributes.append((attr_name, attr_type))
 
             type_definitions.append(TypeDefinition(name=name, attributes=attributes))
 
@@ -165,7 +165,7 @@ class GenerateAst:
             f"class {type_definition.name}({base_name}):",
             *[
                 f"{TAB}{attr_name}: {attr_type}"
-                for attr_type, attr_name in type_definition.attributes
+                for attr_name, attr_type in type_definition.attributes
             ],
         ]
 
