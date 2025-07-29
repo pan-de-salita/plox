@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 
 class InformalParserInterface:
@@ -155,25 +156,46 @@ PdfParserNew.__mro__
 EmlParserNew.__mro__
 
 pdf_parser = PdfParserNew()
-eml_parser = EmlParserNew()  # Raises Exception.
+# eml_parser = EmlParserNew()  # Raises Exception.
 
 
-# Crafting Interpreters Visitor Pattern example with pastries.
+# Crafting Interpreters Visitor pattern example with pastries.
+
+# The Visitor pattern is really about approximating the functional style within
+# an OOP language. [...] We can define all of the behavior for a new operation
+# on a set of types in one place, without having to touch the types themselves.
+# It does this the same way we solve almost every problem in CS: by adding a
+# layer of indirection.
+
+# The Visitor pattern simulates double dispatch:
+# - The first dispatch is from the client code calling pastry.accept(visitor).
+#   The accept() method is resolved dynamically to the concrete pastry's
+#   accept() method.
+# - Inside accept(), the second dispatch happens when calling the visitor's
+#   method specific to the concrete pastry type(e.g., visit_beignet() or
+#   visit_cruller). This mechanism ensures that the correct visitor method
+#   corresponding to the concrete pastry type is executed, supporting polymorphic
+#   behavior across different pastry classes and visitors.
 
 
+@dataclass
 class Pastry(ABC):
+    price: float
+
     @abstractmethod
-    def accept(self, visitor: PastryVisitor):
+    def accept(self, visitor: PastryVisitor) -> None:
         pass
 
 
+@dataclass
 class Beignet(Pastry):
-    def accept(self, visitor: PastryVisitor):
+    def accept(self, visitor: PastryVisitor) -> None:
         visitor.visit_beignet(self)
 
 
+@dataclass
 class Cruller(Pastry):
-    def accept(self, visitor: PastryVisitor):
+    def accept(self, visitor: PastryVisitor) -> None:
         visitor.visit_cruller(self)
 
 
@@ -185,3 +207,19 @@ class PastryVisitor(ABC):
     @abstractmethod
     def visit_cruller(self, cruller: Cruller):
         pass
+
+
+class PastryPriceVisitor(PastryVisitor):
+    def visit_beignet(self, beignet: Beignet) -> None:
+        print(f"Beignet costs ${beignet.price}")
+
+    def visit_cruller(self, cruller: Cruller) -> None:
+        print(f"Cruller costs ${cruller.price}")
+
+
+pastries = [Beignet(price=5.95), Cruller(price=4.99)]
+price_visitor = PastryPriceVisitor()
+
+print("Displaying prices:")
+for pastry in pastries:
+    pastry.accept(price_visitor)
