@@ -1,6 +1,7 @@
 import sys
 from dataclasses import dataclass
 from datetime import datetime
+from itertools import chain
 from pathlib import Path
 from typing import Iterator
 
@@ -9,11 +10,15 @@ TAB = "    "
 
 @dataclass()
 class TypeDefinition:
+    """Type definition of Expr subclasses."""
+
     name: str
     attributes: list[tuple[str, str]]
 
 
 class GenerateAst:
+    """Generate AST."""
+
     @staticmethod
     def main(args: list) -> None:
         if len(args) != 1:
@@ -34,9 +39,7 @@ class GenerateAst:
 
     @staticmethod
     def __define_ast(output_dir: Path, base_name: str, types: list[str]) -> None:
-        """
-        Generate AST classes from type definitions.
-        """
+        """Generate AST classes from type definitions."""
         output_dir.mkdir(
             parents=True,  # Create any missing parent dirs.
             exist_ok=True,  # Don't error if dir exists.
@@ -61,9 +64,7 @@ class GenerateAst:
 
     @staticmethod
     def __generate_type_definitions(types: list[str]) -> list[TypeDefinition]:
-        """
-        Generate type definitions.
-        """
+        """Generate type definitions."""
         type_definitions: list[TypeDefinition] = []
         for type_spec in types:
             if ":" not in type_spec:
@@ -101,9 +102,7 @@ class GenerateAst:
 
     @staticmethod
     def __generate_documentation() -> list[str]:
-        """
-        Generate documentation.
-        """
+        """Generate documentation."""
         return [
             f"# Generated from GenerateAst class ({datetime.now()}).",
             "",
@@ -111,9 +110,7 @@ class GenerateAst:
 
     @staticmethod
     def __generate_imports() -> list[str]:
-        """
-        Generate imports.
-        """
+        """Generate imports."""
         return [
             "from __future__ import annotations",
             "",
@@ -130,57 +127,62 @@ class GenerateAst:
         base_name: str, type_definitions: list[TypeDefinition]
     ) -> list[str]:
         """Generate Visitor interface."""
-        generic = 'R = TypeVar("R")'
-        visitor = [generic, "", "", "class Visitor(ABC, Generic[R]):"]
-        for type_definition in type_definitions:
-            visitor.extend(
+        generic = ['R = TypeVar("R")', "", ""]
+        signature = ["class Visitor(ABC, Generic[R]):"]
+        abstract_visit_methods = list(
+            chain.from_iterable(
                 [
                     f"{TAB}@abstractmethod",
                     f"{TAB}def visit_{type_definition.name.lower()}_{base_name.lower()}(self, {type_definition.name.lower()}: {type_definition.name}) -> R:",
                     f"{TAB}{TAB}pass",
                     "",
                 ]
+                for type_definition in type_definitions
             )
-        visitor.append("")
+        )
+        spacing = [""]
 
-        return visitor
+        # Iter 1 of abstract_visit_methods with nested loop:
+        # abstract_visit_methods = [
+        #     line
+        #     for abstract_visit_method in [
+        #         [
+        #             f"{TAB}@abstractmethod",
+        #             f"{TAB}def visit_{type_definition.name.lower()}_{base_name.lower()}(self, {type_definition.name.lower()}: {type_definition.name}) -> R:",
+        #             f"{TAB}{TAB}pass",
+        #             "",
+        #         ]
+        #         for type_definition in type_definitions
+        #     ]
+        #     for line in abstract_visit_method
+        # ]
+
+        return generic + signature + abstract_visit_methods + spacing
 
     @staticmethod
     def __generate_base_class(base_name: str) -> list[str]:
-        """
-        Generate base class.
-        """
-        base_class = [
+        """Generate base class."""
+        signature = [
             "@dataclass(frozen=True)",
             f"class {base_name}(ABC):",
         ]
+        abstract_accept_method = [
+            f"{TAB}@abstractmethod",
+            f"{TAB}def accept(self, visitor: Visitor[R]) -> R:",
+            f"{TAB}{TAB}pass",
+        ]
+        spacing = [
+            "",
+            "",
+        ]
 
-        # Generate visit() abstract method.
-        base_class.extend(
-            [
-                f"{TAB}@abstractmethod",
-                f"{TAB}def accept(self, visitor: Visitor[R]) -> R:",
-                f"{TAB}{TAB}pass",
-            ]
-        )
-
-        # Generate spacing.
-        base_class.extend(
-            [
-                "",
-                "",
-            ]
-        )
-
-        return base_class
+        return signature + abstract_accept_method + spacing
 
     @staticmethod
     def __generate_child_classes(
         base_name: str, type_definitions: list[TypeDefinition]
     ) -> list[str]:
-        """
-        Generate child classes based on type definitions.
-        """
+        """Generate child classes based on type definitions."""
         child_classes: list[str] = []
         for index, type_definition in enumerate(type_definitions):
             child_classes.extend(
@@ -196,35 +198,24 @@ class GenerateAst:
     def __generate_child_class(
         base_name: str, type_definition: TypeDefinition
     ) -> list[str]:
-        """
-        Generate single child class based on type definition.
-        """
-        # Generate header.
-        child_class = [
+        """Generate single child class based on type definition."""
+        signature = [
             "@dataclass(frozen=True)",
             f"class {type_definition.name}({base_name}):",
         ]
+        attributes = [
+            *[
+                f"{TAB}{attr_name}: {attr_type}"
+                for attr_name, attr_type in type_definition.attributes
+            ],
+            "",
+        ]
+        accept_method = [
+            f"{TAB}def accept(self, visitor: Visitor[R]) -> R:",
+            f"{TAB}{TAB}return visitor.visit_{type_definition.name.lower()}_{base_name.lower()}(self)",
+        ]
 
-        # Generate attributes.
-        child_class.extend(
-            [
-                *[
-                    f"{TAB}{attr_name}: {attr_type}"
-                    for attr_name, attr_type in type_definition.attributes
-                ],
-                "",
-            ]
-        )
-
-        # Generate visit() method.
-        child_class.extend(
-            [
-                f"{TAB}def accept(self, visitor: Visitor[R]) -> R:",
-                f"{TAB}{TAB}return visitor.visit_{type_definition.name.lower()}_{base_name.lower()}(self)",
-            ]
-        )
-
-        return child_class
+        return signature + attributes + accept_method
 
 
 if __name__ == "__main__":
