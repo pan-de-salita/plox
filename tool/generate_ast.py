@@ -50,6 +50,7 @@ class GenerateAst:
             [
                 *GenerateAst.__generate_documentation(),
                 *GenerateAst.__generate_imports(),
+                *GenerateAst.__generate_visitor(base_name, type_definitions),
                 *GenerateAst.__generate_base_class(base_name),
                 *GenerateAst.__generate_child_classes(base_name, type_definitions),
             ],
@@ -114,26 +115,64 @@ class GenerateAst:
         Generate imports.
         """
         return [
-            "from abc import ABC",
+            "from __future__ import annotations",
+            "",
+            "from abc import ABC, abstractmethod",
             "from dataclasses import dataclass",
+            "from typing import Generic, TypeVar",
             "",
             "from lox.token import Token",
             "",
-            "",
         ]
+
+    @staticmethod
+    def __generate_visitor(
+        base_name: str, type_definitions: list[TypeDefinition]
+    ) -> list[str]:
+        """Generate Visitor interface."""
+        generic = 'R = TypeVar("R")'
+        visitor = [generic, "", "", "class Visitor(ABC, Generic[R]):"]
+        for type_definition in type_definitions:
+            visitor.extend(
+                [
+                    f"{TAB}@abstractmethod",
+                    f"{TAB}def visit_{type_definition.name.lower()}_{base_name.lower()}(self, {type_definition.name.lower()}: {type_definition.name}) -> R:",
+                    f"{TAB}{TAB}pass",
+                    "",
+                ]
+            )
+        visitor.append("")
+
+        return visitor
 
     @staticmethod
     def __generate_base_class(base_name: str) -> list[str]:
         """
         Generate base class.
         """
-        return [
+        base_class = [
             "@dataclass(frozen=True)",
             f"class {base_name}(ABC):",
-            f"{TAB}pass",
-            "",
-            "",
         ]
+
+        # Generate visit() abstract method.
+        base_class.extend(
+            [
+                f"{TAB}@abstractmethod",
+                f"{TAB}def accept(self, visitor: Visitor[R]) -> R:",
+                f"{TAB}{TAB}pass",
+            ]
+        )
+
+        # Generate spacing.
+        base_class.extend(
+            [
+                "",
+                "",
+            ]
+        )
+
+        return base_class
 
     @staticmethod
     def __generate_child_classes(
@@ -160,14 +199,32 @@ class GenerateAst:
         """
         Generate single child class based on type definition.
         """
-        return [
+        # Generate header.
+        child_class = [
             "@dataclass(frozen=True)",
             f"class {type_definition.name}({base_name}):",
-            *[
-                f"{TAB}{attr_name}: {attr_type}"
-                for attr_name, attr_type in type_definition.attributes
-            ],
         ]
+
+        # Generate attributes.
+        child_class.extend(
+            [
+                *[
+                    f"{TAB}{attr_name}: {attr_type}"
+                    for attr_name, attr_type in type_definition.attributes
+                ],
+                "",
+            ]
+        )
+
+        # Generate visit() method.
+        child_class.extend(
+            [
+                f"{TAB}def accept(self, visitor: Visitor[R]) -> R:",
+                f"{TAB}{TAB}return visitor.visit_{type_definition.name.lower()}_{base_name.lower()}(self)",
+            ]
+        )
+
+        return child_class
 
 
 if __name__ == "__main__":
