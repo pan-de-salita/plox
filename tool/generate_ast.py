@@ -220,6 +220,6 @@ class GenerateAst:
 
 if __name__ == "__main__":
     # Testing.
-    GenerateAst.main(["expr"])
-    with open("expr/expr.py", "r", encoding="utf-8") as file:
+    GenerateAst.main(["lox"])
+    with open("lox/expr.py", "r", encoding="utf-8") as file:
         print(file.read())
