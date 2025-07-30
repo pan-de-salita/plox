@@ -8,7 +8,7 @@ class AstPrinter(expr.Visitor[str]):
 
     @staticmethod
     def main(expression: expr.Expr | None = None) -> None:
-        if not expression:
+        if not expression or not isinstance(expression, expr.Expr):
             # (+ 1 2)
             # expression: expr.Expr = expr.Binary(
             #     left=expr.Literal(value=1),
