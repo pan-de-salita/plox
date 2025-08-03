@@ -72,7 +72,7 @@ class AstPrinter(expr.Visitor[str]):
 
     def visit_literal_expr(self, literal: expr.Literal) -> str:
         """Overrides Visitor.visit_literal_expr()."""
-        if literal.value == "null":
+        if not literal.value:
             return "nil"
 
         return self.__parenthesize(str(literal.value))
