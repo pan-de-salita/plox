@@ -108,9 +108,6 @@ class AstPrinter(expr.Visitor[str]):
         #     + (")" if exprs else "")
         # )
 
-        if not exprs:
-            return name
-
         return f"({name}{''.join(' ' + e.accept(self) for e in exprs)})"
 
 
