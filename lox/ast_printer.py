@@ -6,6 +6,7 @@ from .token_type import TokenType
 class AstPrinter(expr.Visitor[str]):
     """A (not very) pretty printer."""
 
+    # NOTE: To be deleted.
     @staticmethod
     def main(expression: expr.Expr | None = None) -> None:
         if not expression or not isinstance(expression, expr.Expr):
