@@ -11,11 +11,11 @@ class AstPrinterRpn(expr.Visitor[str]):
     def main(expression: expr.Expr | None = None) -> None:
         if not expression or not isinstance(expression, expr.Expr):
             # 1 2 +
-            expression = expr.Binary(
-                operator=Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),
-                left=expr.Literal(value=1),
-                right=expr.Literal(value=2),
-            )
+            # expression = expr.Binary(
+            #     operator=Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),
+            #     left=expr.Literal(value=1),
+            #     right=expr.Literal(value=2),
+            # )
 
             # 1 2 + 4 3 - *
             expression = expr.Binary(
