@@ -56,8 +56,7 @@ class AstPrinter(expr.Visitor[str]):
                 ),
             )
 
-        printer = AstPrinter()
-        print(printer.print(expression))
+        print(AstPrinter().print(expression))
 
     def print(self, expr: expr.Expr) -> str:
         """Pretty-print an expression in Lisp format."""
@@ -73,6 +72,9 @@ class AstPrinter(expr.Visitor[str]):
 
     def visit_literal_expr(self, literal: expr.Literal) -> str:
         """Overrides Visitor.visit_literal_expr()."""
+        if literal.value == "null":
+            return "nil"
+
         return self.__parenthesize(str(literal.value))
 
     def visit_unary_expr(self, unary: expr.Unary) -> str:
