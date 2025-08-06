@@ -1,8 +1,3 @@
-from abc import ABC
-from dataclasses import dataclass
-
-from lox.token import Token
-
 # Lox's grammar as per ch2
 #
 # expr -> literals
@@ -11,12 +6,12 @@ from lox.token import Token
 #       | grouping ;
 #
 # literal -> STRING | NUMBER | "true" | "false" | "nil" ;
-# unary -> ( "-" | "!" ) expr;
-# binary -> expr operator expr;
-# grouping -> "(" expr ")";
+# unary -> ( "-" | "!" ) expr ;
+# binary -> expr operator expr ;
+# grouping -> "(" expr ")" ;
 #
 # operator -> "+" | "-" | "*" | "/"
-#           | "==" | "!=" | "<" | "<=" | ">" | ">=";
+#           | "==" | "!=" | "<" | "<=" | ">" | ">=" ;
 
 # Expansion of 1 + 2 != 4
 #
@@ -41,14 +36,37 @@ from lox.token import Token
 # 12. ("1" "+" "2") "!=" NUMBER
 # 13. ("1" "+" "2") "!=" "4"
 
+# Limitation of the above grammar:
+# Right now, the grammar stuffs all expression types into a single expr rule.
+# That same rule is used as the non-terminal for operands, which lets the
+# grammar accept any kind of expression as a subexpression, regardless of
+# whether the precedence rules allow it. E.g., 1 + 2 * 3 can be parsed as
+# any of the following:
+#
+# - (1 + 2) * 3
+# - 1 + (2 * 3)
+#
+# This can lead to errors in calculations.
 
-@dataclass(frozen=True)
-class Expr(ABC):
-    pass
-
-
-@dataclass(frozen=True)
-class Binary(Expr):
-    left: Expr
-    operator: Token
-    right: Expr
+# Solution: Stratify the grammar such that each rule can match only the
+# expression that are at:
+#
+# - Its level of precedence
+# - A higher level of precedence
+#
+# - expr -> equality ;
+#
+# - equality -> ...
+#
+# - comparison -> ...
+#
+# - term -> ...
+#
+# - factor -> factor ( "*" | "/" ) unary
+#           | unary ;
+#
+# - unary -> ("-" | "!") unary
+#          | primary ;
+#
+# - primary -> NUMBER | STRING | "true" | "false" | "nil"
+#            | "(" expr ")" ;
