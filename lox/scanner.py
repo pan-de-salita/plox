@@ -26,31 +26,31 @@ class Scanner:
         TokenType.VAR,
         TokenType.WHILE,
     ]
-    keywords: ClassVar[MappingProxyType[str, TokenType]] = MappingProxyType(
+
+    _keywords: ClassVar[MappingProxyType[str, TokenType]] = MappingProxyType(
         {keyword.name.lower(): keyword for keyword in _KEYWORDS}
     )
-
-    source: str
-    tokens: list[Token] = field(default_factory=list)
-    start: int = 0
-    current: int = 0
-    line: int = 1
+    _source: str
+    _tokens: list[Token] = field(default_factory=list)
+    _start: int = 0
+    _current: int = 0
+    _line: int = 1
 
     def scan_tokens(self) -> list[Token]:
         """
         Scan tokens from source.
         """
         # For inspection purposes.
-        print(f"Source length: {len(self.source)}")
+        print(f"Source length: {len(self._source)}")
         print("Source:")
-        print(repr(self.source) + "\n")
+        print(repr(self._source) + "\n")
 
         while not self.__is_at_end():
-            self.start = self.current
+            self._start = self._current
             self.__scan_token()
 
-        self.tokens += [Token(TokenType.EOF, "", None, self.line)]
-        return self.tokens
+        self._tokens += [Token(TokenType.EOF, "", None, self._line)]
+        return self._tokens
 
     def __scan_token(self) -> None:
         """
@@ -106,7 +106,7 @@ class Scanner:
             case " " | "\r" | "\t":
                 pass
             case "\n":
-                self.line += 1
+                self._line += 1
             case '"':
                 self.__string()
             case _:
@@ -117,24 +117,24 @@ class Scanner:
                 else:
                     from .lox import Lox
 
-                    Lox.error(self.line, "Unexpected character.")
+                    Lox.error(self._line, "Unexpected character.")
 
     def __add_token(self, type: TokenType, literal: Any = None) -> None:
         """
-        Add a token to self.tokens.
+        Add a token to self._tokens.
         """
-        # NOTE: self.current will be incremented to the right index because of
+        # NOTE: self._current will be incremented to the right index because of
         # self.advance().
-        text: str = self.source[self.start : self.current]
-        self.tokens += [Token(type, text, literal, self.line)]
+        text: str = self._source[self._start : self._current]
+        self._tokens += [Token(type, text, literal, self._line)]
 
     def __advance(self) -> str:
         """
         Advance current.
         Return current scanned character in source.
         """
-        self.current += 1
-        return self.source[self.current - 1]
+        self._current += 1
+        return self._source[self._current - 1]
 
     def __match(self, expected: str) -> bool:
         """
@@ -144,10 +144,10 @@ class Scanner:
         if self.__is_at_end():
             return False
 
-        if self.source[self.current] != expected:
+        if self._source[self._current] != expected:
             return False
 
-        self.current += 1
+        self._current += 1
         return True
 
     def __peek(self) -> str:
@@ -157,33 +157,33 @@ class Scanner:
         if self.__is_at_end():
             return "\0"
 
-        return self.source[self.current]
+        return self._source[self._current]
 
     def __peek_next(self) -> str:
         """
         Look ahead by two characters in source.
         """
-        if self.current + 1 >= len(self.source):
+        if self._current + 1 >= len(self._source):
             return "\0"
 
-        return self.source[self.current + 1]
+        return self._source[self._current + 1]
 
     # Iter 1 (own version).
     # Less explicit about advancing to consume second quote.
     # def __string(self):
     #     while not self.__match('"') and not self.__is_at_end():
     #         if self.__peek() == "\n":
-    #             self.line += 1
+    #             self._line += 1
     #         self.__advance()
     #
     #     if self.__is_at_end():
     #         from .lox import Lox
     #
-    #         Lox.error(self.line, "Unterminated string.")
+    #         Lox.error(self._line, "Unterminated string.")
     #         return
     #
     #     self.__add_token(
-    #         TokenType.STRING, self.source[self.start + 1 : self.current - 1]
+    #         TokenType.STRING, self._source[self._start + 1 : self._current - 1]
     #     )
 
     def __string(self) -> None:
@@ -193,20 +193,20 @@ class Scanner:
         # Use of self.__is_at_end() needed to avoid IndexError.
         while self.__peek() != '"' and not self.__is_at_end():
             if self.__peek() == "\n":
-                self.line += 1
+                self._line += 1
             self.__advance()
 
         if self.__is_at_end():
             from .lox import Lox
 
-            Lox.error(self.line, "Unterminated string.")
+            Lox.error(self._line, "Unterminated string.")
             return
 
         # Consume the closing ".
         self.__advance()
 
         # Trim the surrounding quotes.
-        string: str = self.source[self.start + 1 : self.current - 1]
+        string: str = self._source[self._start + 1 : self._current - 1]
         self.__add_token(TokenType.STRING, string)
 
     def __number(self) -> None:
@@ -223,7 +223,7 @@ class Scanner:
                 self.__advance()
 
         self.__add_token(
-            TokenType.NUMBER, float(self.source[self.start : self.current])
+            TokenType.NUMBER, float(self._source[self._start : self._current])
         )
 
     def __identifier(self) -> None:
@@ -237,8 +237,8 @@ class Scanner:
         while self.__is_alpha_numeric(self.__peek()):
             self.__advance()
 
-        identifier = self.source[self.start : self.current]
-        keyword = self.keywords.get(identifier)
+        identifier = self._source[self._start : self._current]
+        keyword = self._keywords.get(identifier)
 
         if keyword:
             self.__add_token(keyword)
@@ -259,13 +259,13 @@ class Scanner:
     #     else:
     #         from lox import Lox
     #
-    #         Lox.error(self.line, "Unterminated block comment.")
+    #         Lox.error(self._line, "Unterminated block comment.")
     #         print(
-    #             "Unterminated block comment: " + self.source[self.start : self.current]
+    #             "Unterminated block comment: " + self._source[self._start : self._current]
     #         )
     #
     # def __is_two_chars_before_end(self) -> bool:
-    #     return self.current + 1 == len(self.source)
+    #     return self._current + 1 == len(self._source)
     #
     # def __is_block_comment_close(self) -> bool:
     #     return self.__peek() + self.__peek_next() == "*/"
@@ -281,7 +281,7 @@ class Scanner:
         # Loop until:
         # - No more open block comments
         # - Fewer than two characters to scan
-        while open_block_comments > 0 and self.current + 1 < len(self.source):
+        while open_block_comments > 0 and self._current + 1 < len(self._source):
             two_chars_ahead = self.__peek() + self.__peek_next()
 
             # Check for new depth.
@@ -298,28 +298,28 @@ class Scanner:
 
             # Advance by one character only if no /* or */ registered.
             else:
-                # NOTE: Use of self.__peek() is more defensive than self.source[self.current].
+                # NOTE: Use of self.__peek() is more defensive than self._source[self._current].
                 if self.__peek() == "\n":
-                    self.line += 1  # Track line number.
+                    self._line += 1  # Track line number.
 
                 self.__advance()
 
         # For inspection purposes.
         print(f"Open block comments remaining: {open_block_comments}")
         print("Block comment:")
-        print(self.source[self.start : self.current] + "\n")
+        print(self._source[self._start : self._current] + "\n")
 
         if open_block_comments != 0:
             from .lox import Lox
 
-            Lox.error(self.line, "Unterminated block comment.")
+            Lox.error(self._line, "Unterminated block comment.")
 
     def __is_at_end(self) -> bool:
         """
         Check if current points to the end of source. Useful for preventing
         IndexError.
         """
-        return self.current >= len(self.source)
+        return self._current >= len(self._source)
 
     def __is_alpha_numeric(self, char: str) -> bool:
         """
