@@ -55,18 +55,17 @@
 # - A higher level of precedence
 #
 # - expr -> equality ;
-#
-# - equality -> ...
-#
-# - comparison -> ...
-#
-# - term -> ...
-#
-# - factor -> factor ( "*" | "/" ) unary
-#           | unary ;
-#
+# - equality -> comparison ( ( "!=" | "==" ) comparison )* ;
+# - comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+# - term -> factor ( ( "-" | "+" ) factor )* ;
+# - factor -> unary ( ( "/" | "*" ) unary )* ;
 # - unary -> ("-" | "!") unary
 #          | primary ;
-#
 # - primary -> NUMBER | STRING | "true" | "false" | "nil"
 #            | "(" expr ")" ;
+
+# first attempt at a rule for factor:
+# - factor -> factor ( "*" | "/" ) unary
+#           | unary ;
+# NOTE: Lox would have trouble with left-recursive parsing (see how the first
+# symbol of the body is the same as the head).
