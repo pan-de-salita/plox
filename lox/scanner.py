@@ -126,7 +126,9 @@ class Scanner:
         # NOTE: self._current will be incremented to the right index because of
         # self.advance().
         text: str = self._source[self._start : self._current]
-        self._tokens += [Token(type, text, literal, self._line)]
+        self._tokens += [
+            Token(type=type, lexeme=text, literal=literal, line=self._line)
+        ]
 
     def __advance(self) -> str:
         """
