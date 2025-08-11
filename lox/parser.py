@@ -18,7 +18,7 @@ class Parser:
     _tokens: list[Token]
     _current: int = 0
 
-    def __expression(self) -> expr.Expr:
+    def expression(self) -> expr.Expr:
         return self.__equality()
 
     def __equality(self) -> expr.Expr:
@@ -66,21 +66,20 @@ class Parser:
         return expr.Unary(operator=operator, right=right)
 
     def __primary(self) -> expr.Expr:
-        match True:
-            case self.__match(TokenType.FALSE):
-                return expr.Literal(value=False)
-            case self.__match(TokenType.TRUE):
-                return expr.Literal(value=True)
-            case self.__match(TokenType.NIL):
-                return expr.Literal(value=None)
-            case self.__match(TokenType.NUMBER, TokenType.STRING):
-                return expr.Literal(value=self.__previous().literal)
-            case self.__match(TokenType.LEFT_PAREN):
-                expression: expr.Expr = self.__expression()
-                self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
-                return expr.Grouping(expression=expression)
-            case _:
-                raise RuntimeError("Expected expression, but none found.")
+        if self.__match(TokenType.FALSE):
+            return expr.Literal(value=False)
+        elif self.__match(TokenType.TRUE):
+            return expr.Literal(value=True)
+        elif self.__match(TokenType.NIL):
+            return expr.Literal(value=None)
+        elif self.__match(TokenType.NUMBER, TokenType.STRING):
+            return expr.Literal(value=self.__previous().literal)
+        elif self.__match(TokenType.LEFT_PAREN):
+            expression: expr.Expr = self.expression()
+            self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
+            return expr.Grouping(expression=expression)
+        else:
+            raise RuntimeError("Expected expression, but none found.")
 
     def __match(self, *token_types: TokenType) -> bool:
         """Check if the current token has any of the given types. If so,
@@ -163,4 +162,4 @@ if __name__ == "__main__":
         ]
     )
 
-    # print(parser.__expression())
+    print(parser.expression())
