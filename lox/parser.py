@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Callable
 
 from . import expr
 from .token import Token
@@ -21,51 +22,39 @@ class Parser:
         return self.__equality()
 
     def __equality(self) -> expr.Expr:
-        expression: expr.Expr = self.__comparison()
-        while self.__match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL):
-            operator: Token = self.__previous()
-            right: expr.Expr = self.__comparison()
-            expression = expr.Binary(left=expression, operator=operator, right=right)
-
-        return expression
+        return self.__binary_left_associative(
+            nonterminal=self.__comparison,
+            types=[TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL],
+        )
 
     def __comparison(self) -> expr.Expr:
-        expression: expr.Expr = self.__term()
-        while self.__match(
-            TokenType.GREATER,
-            TokenType.GREATER_EQUAL,
-            TokenType.LESS,
-            TokenType.LESS_EQUAL,
-        ):
-            operator: Token = self.__previous()
-            right: expr.Expr = self.__term()
-            expression = expr.Binary(left=expression, operator=operator, right=right)
-
-        return expression
+        return self.__binary_left_associative(
+            nonterminal=self.__term,
+            types=[
+                TokenType.GREATER,
+                TokenType.GREATER_EQUAL,
+                TokenType.LESS,
+                TokenType.LESS_EQUAL,
+            ],
+        )
 
     def __term(self) -> expr.Expr:
-        expression: expr.Expr = self.__factor()
-        while self.__match(
-            TokenType.MINUS,
-            TokenType.PLUS,
-        ):
-            operator: Token = self.__previous()
-            right: expr.Expr = self.__factor()
-            expression = expr.Binary(left=expression, operator=operator, right=right)
-
-        return expression
+        return self.__binary_left_associative(
+            nonterminal=self.__factor,
+            types=[
+                TokenType.MINUS,
+                TokenType.PLUS,
+            ],
+        )
 
     def __factor(self) -> expr.Expr:
-        expression: expr.Expr = self.__unary()
-        while self.__match(
-            TokenType.STAR,
-            TokenType.SLASH,
-        ):
-            operator: Token = self.__previous()
-            right: expr.Expr = self.__unary()
-            expression = expr.Binary(left=expression, operator=operator, right=right)
-
-        return expression
+        return self.__binary_left_associative(
+            nonterminal=self.__unary,
+            types=[
+                TokenType.SLASH,
+                TokenType.STAR,
+            ],
+        )
 
     def __unary(self) -> expr.Expr:
         if not self.__match(TokenType.MINUS, TokenType.BANG):
@@ -128,6 +117,20 @@ class Parser:
     def __previous(self) -> Token:
         """Return most recently consumed token."""
         return self._tokens[self._current - 1]
+
+    def __binary_left_associative(
+        self, nonterminal: Callable, types: list[TokenType]
+    ) -> expr.Expr:
+        """Return a left-associative binary parser."""
+        expression: expr.Expr = nonterminal()
+
+        # Rolling accumulator for building appropriate Binary expression.
+        while self.__match(*types):
+            operator: Token = self.__previous()
+            right: expr.Expr = nonterminal()
+            expression = expr.Binary(left=expression, operator=operator, right=right)
+
+        return expression
 
     def __literal(self, literal: object) -> expr.Literal:
         return expr.Literal(value=literal)
