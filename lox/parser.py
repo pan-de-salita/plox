@@ -18,7 +18,7 @@ class Parser:
     _tokens: list[Token]
     _current: int = 0
 
-    def expression(self) -> expr.Expr:
+    def __expression(self) -> expr.Expr:
         return self.__equality()
 
     def __equality(self) -> expr.Expr:
@@ -66,20 +66,21 @@ class Parser:
         return expr.Unary(operator=operator, right=right)
 
     def __primary(self) -> expr.Expr:
-        token: Token = self.__advance()
-        expression: expr.Expr = self.__literal(token.literal)
-
-        match token.type:
-            # case TokenType.NUMBER | TokenType.STRING:
-            #     return self.__literal(token.literal)
-
-            # TODO:
-            # Handle true, false, and nil
-
-            case TokenType.LEFT_PAREN:
-                expression = self.__parenthesize()
-
-        return expression
+        match True:
+            case self.__match(TokenType.FALSE):
+                return expr.Literal(value=False)
+            case self.__match(TokenType.TRUE):
+                return expr.Literal(value=True)
+            case self.__match(TokenType.NIL):
+                return expr.Literal(value=None)
+            case self.__match(TokenType.NUMBER, TokenType.STRING):
+                return expr.Literal(value=self.__previous().literal)
+            case self.__match(TokenType.LEFT_PAREN):
+                expression: expr.Expr = self.__expression()
+                self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
+                return expr.Grouping(expression=expression)
+            case _:
+                raise RuntimeError("Expected expression, but none found.")
 
     def __match(self, *token_types: TokenType) -> bool:
         """Check if the current token has any of the given types. If so,
@@ -118,13 +119,16 @@ class Parser:
         """Return most recently consumed token."""
         return self._tokens[self._current - 1]
 
+    # NOTE: Opportunity to use a decorator?
     def __binary_left_associative(
         self, nonterminal: Callable, types: list[TokenType]
     ) -> expr.Expr:
-        """Return a left-associative binary parser."""
+        """Return a left-associative binary syntax tree."""
         expression: expr.Expr = nonterminal()
 
         # Rolling accumulator for building appropriate Binary expression.
+        # The fact that the parser looks ahead at upcoming tokens to decide how
+        # to parse puts recursive descent into the category of predictive patterns.
         while self.__match(*types):
             operator: Token = self.__previous()
             right: expr.Expr = nonterminal()
@@ -132,18 +136,12 @@ class Parser:
 
         return expression
 
-    def __literal(self, literal: object) -> expr.Literal:
-        return expr.Literal(value=literal)
+    def __consume(self, type: TokenType, message: str) -> Token:
+        """Consume current token if current token matches a given type."""
+        if self.__check(type):
+            return self.__advance()
 
-    def __parenthesize(self) -> expr.Expr:
-        expression: expr.Expr = expr.Grouping(expression=self.expression())
-
-        if self.__peek().type != TokenType.RIGHT_PAREN:
-            raise RuntimeError("Expected ')' after expression")
-
-        self.__advance()  # Consume the closing parenthesis
-
-        return expression
+        raise RuntimeError(message)
 
 
 if __name__ == "__main__":
@@ -165,4 +163,4 @@ if __name__ == "__main__":
         ]
     )
 
-    print(parser.expression())
+    # print(parser.__expression())
