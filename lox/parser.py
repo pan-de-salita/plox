@@ -118,7 +118,6 @@ class Parser:
         """Return most recently consumed token."""
         return self._tokens[self._current - 1]
 
-    # NOTE: Opportunity to use a decorator?
     def __binary_left_associative(
         self, nonterminal: Callable, types: list[TokenType]
     ) -> expr.Expr:
