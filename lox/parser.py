@@ -48,6 +48,18 @@ class Parser:
         )
 
     def __factor(self) -> expr.Expr:
+        # NOTE: Infinite recursion if we used a left-recursive approach:
+        #
+        # print(self._current) # No token gets consumed, prompting infinite recursion.
+        # expression: expr.Expr = self.__factor()
+        #
+        # while self.__match(TokenType.STAR, TokenType.SLASH):
+        #     operator: Token = self.__previous()
+        #     right: expr.Expr = self.__unary()
+        #     expression = expr.Binary(left=expression, operator=operator, right=right)
+        #
+        # return expression
+
         return self.__binary_left_associative(
             nonterminal=self.__unary,
             types=[
@@ -147,7 +159,7 @@ if __name__ == "__main__":
         [
             Token(type=TokenType.LEFT_PAREN, lexeme="(", literal=None, line=1),
             Token(type=TokenType.NUMBER, lexeme="1", literal=float(1), line=1),
-            Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),
+            Token(type=TokenType.STAR, lexeme="*", literal=None, line=1),
             Token(type=TokenType.NUMBER, lexeme="2", literal=float(2), line=1),
             Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),
             Token(type=TokenType.NUMBER, lexeme="2", literal=float(2), line=1),
