@@ -48,9 +48,8 @@ class Parser:
         )
 
     def __factor(self) -> expr.Expr:
-        # NOTE: Infinite recursion if we used a left-recursive approach:
+        # NOTE: Infinite recursion if we use a left-recursive approach.
         #
-        # print(self._current) # No token gets consumed, prompting infinite recursion.
         # expression: expr.Expr = self.__factor()
         #
         # while self.__match(TokenType.STAR, TokenType.SLASH):
@@ -138,7 +137,7 @@ class Parser:
 
         # Rolling accumulator for building appropriate Binary expression.
         # The fact that the parser looks ahead at upcoming tokens to decide how
-        # to parse puts recursive descent into the category of predictive patterns.
+        # to parse puts recursive descent into the category of predictive parsers.
         while self.__match(*types):
             operator: Token = self.__previous()
             right: expr.Expr = nonterminal()
