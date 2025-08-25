@@ -126,7 +126,7 @@ class Parser:
 
     def __consume(self, token_type: TokenType, message: str) -> Token:
         """Consume current token if current token matches a given type."""
-        if self.__match(token_type):
+        if self.__check(token_type):
             return self.__advance()
 
         raise self.__error(self.__peek(), message)
@@ -177,13 +177,14 @@ if __name__ == "__main__":
             Token(type=TokenType.NUMBER, lexeme="2", literal=float(2), line=1),
             Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),
             Token(type=TokenType.NUMBER, lexeme="2", literal=float(2), line=1),
-            # Token(type=TokenType.RIGHT_PAREN, lexeme=")", literal=None, line=1),
+            Token(type=TokenType.RIGHT_PAREN, lexeme=")", literal=None, line=1),
             Token(type=TokenType.EQUAL_EQUAL, lexeme="==", literal=None, line=1),
             Token(type=TokenType.NUMBER, lexeme="1", literal=float(1), line=1),
             Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),
-            Token(type=TokenType.MINUS, lexeme="-", literal=None, line=1),
             Token(type=TokenType.NUMBER, lexeme="2", literal=float(2), line=1),
-            Token(type=TokenType.EOF, lexeme="", literal=float(1), line=1),
+            Token(type=TokenType.MINUS, lexeme="-", literal=None, line=1),
+            Token(type=TokenType.NUMBER, lexeme="1", literal=float(1), line=1),
+            Token(type=TokenType.EOF, lexeme="", literal=None, line=1),
         ]
     )
 
