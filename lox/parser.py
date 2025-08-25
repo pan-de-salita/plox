@@ -24,13 +24,13 @@ class Parser:
     def __equality(self) -> expr.Expr:
         return self.__binary_left_associative(
             nonterminal=self.__comparison,
-            types=[TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL],
+            token_types=[TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL],
         )
 
     def __comparison(self) -> expr.Expr:
         return self.__binary_left_associative(
             nonterminal=self.__term,
-            types=[
+            token_types=[
                 TokenType.GREATER,
                 TokenType.GREATER_EQUAL,
                 TokenType.LESS,
@@ -41,7 +41,7 @@ class Parser:
     def __term(self) -> expr.Expr:
         return self.__binary_left_associative(
             nonterminal=self.__factor,
-            types=[
+            token_types=[
                 TokenType.MINUS,
                 TokenType.PLUS,
             ],
@@ -61,7 +61,7 @@ class Parser:
 
         return self.__binary_left_associative(
             nonterminal=self.__unary,
-            types=[
+            token_types=[
                 TokenType.SLASH,
                 TokenType.STAR,
             ],
