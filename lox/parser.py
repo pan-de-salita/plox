@@ -21,7 +21,7 @@ class Parser:
     _tokens: list[Token]
     _current: int = 0
 
-    def __init__(self, tokens: list[Token]):
+    def __init__(self, tokens: list[Token]) -> None:
         if tokens:
             self._tokens = tokens
         else:
