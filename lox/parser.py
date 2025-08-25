@@ -68,13 +68,13 @@ class Parser:
         )
 
     def __unary(self) -> expr.Expr:
-        if not self.__match(TokenType.MINUS, TokenType.BANG):
+        if self.__match(TokenType.MINUS, TokenType.BANG):
+            operator: Token = self.__previous()
+            right: expr.Expr = self.__unary()
+
+            return expr.Unary(operator=operator, right=right)
+        else:
             return self.__primary()
-
-        operator: Token = self.__previous()
-        right: expr.Expr = self.__unary()
-
-        return expr.Unary(operator=operator, right=right)
 
     def __primary(self) -> expr.Expr:
         if self.__match(TokenType.FALSE):
