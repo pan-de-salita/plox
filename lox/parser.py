@@ -179,25 +179,3 @@ class Parser:
         #
         # Currently, only __consume() would raise an error.
         return ParseError()
-
-
-if __name__ == "__main__":
-    parser = Parser(
-        [
-            Token(type=TokenType.LEFT_PAREN, lexeme="(", literal=None, line=1),
-            Token(type=TokenType.NUMBER, lexeme="1", literal=float(1), line=1),
-            Token(type=TokenType.STAR, lexeme="*", literal=None, line=1),
-            Token(type=TokenType.NUMBER, lexeme="2", literal=float(2), line=1),
-            Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),
-            Token(type=TokenType.NUMBER, lexeme="2", literal=float(2), line=1),
-            Token(type=TokenType.RIGHT_PAREN, lexeme=")", literal=None, line=1),
-            Token(type=TokenType.EQUAL_EQUAL, lexeme="==", literal=None, line=1),
-            Token(type=TokenType.NUMBER, lexeme="1", literal=float(1), line=1),
-            Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),
-            Token(type=TokenType.NUMBER, lexeme="2", literal=float(2), line=1),
-            Token(type=TokenType.MINUS, lexeme="-", literal=None, line=1),
-            Token(type=TokenType.NUMBER, lexeme="1", literal=float(1), line=1),
-            Token(type=TokenType.EOF, lexeme="", literal=None, line=1),
-        ]
-    )
-    print(parser.parse())
