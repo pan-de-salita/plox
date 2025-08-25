@@ -1,5 +1,7 @@
 import sys
 
+from . import expr
+from .ast_printer import AstPrinter
 from .scanner import Scanner
 from .token import Token
 from .token_type import TokenType
@@ -39,8 +41,14 @@ class Lox:
     def __run(source: str) -> None:
         scanner = Scanner(source)
         tokens = scanner.scan_tokens()
-        for token in tokens:
-            print(token)
+
+        from .parser import Parser
+
+        parser: Parser = Parser(tokens=tokens)
+        expression: expr.Expr | None = parser.parse()
+
+        if expression:
+            print(AstPrinter().print(expression))
 
     @staticmethod
     def error(
@@ -63,4 +71,4 @@ class Lox:
 
 
 if __name__ == "__main__":
-    Lox.main(["./test.lox"])
+    Lox.main([])

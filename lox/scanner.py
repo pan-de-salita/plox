@@ -37,13 +37,11 @@ class Scanner:
     _line: int = 1
 
     def scan_tokens(self) -> list[Token]:
-        """
-        Scan tokens from source.
-        """
+        """Scan tokens from source."""
         # For inspection purposes.
-        print(f"Source length: {len(self._source)}")
-        print("Source:")
-        print(repr(self._source) + "\n")
+        # print(f"Source length: {len(self._source)}")
+        # print("Source:")
+        # print(repr(self._source) + "\n")
 
         while not self.__is_at_end():
             self._start = self._current
@@ -310,9 +308,9 @@ class Scanner:
                 self.__advance()
 
         # For inspection purposes.
-        print(f"Open block comments remaining: {open_block_comments}")
-        print("Block comment:")
-        print(self._source[self._start : self._current] + "\n")
+        # print(f"Open block comments remaining: {open_block_comments}")
+        # print("Block comment:")
+        # print(self._source[self._start : self._current] + "\n")
 
         if open_block_comments != 0:
             from .lox import Lox
@@ -341,9 +339,7 @@ class Scanner:
         return char in string.ascii_letters + "_"
 
     def __is_digit(self, char: str) -> bool:
-        """
-        Check if char is a digit.
-        """
+        """Check if char is a digit."""
         # Iter 1:
         # return char in map(str, range(0, 10))
 
