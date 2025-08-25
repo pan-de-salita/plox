@@ -1,6 +1,8 @@
 import sys
 
 from .scanner import Scanner
+from .token import Token
+from .token_type import TokenType
 
 
 class Lox:
@@ -41,8 +43,18 @@ class Lox:
             print(token)
 
     @staticmethod
-    def error(line: int, message: str) -> None:
-        Lox.__report(line, "", message)
+    def error(
+        message: str,
+        line: int | None = None,
+        token: Token | None = None,
+    ) -> None:
+        if line:
+            Lox.__report(line, "", message)
+        elif token:
+            if token.type == TokenType.EOF:
+                Lox.__report(token.line, " at end", message)
+            else:
+                Lox.__report(token.line, f" at {token.lexeme}", message)
 
     @staticmethod
     def __report(line: int, where: str, message: str) -> None:

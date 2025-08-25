@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 from typing import Callable
 
+# Opportunity to use __init__.py?
 from . import expr
+from .lox import Lox
+from .parse_error import ParseError
 from .token import Token
 from .token_type import TokenType
 
@@ -87,7 +90,9 @@ class Parser:
             return expr.Literal(value=self.__previous().literal)
         elif self.__match(TokenType.LEFT_PAREN):
             expression: expr.Expr = self.expression()
-            self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
+            self.__consume(
+                token_type=TokenType.RIGHT_PAREN, message="Expect ')' after expression."
+            )
             return expr.Grouping(expression=expression)
         else:
             raise RuntimeError("Expected expression, but none found.")
@@ -119,6 +124,13 @@ class Parser:
 
         return False
 
+    def __consume(self, token_type: TokenType, message: str) -> Token:
+        """Consume current token if current token matches a given type."""
+        if self.__match(token_type):
+            return self.__advance()
+
+        raise self.__error(self.__peek(), message)
+
     def __check(self, type: TokenType) -> bool:
         """Check if current token matches given type."""
         if self.__is_at_end():
@@ -145,12 +157,15 @@ class Parser:
         """Return most recently consumed token."""
         return self._tokens[self._current - 1]
 
-    def __consume(self, type: TokenType, message: str) -> Token:
-        """Consume current token if current token matches a given type."""
-        if self.__check(type):
-            return self.__advance()
+    def __error(self, token: Token, message: str) -> ParseError:
+        Lox.error(message=message, token=token)
 
-        raise RuntimeError(message)
+        # Since parse errors vary in severity, return the error instead of
+        # raising it to let the calling method inside the parser decide whether
+        # to unwind or not.
+        #
+        # Currently, only __consume() would raise an error.
+        return ParseError()
 
 
 if __name__ == "__main__":
@@ -162,7 +177,7 @@ if __name__ == "__main__":
             Token(type=TokenType.NUMBER, lexeme="2", literal=float(2), line=1),
             Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),
             Token(type=TokenType.NUMBER, lexeme="2", literal=float(2), line=1),
-            Token(type=TokenType.RIGHT_PAREN, lexeme=")", literal=None, line=1),
+            # Token(type=TokenType.RIGHT_PAREN, lexeme=")", literal=None, line=1),
             Token(type=TokenType.EQUAL_EQUAL, lexeme="==", literal=None, line=1),
             Token(type=TokenType.NUMBER, lexeme="1", literal=float(1), line=1),
             Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),

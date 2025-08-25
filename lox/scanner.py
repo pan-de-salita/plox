@@ -117,7 +117,7 @@ class Scanner:
                 else:
                     from .lox import Lox
 
-                    Lox.error(self._line, "Unexpected character.")
+                    Lox.error(message="Unexpected character.", line=self._line)
 
     def __add_token(self, type: TokenType, literal: Any = None) -> None:
         """
@@ -181,7 +181,7 @@ class Scanner:
     #     if self.__is_at_end():
     #         from .lox import Lox
     #
-    #         Lox.error(self._line, "Unterminated string.")
+    #         Lox.error(message="Unterminated string.", line=self._line)
     #         return
     #
     #     self.__add_token(
@@ -201,7 +201,10 @@ class Scanner:
         if self.__is_at_end():
             from .lox import Lox
 
-            Lox.error(self._line, "Unterminated string.")
+            Lox.error(
+                message="Unterminated string.",
+                line=self._line,
+            )
             return
 
         # Consume the closing ".
@@ -261,7 +264,7 @@ class Scanner:
     #     else:
     #         from lox import Lox
     #
-    #         Lox.error(self._line, "Unterminated block comment.")
+    #         Lox.error(message="Unterminated block comment.", line=self._line)
     #         print(
     #             "Unterminated block comment: " + self._source[self._start : self._current]
     #         )
@@ -314,7 +317,7 @@ class Scanner:
         if open_block_comments != 0:
             from .lox import Lox
 
-            Lox.error(self._line, "Unterminated block comment.")
+            Lox.error(message="Unterminated block comment.", line=self._line)
 
     def __is_at_end(self) -> bool:
         """
