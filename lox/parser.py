@@ -21,7 +21,19 @@ class Parser:
     _tokens: list[Token]
     _current: int = 0
 
-    def expression(self) -> expr.Expr:
+    def __init__(self, tokens: list[Token]):
+        if tokens:
+            self._tokens = tokens
+        else:
+            raise ParseError("Expected tokens, but none given.")
+
+    def parse(self) -> expr.Expr | None:
+        try:
+            return self.__expression()
+        except ParseError:
+            return None
+
+    def __expression(self) -> expr.Expr:
         return self.__equality()
 
     def __equality(self) -> expr.Expr:
@@ -51,10 +63,11 @@ class Parser:
         )
 
     def __factor(self) -> expr.Expr:
-        # NOTE: Infinite recursion if we use a left-recursive approach.
+        # NOTE: We'd hit infinite recursion if we used a left-recursive approach:
         #
-        # expression: expr.Expr = self.__factor()
+        # expression: expr.Expr = self.__factor() # Triggers infinite recursion.
         #
+        # # This never gets executed:
         # while self.__match(TokenType.STAR, TokenType.SLASH):
         #     operator: Token = self.__previous()
         #     right: expr.Expr = self.__unary()
@@ -89,13 +102,13 @@ class Parser:
         elif self.__match(TokenType.NUMBER, TokenType.STRING):
             return expr.Literal(value=self.__previous().literal)
         elif self.__match(TokenType.LEFT_PAREN):
-            expression: expr.Expr = self.expression()
+            expression: expr.Expr = self.__expression()
             self.__consume(
                 token_type=TokenType.RIGHT_PAREN, message="Expect ')' after expression."
             )
             return expr.Grouping(expression=expression)
         else:
-            raise RuntimeError("Expected expression, but none found.")
+            raise self.__error(self.__peek(), "Expect expression.")
 
     def __binary_left_associative(
         self, nonterminal: Callable, token_types: list[TokenType]
@@ -188,4 +201,4 @@ if __name__ == "__main__":
         ]
     )
 
-    print(parser.expression())
+    print(parser.parse())
