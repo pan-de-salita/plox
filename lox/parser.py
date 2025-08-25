@@ -200,5 +200,4 @@ if __name__ == "__main__":
             Token(type=TokenType.EOF, lexeme="", literal=None, line=1),
         ]
     )
-
     print(parser.parse())
