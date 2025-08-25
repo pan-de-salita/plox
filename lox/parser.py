@@ -92,10 +92,26 @@ class Parser:
         else:
             raise RuntimeError("Expected expression, but none found.")
 
+    def __binary_left_associative(
+        self, nonterminal: Callable, types: list[TokenType]
+    ) -> expr.Expr:
+        """Return a left-associative binary syntax tree."""
+        expression: expr.Expr = nonterminal()
+
+        # Rolling accumulator for building appropriate Binary expression.
+        #
+        # The fact that the parser looks ahead at upcoming tokens to decide how
+        # to parse puts recursive descent into the category of predictive parsers.
+        while self.__match(*types):
+            operator: Token = self.__previous()
+            right: expr.Expr = nonterminal()
+            expression = expr.Binary(left=expression, operator=operator, right=right)
+
+        return expression
+
     def __match(self, *token_types: TokenType) -> bool:
-        """Check if the current token has any of the given types. If so,
-        consume the token and return True. Otherwise, ignore current token and
-        return False."""
+        """Check if the current token is of the given types. If so, consume the
+        token and return True. Otherwise, ignore current token and return False."""
         for type in token_types:
             if self.__check(type):
                 self.__advance()
@@ -128,22 +144,6 @@ class Parser:
     def __previous(self) -> Token:
         """Return most recently consumed token."""
         return self._tokens[self._current - 1]
-
-    def __binary_left_associative(
-        self, nonterminal: Callable, types: list[TokenType]
-    ) -> expr.Expr:
-        """Return a left-associative binary syntax tree."""
-        expression: expr.Expr = nonterminal()
-
-        # Rolling accumulator for building appropriate Binary expression.
-        # The fact that the parser looks ahead at upcoming tokens to decide how
-        # to parse puts recursive descent into the category of predictive parsers.
-        while self.__match(*types):
-            operator: Token = self.__previous()
-            right: expr.Expr = nonterminal()
-            expression = expr.Binary(left=expression, operator=operator, right=right)
-
-        return expression
 
     def __consume(self, type: TokenType, message: str) -> Token:
         """Consume current token if current token matches a given type."""
