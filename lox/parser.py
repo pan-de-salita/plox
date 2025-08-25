@@ -93,7 +93,7 @@ class Parser:
             raise RuntimeError("Expected expression, but none found.")
 
     def __binary_left_associative(
-        self, nonterminal: Callable, types: list[TokenType]
+        self, nonterminal: Callable, token_types: list[TokenType]
     ) -> expr.Expr:
         """Return a left-associative binary syntax tree."""
         expression: expr.Expr = nonterminal()
@@ -102,7 +102,7 @@ class Parser:
         #
         # The fact that the parser looks ahead at upcoming tokens to decide how
         # to parse puts recursive descent into the category of predictive parsers.
-        while self.__match(*types):
+        while self.__match(*token_types):
             operator: Token = self.__previous()
             right: expr.Expr = nonterminal()
             expression = expr.Binary(left=expression, operator=operator, right=right)
