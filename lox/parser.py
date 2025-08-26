@@ -179,3 +179,27 @@ class Parser:
         #
         # Currently, only __consume() would raise an error.
         return ParseError()
+
+    def __synchronize(self) -> None:
+        """Discard tokens until a statement boundary is found. For discarding
+        unwanted tokens and resyncing the Parser's state after a ParseError."""
+        self.__advance()
+
+        while not self.__is_at_end():
+            if self.__previous().type == TokenType.SEMICOLON:
+                return None
+
+            match self.__peek().type:
+                case (
+                    TokenType.CLASS
+                    | TokenType.FUN
+                    | TokenType.VAR
+                    | TokenType.FOR
+                    | TokenType.IF
+                    | TokenType.WHILE
+                    | TokenType.PRINT
+                    | TokenType.RETURN
+                ):
+                    return None
+
+            self.__advance()
