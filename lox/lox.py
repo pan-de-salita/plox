@@ -2,6 +2,7 @@ import sys
 
 from . import expr
 from .ast_printer import AstPrinter
+from .parser import Parser
 from .scanner import Scanner
 from .token import Token
 from .token_type import TokenType
@@ -41,9 +42,6 @@ class Lox:
     def __run(source: str) -> None:
         scanner = Scanner(source)
         tokens = scanner.scan_tokens()
-
-        from .parser import Parser
-
         parser: Parser = Parser(tokens=tokens)
         expression: expr.Expr | None = parser.parse()
 

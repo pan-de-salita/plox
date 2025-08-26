@@ -3,7 +3,6 @@ from typing import Callable
 
 # Opportunity to use __init__.py?
 from . import expr
-from .lox import Lox
 from .parse_error import ParseError
 from .token import Token
 from .token_type import TokenType
@@ -28,21 +27,39 @@ class Parser:
             raise ParseError("Expected tokens, but none given.")
 
     def parse(self) -> expr.Expr | None:
+        """Parse tokens."""
         try:
             return self.__expression()
         except ParseError:
             return None
 
     def __expression(self) -> expr.Expr:
+        """Parse expression rule: expression -> equality
+
+        This is the top-level rule for expressions. Currently just delegates
+        to equality since that's the lowest precedence binary operator.
+        """
         return self.__equality()
 
     def __equality(self) -> expr.Expr:
+        """Parse equality rule: equality -> comparison ( ( "!=" | "==" ) comparison )*
+
+        Handles equality and inequality operators (== and !=).
+        These have lower precedence than comparison operators.
+        Left-associative: a == b == c is parsed as ((a == b) == c)
+        """
         return self.__binary_left_associative(
             nonterminal=self.__comparison,
             token_types=[TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL],
         )
 
     def __comparison(self) -> expr.Expr:
+        """Parse comparison rule: comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )*
+
+        Handles relational operators (>, >=, <, <=).
+        These have higher precedence than equality but lower than arithmetic.
+        Left-associative: a < b < c is parsed as ((a < b) < c)
+        """
         return self.__binary_left_associative(
             nonterminal=self.__term,
             token_types=[
@@ -54,6 +71,12 @@ class Parser:
         )
 
     def __term(self) -> expr.Expr:
+        """Parse term rule: term -> factor ( ( "-" | "+" ) factor )*
+
+        Handles addition and subtraction operators.
+        These have higher precedence than comparison but lower than multiplication/division.
+        Left-associative: a + b - c is parsed as ((a + b) - c)
+        """
         return self.__binary_left_associative(
             nonterminal=self.__factor,
             token_types=[
@@ -63,8 +86,16 @@ class Parser:
         )
 
     def __factor(self) -> expr.Expr:
-        # NOTE: We'd hit infinite recursion if we used a left-recursive approach:
-        #
+        """Parse factor rule: factor -> unary ( ( "/" | "*" ) unary )*
+
+        Handles multiplication and division operators.
+        These have higher precedence than addition/subtraction but lower than unary.
+        Left-associative: a * b / c is parsed as ((a * b) / c)
+
+        Note: The commented code shows why left-recursion doesn't work in
+        recursive descent - it would cause infinite recursion.
+        """
+
         # expression: expr.Expr = self.__factor() # Triggers infinite recursion.
         #
         # # This never gets executed:
@@ -84,6 +115,14 @@ class Parser:
         )
 
     def __unary(self) -> expr.Expr:
+        """Parse unary rule: unary -> ( "!" | "-" ) unary | primary
+
+        Handles unary operators (! and -).
+        These have higher precedence than all binary operators.
+        Right-associative: --a is parsed as -(-(a))
+
+        If no unary operator is found, delegates to primary.
+        """
         if self.__match(TokenType.MINUS, TokenType.BANG):
             operator: Token = self.__previous()
             right: expr.Expr = self.__unary()
@@ -93,6 +132,15 @@ class Parser:
             return self.__primary()
 
     def __primary(self) -> expr.Expr:
+        """Parse primary rule: primary -> "true" | "false" | "nil" | NUMBER | STRING | "(" expression ")"
+
+        Handles the highest precedence expressions:
+        - Literal values: true, false, nil, numbers, strings
+        - Grouped expressions: (expression)
+
+        This is the base case of the recursive descent - no further recursion
+        except for grouped expressions which restart from the top.
+        """
         if self.__match(TokenType.FALSE):
             return expr.Literal(value=False)
         elif self.__match(TokenType.TRUE):
@@ -171,6 +219,9 @@ class Parser:
         return self._tokens[self._current - 1]
 
     def __error(self, token: Token, message: str) -> ParseError:
+        """Handle parse errors."""
+        from .lox import Lox
+
         Lox.error(message=message, token=token)
 
         # Since parse errors vary in severity, return the error instead of
@@ -178,6 +229,7 @@ class Parser:
         # to unwind or not.
         #
         # Currently, only __consume() would raise an error.
+
         return ParseError()
 
     def __synchronize(self) -> None:
