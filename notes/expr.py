@@ -54,7 +54,8 @@
 # - Its level of precedence
 # - A higher level of precedence
 #
-# - expr -> equality ;
+# - expr -> comma_expr ;
+# - comma_expr -> equality ( "," equality )* ;
 # - equality -> comparison ( ( "!=" | "==" ) comparison )* ;
 # - comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 # - term -> factor ( ( "-" | "+" ) factor )* ;

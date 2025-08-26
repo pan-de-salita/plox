@@ -34,12 +34,23 @@ class Parser:
             return None
 
     def __expression(self) -> expr.Expr:
-        """Parse expression rule: expression -> equality
+        """Parse expression rule: expression -> comma_expression
 
         This is the top-level rule for expressions. Currently just delegates
-        to equality since that's the lowest precedence binary operator.
+        to comma_expression since that's the lowest precedence binary operator.
         """
-        return self.__equality()
+        return self.__comma_expression()
+
+    def __comma_expression(self) -> expr.Expr:
+        """Parse expression rule: comma_expression -> equality ( "," equality )
+
+        Handles comma operators (,).
+        These have lower precedence than equality operators.
+        Left-associative: a, b, c is parsed as ((a, b), c)
+        """
+        return self.__binary_left_associative(
+            nonterminal=self.__equality, token_types=[TokenType.COMMA]
+        )
 
     def __equality(self) -> expr.Expr:
         """Parse equality rule: equality -> comparison ( ( "!=" | "==" ) comparison )*
