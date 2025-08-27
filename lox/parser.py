@@ -79,7 +79,7 @@ class Parser:
             else:
                 self.__error(
                     token=self.__peek(),
-                    message="Expected binary branch after '?' for a ternary expression.",
+                    message="Expect binary branch after '?' for a ternary expression.",
                 )
 
         return expression
