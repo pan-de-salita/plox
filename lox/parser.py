@@ -166,8 +166,33 @@ class Parser:
 
         If no unary operator is found, delegates to primary.
         """
-        if self.__match(TokenType.MINUS, TokenType.BANG):
+        invalid_binary_operators: list[TokenType] = [
+            TokenType.COMMA,
+            TokenType.DOT,
+            TokenType.PLUS,
+            TokenType.SLASH,
+            TokenType.STAR,
+            TokenType.BANG_EQUAL,
+            TokenType.EQUAL,
+            TokenType.EQUAL_EQUAL,
+            TokenType.GREATER,
+            TokenType.GREATER_EQUAL,
+            TokenType.LESS,
+            TokenType.LESS_EQUAL,
+            # TokenType.AND,
+            # TokenType.OR,
+        ]
+
+        if self.__match(*invalid_binary_operators, TokenType.MINUS, TokenType.BANG):
             operator: Token = self.__previous()
+
+            if operator.type in invalid_binary_operators:
+                self.__error(
+                    operator,
+                    f"Expressions beginning with '{operator.lexeme}' not allowed.",
+                )
+                return self.__primary()
+
             right: expr.Expr = self.__unary()
 
             return expr.Unary(operator=operator, right=right)
