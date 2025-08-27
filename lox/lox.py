@@ -61,6 +61,8 @@ class Lox:
                 Lox.__report(token.line, " at end", message)
             else:
                 Lox.__report(token.line, f" at {token.lexeme}", message)
+        else:
+            raise RuntimeError("Lox.error called without line or token.")
 
     @staticmethod
     def __report(line: int, where: str, message: str) -> None:
