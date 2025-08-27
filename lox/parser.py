@@ -23,6 +23,7 @@ class Parser:
     def __init__(self, tokens: list[Token]) -> None:
         if tokens:
             self._tokens = tokens
+            # print(self._tokens)
         else:
             raise ParseError("Expected tokens, but none given.")
 
@@ -34,7 +35,7 @@ class Parser:
             return None
 
     def __expression(self) -> expr.Expr:
-        """Parse expression rule: expression -> comma_expression
+        """Parse expression rule: expression -> comma_expresiion
 
         This is the top-level rule for expressions. Currently just delegates
         to comma_expression since that's the lowest precedence binary operator.
@@ -42,15 +43,46 @@ class Parser:
         return self.__comma_expression()
 
     def __comma_expression(self) -> expr.Expr:
-        """Parse expression rule: comma_expression -> equality ( "," equality )
+        """Parse expression rule: comma_expression -> ternary ( "," ternary )
 
         Handles comma operators (,).
         These have lower precedence than equality operators.
         Left-associative: a, b, c is parsed as ((a, b), c)
         """
         return self.__binary_left_associative(
-            nonterminal=self.__equality, token_types=[TokenType.COMMA]
+            nonterminal=self.__ternary, token_types=[TokenType.COMMA]
         )
+
+    def __ternary(self) -> expr.Expr:
+        """Parse expression rule: ternary -> ( equality "?" equality ":" ternary ) | equality
+
+        Handles ternary expressions.
+        These have lower precedence than comma expressions.
+        Right-associative: true ? 1 : 2 ? 3 : 4 is parsed as (? true (: 1 (? 2 (: 3 4))))
+        """
+        expression: expr.Expr = self.__equality()
+
+        if self.__match(TokenType.QUESTION):
+            condition: expr.Expr = expression
+            question: Token = self.__previous()
+            consequent: expr.Expr = self.__equality()
+
+            if self.__match(TokenType.COLON):
+                colon: Token = self.__previous()
+                alternative: expr.Expr = self.__ternary()
+                branches: expr.Binary = expr.Binary(
+                    left=consequent, operator=colon, right=alternative
+                )
+                expression = expr.Binary(
+                    left=condition, operator=question, right=branches
+                )
+            else:
+                self.__error(
+                    token=self.__peek(),
+                    message="Expected binary branch after '?' for a ternary expression.",
+                )
+
+        return expression
 
     def __equality(self) -> expr.Expr:
         """Parse equality rule: equality -> comparison ( ( "!=" | "==" ) comparison )*

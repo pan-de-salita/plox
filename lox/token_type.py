@@ -11,9 +11,11 @@ class TokenType(Enum):
     DOT = auto()
     MINUS = auto()
     PLUS = auto()
+    COLON = auto()
     SEMICOLON = auto()
     SLASH = auto()
     STAR = auto()
+    QUESTION = auto()
 
     # One-or-more-character tokens.
     BANG = auto()

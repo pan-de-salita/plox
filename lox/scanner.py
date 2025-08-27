@@ -73,10 +73,14 @@ class Scanner:
                 self.__add_token(TokenType.MINUS)
             case "+":
                 self.__add_token(TokenType.PLUS)
+            case ":":
+                self.__add_token(TokenType.COLON)
             case ";":
                 self.__add_token(TokenType.SEMICOLON)
             case "*":
                 self.__add_token(TokenType.STAR)
+            case "?":
+                self.__add_token(TokenType.QUESTION)
             case "!":
                 self.__add_token(
                     TokenType.BANG_EQUAL if self.__match("=") else TokenType.BANG

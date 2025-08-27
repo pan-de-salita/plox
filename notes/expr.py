@@ -55,7 +55,8 @@
 # - A higher level of precedence
 #
 # - expr -> comma_expr ;
-# - comma_expr -> equality ( "," equality )* ;
+# - comma_expr -> ternary ( "," ternary )* ;
+# - ternary -> ( equality "?" equality ":" ternary ) | equality ;
 # - equality -> comparison ( ( "!=" | "==" ) comparison )* ;
 # - comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 # - term -> factor ( ( "-" | "+" ) factor )* ;
@@ -70,3 +71,5 @@
 #           | unary ;
 # NOTE: Lox would have trouble with left-recursive parsing (see how the first
 # symbol of the body is the same as the head).
+
+# True ? (True ? x : y) : z
