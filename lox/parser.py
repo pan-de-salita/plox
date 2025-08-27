@@ -292,11 +292,9 @@ class Parser:
 
         Lox.error(message=message, token=token)
 
-        # Since parse errors vary in severity, return the error instead of
+        # Since parse errors vary in severity, returning the error instead of
         # raising it to let the calling method inside the parser decide whether
         # to unwind or not.
-        #
-        # Currently, only __consume() would raise an error.
 
         return ParseError()
 
