@@ -57,7 +57,7 @@ class Parser:
         """Parse expression rule: ternary -> ( equality "?" equality ":" ternary ) | equality
 
         Handles ternary expressions.
-        These have lower precedence than comma expressions.
+        These have lower precedence than equality expressions.
         Right-associative: true ? 1 : 2 ? 3 : 4 is parsed as (? true (: 1 (? 2 (: 3 4))))
         """
         expression: expr.Expr = self.__equality()
