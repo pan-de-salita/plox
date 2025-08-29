@@ -46,7 +46,7 @@ class Parser:
         """Parse expression rule: comma_expression -> ternary ( "," ternary )
 
         Handles comma operators (,).
-        These have lower precedence than equality operators.
+        These have lower precedence than ternary operators.
         Left-associative: a, b, c is parsed as ((a, b), c)
         """
         return self.__binary_left_associative(
