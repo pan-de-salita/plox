@@ -63,6 +63,16 @@ class AstPrinter(expr.Visitor[str]):
         """Pretty-print an expression in Lisp format."""
         return expr.accept(self)
 
+    def visit_ternary_expr(self, ternary: expr.Ternary) -> str:
+        """Overrides Visitor.visit_ternary_expr()."""
+        condition: str = f"? {ternary.condition.accept(self)}"
+
+        return self.__parenthesize(
+            condition,
+            ternary.consequent,
+            ternary.alternative,
+        )
+
     def visit_binary_expr(self, binary: expr.Binary) -> str:
         """Overrides Visitor.visit_binary_expr()."""
         return self.__parenthesize(binary.operator.lexeme, binary.left, binary.right)

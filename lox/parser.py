@@ -63,24 +63,20 @@ class Parser:
         expression: expr.Expr = self.__equality()
 
         if self.__match(TokenType.QUESTION):
+            # Question mark is consumed via call to __match().
             condition: expr.Expr = expression
-            question: Token = self.__previous()
             consequent: expr.Expr = self.__equality()
 
-            if self.__match(TokenType.COLON):
-                colon: Token = self.__previous()
-                alternative: expr.Expr = self.__ternary()
-                branches: expr.Binary = expr.Binary(
-                    left=consequent, operator=colon, right=alternative
-                )
-                expression = expr.Binary(
-                    left=condition, operator=question, right=branches
-                )
-            else:
-                self.__error(
-                    token=self.__peek(),
-                    message="Expect binary branch after '?' for a ternary expression.",
-                )
+            # Check for colon.
+            self.__consume(
+                TokenType.COLON,
+                "Expect binary branch after '?' for a ternary expression.",
+            )
+
+            alternative: expr.Expr = self.__ternary()
+            expression = expr.Ternary(
+                condition=condition, consequent=consequent, alternative=alternative
+            )
 
         return expression
 
