@@ -49,9 +49,9 @@ class Interpreter(expr.Visitor[object]):
                 if self.__is_both_float(left, right):
                     res = eval(f"{left} / {right}")
             case "==":
-                res = eval(f"{left} == {right}")
+                res = self.__is_both_equal(left, right)
             case "!=":
-                res = eval(f"{left} != {right}")
+                res = not self.__is_both_equal(left, right)
             case ">":
                 if self.__is_both_float(left, right):
                     res = eval(f"{left} > {right}")
@@ -109,6 +109,14 @@ class Interpreter(expr.Visitor[object]):
             return str(obj).split(".")[0]
         else:
             return str(obj)
+
+    def __is_both_equal(self, left: object, right: object) -> bool:
+        if left is None and right is None:
+            return True
+        elif left is None:
+            return False
+        else:
+            return left == right
 
 
 if __name__ == "__main__":
