@@ -93,8 +93,8 @@ class Interpreter(expr.Visitor[object]):
     def __is_truthy(self, obj: object) -> bool:
         if obj is None:
             return False
-        elif isinstance(obj, bool) and obj:
-            return False
+        elif isinstance(obj, bool):
+            return obj
         else:
             return True
 
