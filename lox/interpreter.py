@@ -111,6 +111,12 @@ class Interpreter(expr.Visitor[object]):
             return str(obj)
 
     def __is_both_equal(self, left: object, right: object) -> bool:
+        # For matching the author's implementation. In Java calling equals() on
+        # nil results in a NullPointerException. In Python, however, it's safe
+        # to compare a value with None; i.e., the following is completely fine:
+        #
+        # return left == right
+
         if left is None and right is None:
             return True
         elif left is None:
