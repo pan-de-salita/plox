@@ -35,35 +35,35 @@ class Interpreter(expr.Visitor[object]):
 
         match operand:
             case "+":
-                if self.__is_both_float(left, right):
-                    res = eval(f"{left} + {right}")
-                elif self.__is_both_string(left, right):
-                    res = eval(f"'{left}' + '{right}'")
+                if isinstance(left, float) and isinstance(right, float):
+                    res = float(left) + float(right)
+                elif isinstance(left, str) and isinstance(right, str):
+                    res = str(left) + str(right)
             case "-":
-                if self.__is_both_float(left, right):
-                    res = eval(f"{left} - {right}")
+                if isinstance(left, float) and isinstance(right, float):
+                    res = float(left) - float(right)
             case "*":
-                if self.__is_both_float(left, right):
-                    res = eval(f"{left} * {right}")
+                if isinstance(left, float) and isinstance(right, float):
+                    res = float(left) * float(right)
             case "/":
-                if self.__is_both_float(left, right):
-                    res = eval(f"{left} / {right}")
+                if isinstance(left, float) and isinstance(right, float):
+                    res = float(left) / float(right)
             case "==":
                 res = self.__is_both_equal(left, right)
             case "!=":
                 res = not self.__is_both_equal(left, right)
             case ">":
-                if self.__is_both_float(left, right):
-                    res = eval(f"{left} > {right}")
+                if isinstance(left, float) and isinstance(right, float):
+                    res = float(left) > float(right)
             case ">=":
-                if self.__is_both_float(left, right):
-                    res = eval(f"{left} >= {right}")
+                if isinstance(left, float) and isinstance(right, float):
+                    res = float(left) >= float(right)
             case "<":
-                if self.__is_both_float(left, right):
-                    res = eval(f"{left} < {right}")
+                if isinstance(left, float) and isinstance(right, float):
+                    res = float(left) < float(right)
             case "<=":
-                if self.__is_both_float(left, right):
-                    res = eval(f"{left} <= {right}")
+                if isinstance(left, float) and isinstance(right, float):
+                    res = float(left) <= float(right)
 
         return res
 
@@ -98,18 +98,6 @@ class Interpreter(expr.Visitor[object]):
         else:
             return True
 
-    def __is_both_float(self, left: object, right: object) -> bool:
-        return isinstance(left, float) and isinstance(right, float)
-
-    def __is_both_string(self, left: object, right: object) -> bool:
-        return isinstance(left, str) and isinstance(right, str)
-
-    def __stringify(self, obj: object) -> str:
-        if isinstance(obj, float):
-            return str(obj).split(".")[0]
-        else:
-            return str(obj)
-
     def __is_both_equal(self, left: object, right: object) -> bool:
         # For matching the author's implementation. In Java calling equals() on
         # nil results in a NullPointerException. In Python, however, it's safe
@@ -123,6 +111,12 @@ class Interpreter(expr.Visitor[object]):
             return False
         else:
             return left == right
+
+    def __stringify(self, obj: object) -> str:
+        if isinstance(obj, float):
+            return str(obj).split(".")[0]
+        else:
+            return str(obj)
 
 
 if __name__ == "__main__":
