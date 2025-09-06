@@ -31,8 +31,6 @@ class Interpreter(expr.Visitor[object]):
         return result
 
     def visit_binary_expr(self, binary: expr.Binary) -> object:
-        # TODO: Handle errors.
-
         operator: Token = binary.operator
         left: object = self.__evaluate(binary.left)
         right: object = self.__evaluate(binary.right)
@@ -83,8 +81,6 @@ class Interpreter(expr.Visitor[object]):
         return literal.value
 
     def visit_unary_expr(self, unary: expr.Unary) -> object:
-        # TODO: Handle errors.
-
         operator: Token = unary.operator
         right: object = self.__evaluate(unary.right)
         result: object = None
