@@ -40,30 +40,23 @@ class Interpreter(expr.Visitor[object]):
                 elif isinstance(left, str) and isinstance(right, str):
                     result = str(left) + str(right)
             case TokenType.MINUS:
-                if isinstance(left, float) and isinstance(right, float):
-                    result = float(left) - float(right)
+                result = float(left) - float(right)  # type: ignore[arg-type]
             case TokenType.STAR:
-                if isinstance(left, float) and isinstance(right, float):
-                    result = float(left) * float(right)
+                result = float(left) * float(right)  # type: ignore[arg-type]
             case TokenType.SLASH:
-                if isinstance(left, float) and isinstance(right, float):
-                    result = float(left) / float(right)
+                result = float(left) / float(right)  # type: ignore[arg-type]
             case TokenType.EQUAL_EQUAL:
-                result = self.__is_both_equal(left, right)
+                result = self.__is_equal(left, right)  # type: ignore[arg-type]
             case TokenType.BANG_EQUAL:
-                result = not self.__is_both_equal(left, right)
+                result = not self.__is_equal(left, right)  # type: ignore[arg-type]
             case TokenType.GREATER:
-                if isinstance(left, float) and isinstance(right, float):
-                    result = float(left) > float(right)
+                result = float(left) > float(right)  # type: ignore[arg-type]
             case TokenType.GREATER_EQUAL:
-                if isinstance(left, float) and isinstance(right, float):
-                    result = float(left) >= float(right)
+                result = float(left) >= float(right)  # type: ignore[arg-type]
             case TokenType.LESS:
-                if isinstance(left, float) and isinstance(right, float):
-                    result = float(left) < float(right)
+                result = float(left) < float(right)  # type: ignore[arg-type]
             case TokenType.LESS_EQUAL:
-                if isinstance(left, float) and isinstance(right, float):
-                    result = float(left) <= float(right)
+                result = float(left) <= float(right)  # type: ignore[arg-type]
 
         return result
 
@@ -82,11 +75,9 @@ class Interpreter(expr.Visitor[object]):
 
         match operator.type:
             case TokenType.MINUS:
-                if isinstance(right, float):
-                    result = -right
+                result = -float(right)  # type: ignore[arg-type]
             case TokenType.BANG:
-                if self.__is_truthy(right):
-                    result = not right
+                result = not self.__is_truthy(right)
 
         return result
 
@@ -98,7 +89,7 @@ class Interpreter(expr.Visitor[object]):
         else:
             return True
 
-    def __is_both_equal(self, left: object, right: object) -> bool:
+    def __is_equal(self, left: object, right: object) -> bool:
         # For matching the author's implementation. In Java calling equals() on
         # nil results in a NullPointerException. In Python, however, it's safe
         # to compare a value with None; i.e., the following is completely fine:
