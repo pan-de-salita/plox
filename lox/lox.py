@@ -3,6 +3,7 @@ import sys
 from . import expr
 from .ast_printer import AstPrinter
 from .parser import Parser
+from .runtime_exception import RuntimeException
 from .scanner import Scanner
 from .token import Token
 from .token_type import TokenType
@@ -10,6 +11,7 @@ from .token_type import TokenType
 
 class Lox:
     had_error: bool = False
+    had_runtime_error: bool = False
 
     @staticmethod
     def main(args: list[str]) -> None:
@@ -26,8 +28,11 @@ class Lox:
         with open(path, encoding="utf-8") as file:
             bytes = file.read()
             Lox.__run(bytes)
+
             if Lox.had_error:
                 sys.exit(65)  # UNIX/POSIX convention for data format error.
+            if Lox.had_runtime_error:
+                sys.exit(70)
 
     @staticmethod
     def __run_prompt() -> None:
@@ -63,6 +68,11 @@ class Lox:
                 Lox.__report(token.line, f" at {token.lexeme}", message)
         else:
             raise RuntimeError("Lox.error called without line or token.")
+
+    @staticmethod
+    def runtime_error(error: RuntimeException) -> None:
+        print(f"{str(error)}\n[line {error.token.line}]", file=sys.stderr)
+        Lox.had_runtime_error = True
 
     @staticmethod
     def __report(line: int, where: str, message: str) -> None:

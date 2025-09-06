@@ -1,14 +1,19 @@
 from . import expr
-from .ast_printer import AstPrinter
+from .lox import Lox
+from .runtime_exception import RuntimeException
 from .token import Token
 from .token_type import TokenType
 
 
 class Interpreter(expr.Visitor[object]):
-    def main(self, expression: expr.Expr) -> str:
+    def interpret(self, expression: expr.Expr) -> None:
         # For testing purposes:
-        print(AstPrinter().print(expression))
-        return self.__stringify(self.__evaluate(expression))
+        # print(AstPrinter().print(expression))
+        try:
+            value: object = self.__evaluate(expression)
+            print(self.__stringify(value))
+        except RuntimeException as error:
+            Lox.runtime_error(error)
 
     def __evaluate(self, expression: expr.Expr) -> object:
         return expression.accept(self)
@@ -39,23 +44,34 @@ class Interpreter(expr.Visitor[object]):
                     result = float(left) + float(right)
                 elif isinstance(left, str) and isinstance(right, str):
                     result = str(left) + str(right)
+                else:
+                    raise RuntimeException(
+                        operator, "Operands must be two numbers or two strings."
+                    )
             case TokenType.MINUS:
+                self.__check_number_operands(operator, left, right)
                 result = float(left) - float(right)  # type: ignore[arg-type]
             case TokenType.STAR:
+                self.__check_number_operands(operator, left, right)
                 result = float(left) * float(right)  # type: ignore[arg-type]
             case TokenType.SLASH:
+                self.__check_number_operands(operator, left, right)
                 result = float(left) / float(right)  # type: ignore[arg-type]
             case TokenType.EQUAL_EQUAL:
                 result = self.__is_equal(left, right)  # type: ignore[arg-type]
             case TokenType.BANG_EQUAL:
                 result = not self.__is_equal(left, right)  # type: ignore[arg-type]
             case TokenType.GREATER:
+                self.__check_number_operands(operator, left, right)
                 result = float(left) > float(right)  # type: ignore[arg-type]
             case TokenType.GREATER_EQUAL:
+                self.__check_number_operands(operator, left, right)
                 result = float(left) >= float(right)  # type: ignore[arg-type]
             case TokenType.LESS:
+                self.__check_number_operands(operator, left, right)
                 result = float(left) < float(right)  # type: ignore[arg-type]
             case TokenType.LESS_EQUAL:
+                self.__check_number_operands(operator, left, right)
                 result = float(left) <= float(right)  # type: ignore[arg-type]
 
         return result
@@ -75,11 +91,26 @@ class Interpreter(expr.Visitor[object]):
 
         match operator.type:
             case TokenType.MINUS:
+                self.__check_number_operand(operator, right)
                 result = -float(right)  # type: ignore[arg-type]
             case TokenType.BANG:
                 result = not self.__is_truthy(right)
 
         return result
+
+    def __check_number_operand(self, operator: Token, operand: object) -> None:
+        if isinstance(operand, float):
+            return
+
+        raise RuntimeException(operator, "Operand must be a number.")
+
+    def __check_number_operands(
+        self, operator: Token, left: object, right: object
+    ) -> None:
+        if isinstance(left, float) and isinstance(right, float):
+            return
+
+        raise RuntimeException(operator, "Operands must be numbers.")
 
     def __is_truthy(self, obj: object) -> bool:
         if obj is None:
@@ -115,7 +146,7 @@ if __name__ == "__main__":
     expression: expr.Expr = expr.Ternary(
         condition=expr.Binary(
             left=expr.Binary(
-                left=expr.Literal(value=float(5)),
+                left=expr.Literal(value="five"),
                 operator=Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),
                 right=expr.Literal(value=float(0)),
             ),
@@ -136,7 +167,7 @@ if __name__ == "__main__":
         ),
     )
 
-    print(interpreter.main(expression))
+    interpreter.interpret(expression)
 
     # Tests:
     # expr.Binary(
