@@ -1,7 +1,7 @@
 import sys
 
 from . import expr
-from .ast_printer import AstPrinter
+from .interpreter import Interpreter
 from .parser import Parser
 from .runtime_exception import RuntimeException
 from .scanner import Scanner
@@ -10,6 +10,7 @@ from .token_type import TokenType
 
 
 class Lox:
+    _interpreter: Interpreter = Interpreter()
     had_error: bool = False
     had_runtime_error: bool = False
 
@@ -38,8 +39,10 @@ class Lox:
     def __run_prompt() -> None:
         while True:
             line = input("> ")
+
             if not line:
                 break
+
             Lox.__run(line)
             Lox.had_error = False
 
@@ -50,8 +53,10 @@ class Lox:
         parser: Parser = Parser(tokens=tokens)
         expression: expr.Expr | None = parser.parse()
 
-        if expression:
-            print(AstPrinter().print(expression))
+        if Lox.had_error:
+            return
+
+        Lox._interpreter.interpret(expression)  # type: ignore[arg-type]
 
     @staticmethod
     def error(
@@ -76,7 +81,7 @@ class Lox:
 
     @staticmethod
     def __report(line: int, where: str, message: str) -> None:
-        print(f"[line {line}] Error{where}: {message}", sys.stderr)
+        print(f"[line {line}] Error{where}: {message}", file=sys.stderr)
         Lox.had_error = True
 
 

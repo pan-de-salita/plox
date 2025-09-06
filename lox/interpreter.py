@@ -1,5 +1,4 @@
 from . import expr
-from .lox import Lox
 from .runtime_exception import RuntimeException
 from .token import Token
 from .token_type import TokenType
@@ -13,6 +12,8 @@ class Interpreter(expr.Visitor[object]):
             value: object = self.__evaluate(expression)
             print(self.__stringify(value))
         except RuntimeException as error:
+            from .lox import Lox
+
             Lox.runtime_error(error)
 
     def __evaluate(self, expression: expr.Expr) -> object:
