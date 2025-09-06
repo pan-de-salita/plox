@@ -15,15 +15,15 @@ class Interpreter(expr.Visitor[object]):
 
     def visit_ternary_expr(self, ternary: expr.Ternary) -> object:
         condition: object = self.__evaluate(ternary.condition)
-        res: object = None
+        result: object = None
 
         if self.__is_truthy(condition):
             if condition:
-                res = self.__evaluate(ternary.consequent)
+                result = self.__evaluate(ternary.consequent)
             else:
-                res = self.__evaluate(ternary.alternative)
+                result = self.__evaluate(ternary.alternative)
 
-        return res
+        return result
 
     def visit_binary_expr(self, binary: expr.Binary) -> object:
         # TODO: Handle errors.
@@ -31,41 +31,41 @@ class Interpreter(expr.Visitor[object]):
         operator: Token = binary.operator
         left: object = self.__evaluate(binary.left)
         right: object = self.__evaluate(binary.right)
-        res: object = None
+        result: object = None
 
         match operator.type:
             case TokenType.PLUS:
                 if isinstance(left, float) and isinstance(right, float):
-                    res = float(left) + float(right)
+                    result = float(left) + float(right)
                 elif isinstance(left, str) and isinstance(right, str):
-                    res = str(left) + str(right)
+                    result = str(left) + str(right)
             case TokenType.MINUS:
                 if isinstance(left, float) and isinstance(right, float):
-                    res = float(left) - float(right)
+                    result = float(left) - float(right)
             case TokenType.STAR:
                 if isinstance(left, float) and isinstance(right, float):
-                    res = float(left) * float(right)
+                    result = float(left) * float(right)
             case TokenType.SLASH:
                 if isinstance(left, float) and isinstance(right, float):
-                    res = float(left) / float(right)
+                    result = float(left) / float(right)
             case TokenType.EQUAL_EQUAL:
-                res = self.__is_both_equal(left, right)
+                result = self.__is_both_equal(left, right)
             case TokenType.BANG_EQUAL:
-                res = not self.__is_both_equal(left, right)
+                result = not self.__is_both_equal(left, right)
             case TokenType.GREATER:
                 if isinstance(left, float) and isinstance(right, float):
-                    res = float(left) > float(right)
+                    result = float(left) > float(right)
             case TokenType.GREATER_EQUAL:
                 if isinstance(left, float) and isinstance(right, float):
-                    res = float(left) >= float(right)
+                    result = float(left) >= float(right)
             case TokenType.LESS:
                 if isinstance(left, float) and isinstance(right, float):
-                    res = float(left) < float(right)
+                    result = float(left) < float(right)
             case TokenType.LESS_EQUAL:
                 if isinstance(left, float) and isinstance(right, float):
-                    res = float(left) <= float(right)
+                    result = float(left) <= float(right)
 
-        return res
+        return result
 
     def visit_grouping_expr(self, grouping: expr.Grouping) -> object:
         return self.__evaluate(grouping.expression)
@@ -78,17 +78,17 @@ class Interpreter(expr.Visitor[object]):
 
         operator: Token = unary.operator
         right: object = self.__evaluate(unary.right)
-        res: object = None
+        result: object = None
 
         match operator.type:
             case TokenType.MINUS:
                 if isinstance(right, float):
-                    res = -right
+                    result = -right
             case TokenType.BANG:
                 if self.__is_truthy(right):
-                    res = not right
+                    result = not right
 
-        return res
+        return result
 
     def __is_truthy(self, obj: object) -> bool:
         if obj is None:
