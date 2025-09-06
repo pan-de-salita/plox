@@ -28,40 +28,40 @@ class Interpreter(expr.Visitor[object]):
     def visit_binary_expr(self, binary: expr.Binary) -> object:
         # TODO: Handle errors.
 
-        operand: str = binary.operator.lexeme
+        operator: Token = binary.operator
         left: object = self.__evaluate(binary.left)
         right: object = self.__evaluate(binary.right)
         res: object = None
 
-        match operand:
-            case "+":
+        match operator.type:
+            case TokenType.PLUS:
                 if isinstance(left, float) and isinstance(right, float):
                     res = float(left) + float(right)
                 elif isinstance(left, str) and isinstance(right, str):
                     res = str(left) + str(right)
-            case "-":
+            case TokenType.MINUS:
                 if isinstance(left, float) and isinstance(right, float):
                     res = float(left) - float(right)
-            case "*":
+            case TokenType.STAR:
                 if isinstance(left, float) and isinstance(right, float):
                     res = float(left) * float(right)
-            case "/":
+            case TokenType.SLASH:
                 if isinstance(left, float) and isinstance(right, float):
                     res = float(left) / float(right)
-            case "==":
+            case TokenType.EQUAL_EQUAL:
                 res = self.__is_both_equal(left, right)
-            case "!=":
+            case TokenType.BANG_EQUAL:
                 res = not self.__is_both_equal(left, right)
-            case ">":
+            case TokenType.GREATER:
                 if isinstance(left, float) and isinstance(right, float):
                     res = float(left) > float(right)
-            case ">=":
+            case TokenType.GREATER_EQUAL:
                 if isinstance(left, float) and isinstance(right, float):
                     res = float(left) >= float(right)
-            case "<":
+            case TokenType.LESS:
                 if isinstance(left, float) and isinstance(right, float):
                     res = float(left) < float(right)
-            case "<=":
+            case TokenType.LESS_EQUAL:
                 if isinstance(left, float) and isinstance(right, float):
                     res = float(left) <= float(right)
 
@@ -76,15 +76,15 @@ class Interpreter(expr.Visitor[object]):
     def visit_unary_expr(self, unary: expr.Unary) -> object:
         # TODO: Handle errors.
 
-        operand: str = unary.operator.lexeme
+        operator: Token = unary.operator
         right: object = self.__evaluate(unary.right)
         res: object = None
 
-        match operand:
-            case "-":
+        match operator.type:
+            case TokenType.MINUS:
                 if isinstance(right, float):
                     res = -right
-            case "!":
+            case TokenType.BANG:
                 if self.__is_truthy(right):
                     res = not right
 
