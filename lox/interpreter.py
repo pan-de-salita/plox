@@ -135,10 +135,13 @@ class Interpreter(expr.Visitor[object]):
             return left == right
 
     def __stringify(self, obj: object) -> str:
+        if object is None:
+            return "nil"
+
         if isinstance(obj, float):
             return str(obj).split(".")[0]
-        else:
-            return str(obj)
+
+        return str(obj)
 
 
 if __name__ == "__main__":
