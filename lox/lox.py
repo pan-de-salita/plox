@@ -11,8 +11,8 @@ from .token_type import TokenType
 
 class Lox:
     _interpreter: Interpreter = Interpreter()
-    had_error: bool = False
-    had_runtime_error: bool = False
+    _had_error: bool = False
+    _had_runtime_error: bool = False
 
     @staticmethod
     def main(args: list[str]) -> None:
@@ -30,9 +30,9 @@ class Lox:
             bytes = file.read()
             Lox.__run(bytes)
 
-            if Lox.had_error:
+            if Lox._had_error:
                 sys.exit(65)  # UNIX/POSIX convention for data format error.
-            if Lox.had_runtime_error:
+            if Lox._had_runtime_error:
                 sys.exit(70)
 
     @staticmethod
@@ -44,7 +44,7 @@ class Lox:
                 break
 
             Lox.__run(line)
-            Lox.had_error = False
+            Lox._had_error = False
 
     @staticmethod
     def __run(source: str) -> None:
@@ -53,7 +53,7 @@ class Lox:
         parser: Parser = Parser(tokens=tokens)
         expression: expr.Expr | None = parser.parse()
 
-        if Lox.had_error:
+        if Lox._had_error:
             return
 
         Lox._interpreter.interpret(expression)  # type: ignore[arg-type]
@@ -77,12 +77,12 @@ class Lox:
     @staticmethod
     def runtime_error(error: RuntimeException) -> None:
         print(f"{str(error)}\n[line {error.token.line}]", file=sys.stderr)
-        Lox.had_runtime_error = True
+        Lox._had_runtime_error = True
 
     @staticmethod
     def __report(line: int, where: str, message: str) -> None:
         print(f"[line {line}] Error{where}: {message}", file=sys.stderr)
-        Lox.had_error = True
+        Lox._had_error = True
 
 
 if __name__ == "__main__":
