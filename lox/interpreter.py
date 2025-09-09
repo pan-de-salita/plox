@@ -47,9 +47,13 @@ class Interpreter(expr.Visitor[object]):
                     result = float(left) + float(right)
                 elif isinstance(left, str) and isinstance(right, str):
                     result = str(left) + str(right)
+                elif (isinstance(left, float) and isinstance(right, str)) or (
+                    isinstance(left, str) and isinstance(right, float)
+                ):
+                    result = self.__stringify(left) + self.__stringify(right)
                 else:
                     raise RuntimeException(
-                        operator, "Operands must be two numbers or two strings."
+                        operator, "Operands cannot be concatenated or added."
                     )
             case TokenType.MINUS:
                 self.__check_number_operands(operator, left, right)
