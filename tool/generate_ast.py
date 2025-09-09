@@ -37,6 +37,14 @@ class GenerateAst:
                 "Unary    : operator Token, right Expr",
             ],
         )
+        GenerateAst.__define_ast(
+            output_dir,
+            "Stmt",
+            [
+                "Expression  : expression Expr",
+                "Print       : expression Expr",
+            ],
+        )
 
     @staticmethod
     def __define_ast(output_dir: Path, base_name: str, types: list[str]) -> None:
@@ -53,7 +61,7 @@ class GenerateAst:
             lambda line: line + "\n",
             [
                 *GenerateAst.__generate_documentation(),
-                *GenerateAst.__generate_imports(),
+                *GenerateAst.__generate_imports(base_name),
                 *GenerateAst.__generate_visitor(base_name, type_definitions),
                 *GenerateAst.__generate_base_class(base_name),
                 *GenerateAst.__generate_child_classes(base_name, type_definitions),
@@ -110,18 +118,24 @@ class GenerateAst:
         ]
 
     @staticmethod
-    def __generate_imports() -> list[str]:
+    def __generate_imports(base_name: str) -> list[str]:
         """Generate imports."""
-        return [
+        imports = [
             "from __future__ import annotations",
             "",
             "from abc import ABC, abstractmethod",
             "from dataclasses import dataclass",
             "from typing import Generic, TypeVar",
             "",
-            "from lox.token import Token",
-            "",
         ]
+
+        match base_name:
+            case "Expr":
+                imports.extend(["from lox.token import Token", ""])
+            case "Stmt":
+                imports.extend(["from lox.expr import Expr", ""])
+
+        return imports
 
     @staticmethod
     def __generate_visitor(
@@ -220,7 +234,4 @@ class GenerateAst:
 
 
 if __name__ == "__main__":
-    # Testing.
     GenerateAst.main(["lox"])
-    with open("lox/expr.py", "r", encoding="utf-8") as file:
-        print(file.read())
