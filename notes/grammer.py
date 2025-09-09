@@ -73,3 +73,24 @@
 # symbol of the body is the same as the head).
 
 # True ? (True ? x : y) : z
+
+# New grammar from chapter 8:
+#
+# program -> statement* EOF
+# statement -> expr_stmt
+#            | print_stmt
+#
+# expr_stmt -> expr ";" ;
+# print_stmt -> "print" expr ";" ;
+#
+# - expr -> comma_expr ;
+# - comma_expr -> ternary ( "," ternary )* ;
+# - ternary -> ( equality "?" equality ":" ternary ) | equality ;
+# - equality -> comparison ( ( "!=" | "==" ) comparison )* ;
+# - comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+# - term -> factor ( ( "-" | "+" ) factor )* ;
+# - factor -> unary ( ( "/" | "*" ) unary )* ;
+# - unary -> ("-" | "!") unary
+#          | primary ;
+# - primary -> NUMBER | STRING | "true" | "false" | "nil"
+#            | "(" expr ")" ;
