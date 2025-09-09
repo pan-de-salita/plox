@@ -1,36 +1,38 @@
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import Any, ClassVar
+from typing import Any, Callable, ClassVar
 
 from .token import Token
 from .token_type import TokenType
 
+KEYWORDS = [
+    TokenType.AND,
+    TokenType.CLASS,
+    TokenType.ELSE,
+    TokenType.FALSE,
+    TokenType.FOR,
+    TokenType.FUN,
+    TokenType.IF,
+    TokenType.NIL,
+    TokenType.OR,
+    TokenType.PRINT,
+    TokenType.RETURN,
+    TokenType.SUPER,
+    TokenType.THIS,
+    TokenType.TRUE,
+    TokenType.VAR,
+    TokenType.WHILE,
+]
+
 
 @dataclass()
 class Scanner:
-    _KEYWORDS = [
-        TokenType.AND,
-        TokenType.CLASS,
-        TokenType.ELSE,
-        TokenType.FALSE,
-        TokenType.FOR,
-        TokenType.FUN,
-        TokenType.IF,
-        TokenType.NIL,
-        TokenType.OR,
-        TokenType.PRINT,
-        TokenType.RETURN,
-        TokenType.SUPER,
-        TokenType.THIS,
-        TokenType.TRUE,
-        TokenType.VAR,
-        TokenType.WHILE,
-    ]
+    _source: str
+    _error_callback: Callable[[str, int], None]
 
     _keywords: ClassVar[MappingProxyType[str, TokenType]] = MappingProxyType(
-        {keyword.name.lower(): keyword for keyword in _KEYWORDS}
+        {keyword.name.lower(): keyword for keyword in KEYWORDS}
     )
-    _source: str
     _tokens: list[Token] = field(default_factory=list)
     _start: int = 0
     _current: int = 0
@@ -117,9 +119,7 @@ class Scanner:
                 elif self.__is_alpha(char):
                     self.__identifier()
                 else:
-                    from .lox import Lox
-
-                    Lox.error(message="Unexpected character.", line=self._line)
+                    self._error_callback("Unexpected character.", self._line)
 
     def __add_token(self, type: TokenType, literal: Any = None) -> None:
         """
@@ -181,9 +181,7 @@ class Scanner:
     #         self.__advance()
     #
     #     if self.__is_at_end():
-    #         from .lox import Lox
-    #
-    #         Lox.error(message="Unterminated string.", line=self._line)
+    #         self._error_callback(message="Unterminated string.", line=self._line)
     #         return
     #
     #     self.__add_token(
@@ -201,12 +199,7 @@ class Scanner:
             self.__advance()
 
         if self.__is_at_end():
-            from .lox import Lox
-
-            Lox.error(
-                message="Unterminated string.",
-                line=self._line,
-            )
+            self._error_callback("Unterminated string.", self._line)
             return
 
         # Consume the closing ".
@@ -264,9 +257,7 @@ class Scanner:
     #         self.__advance()
     #         return
     #     else:
-    #         from lox import Lox
-    #
-    #         Lox.error(message="Unterminated block comment.", line=self._line)
+    #         self._error_callback(message="Unterminated block comment.", line=self._line)
     #         print(
     #             "Unterminated block comment: " + self._source[self._start : self._current]
     #         )
@@ -317,9 +308,7 @@ class Scanner:
         # print(self._source[self._start : self._current] + "\n")
 
         if open_block_comments != 0:
-            from .lox import Lox
-
-            Lox.error(message="Unterminated block comment.", line=self._line)
+            self._error_callback("Unterminated block comment.", self._line)
 
     def __is_at_end(self) -> bool:
         """

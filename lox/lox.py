@@ -10,80 +10,77 @@ from .token_type import TokenType
 
 
 class Lox:
-    _interpreter: Interpreter = Interpreter()
-    had_error: bool = False
-    had_runtime_error: bool = False
+    _had_error: bool = False
+    _had_runtime_error: bool = False
 
-    @staticmethod
-    def main(args: list[str]) -> None:
+    def __init__(self) -> None:
+        self._interpreter: Interpreter = Interpreter(self.runtime_error)
+
+    def main(self, args: list[str]) -> None:
         if len(args) > 1:
             print("Usage: jlox [script]", file=sys.stderr)
             sys.exit(64)  # UNIX/POSIX convention for command line usage error.
         elif len(args) == 1:
-            Lox.__run_file(args[0])
+            self.__run_file(args[0])
         else:
-            Lox.__run_prompt()
+            self.__run_prompt()
 
-    @staticmethod
-    def __run_file(path: str) -> None:
+    def __run_file(self, path: str) -> None:
         with open(path, encoding="utf-8") as file:
             bytes = file.read()
-            Lox.__run(bytes)
+            self.__run(bytes)
 
-            if Lox.had_error:
+            if Lox._had_error:
                 sys.exit(65)  # UNIX/POSIX convention for data format error.
-            if Lox.had_runtime_error:
+            if Lox._had_runtime_error:
                 sys.exit(70)
 
-    @staticmethod
-    def __run_prompt() -> None:
+    def __run_prompt(self) -> None:
         while True:
-            line = input("> ")
+            try:
+                line = input("> ")
+            except EOFError:
+                print()
+                return
+            except KeyboardInterrupt:
+                print()
+                continue
 
             if not line:
                 break
 
-            Lox.__run(line)
-            Lox.had_error = False
+            self.__run(line)
+            self._had_error = False
+            self._had_runtime_error = False
 
-    @staticmethod
-    def __run(source: str) -> None:
-        scanner = Scanner(source)
+    def __run(self, source: str) -> None:
+        scanner = Scanner(_source=source, _error_callback=self.lexical_error)
         tokens = scanner.scan_tokens()
-        parser: Parser = Parser(tokens=tokens)
+        parser: Parser = Parser(_tokens=tokens, _error_callback=self.parse_error)
         expression: expr.Expr | None = parser.parse()
 
-        if Lox.had_error:
+        if Lox._had_error:
             return
 
-        Lox._interpreter.interpret(expression)  # type: ignore[arg-type]
+        self._interpreter.interpret(expression)  # type: ignore[arg-type]
 
-    @staticmethod
-    def error(
-        message: str,
-        line: int | None = None,
-        token: Token | None = None,
-    ) -> None:
-        if line:
-            Lox.__report(line, "", message)
-        elif token:
-            if token.type == TokenType.EOF:
-                Lox.__report(token.line, " at end", message)
-            else:
-                Lox.__report(token.line, f" at {token.lexeme}", message)
+    def lexical_error(self, message: str, line: int) -> None:
+        self.__report("Lexical", line, "", message)
+
+    def parse_error(self, message: str, token: Token) -> None:
+        if token.type == TokenType.EOF:
+            self.__report("Parse", token.line, " at end", message)
         else:
-            raise RuntimeError("Lox.error called without line or token.")
+            self.__report("Parse", token.line, f" at {token.lexeme}", message)
 
-    @staticmethod
-    def runtime_error(error: RuntimeException) -> None:
+    def runtime_error(self, error: RuntimeException) -> None:
         print(f"{str(error)}\n[line {error.token.line}]", file=sys.stderr)
-        Lox.had_runtime_error = True
+        Lox._had_runtime_error = True
 
-    @staticmethod
-    def __report(line: int, where: str, message: str) -> None:
-        print(f"[line {line}] Error{where}: {message}", file=sys.stderr)
-        Lox.had_error = True
+    def __report(self, type: str, line: int, where: str, message: str) -> None:
+        print(f"[line {line}] {type.title()} Error{where}: {message}", file=sys.stderr)
+        Lox._had_error = True
 
 
 if __name__ == "__main__":
-    Lox.main([])
+    Lox().main([])

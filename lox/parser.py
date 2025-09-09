@@ -18,14 +18,9 @@ class Parser:
     nonterminal, we call that other rule's method."""
 
     _tokens: list[Token]
-    _current: int = 0
+    _error_callback: Callable[[str, Token], None]
 
-    def __init__(self, tokens: list[Token]) -> None:
-        if tokens:
-            self._tokens = tokens
-            # print(self._tokens)
-        else:
-            raise ParseError("Expected tokens, but none given.")
+    _current: int = 0
 
     def parse(self) -> expr.Expr | None:
         """Parse tokens."""
@@ -284,9 +279,7 @@ class Parser:
 
     def __error(self, token: Token, message: str) -> ParseError:
         """Handle parse errors."""
-        from .lox import Lox
-
-        Lox.error(message=message, token=token)
+        self._error_callback(message, token)
 
         # Since parse errors vary in severity, returning the error instead of
         # raising it to let the calling method inside the parser decide whether

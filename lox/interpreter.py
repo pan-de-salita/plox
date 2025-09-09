@@ -1,10 +1,16 @@
+from dataclasses import dataclass
+from typing import Callable
+
 from . import expr
 from .runtime_exception import RuntimeException
 from .token import Token
 from .token_type import TokenType
 
 
+@dataclass()
 class Interpreter(expr.Visitor[object]):
+    _error_callback: Callable[[RuntimeException], None]
+
     def interpret(self, expression: expr.Expr) -> None:
         # For testing purposes:
         # print(AstPrinter().print(expression))
@@ -12,9 +18,7 @@ class Interpreter(expr.Visitor[object]):
             value: object = self.__evaluate(expression)
             print(self.__stringify(value))
         except RuntimeException as error:
-            from .lox import Lox
-
-            Lox.runtime_error(error)
+            self._error_callback(error)
 
     def __evaluate(self, expression: expr.Expr) -> object:
         return expression.accept(self)
@@ -142,52 +146,4 @@ class Interpreter(expr.Visitor[object]):
 
 
 if __name__ == "__main__":
-    interpreter: Interpreter = Interpreter()
-    expression: expr.Expr = expr.Ternary(
-        condition=expr.Binary(
-            left=expr.Binary(
-                left=expr.Literal(value="five"),
-                operator=Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),
-                right=expr.Literal(value=float(0)),
-            ),
-            operator=Token(
-                type=TokenType.EQUAL_EQUAL, lexeme="==", literal=None, line=1
-            ),
-            right=expr.Literal(value=float(5)),
-        ),
-        consequent=expr.Binary(
-            left=expr.Literal(value=float(5)),
-            operator=Token(type=TokenType.STAR, lexeme="*", literal=None, line=1),
-            right=expr.Literal(value=float(5)),
-        ),
-        alternative=expr.Binary(
-            left=expr.Literal(value=float(0)),
-            operator=Token(type=TokenType.STAR, lexeme="*", literal=None, line=1),
-            right=expr.Literal(value=float(0)),
-        ),
-    )
-
-    interpreter.interpret(expression)
-
-    # Tests:
-    # expr.Binary(
-    #     left=expr.Literal(value="Hello "),
-    #     operator=Token(type=TokenType.PLUS, lexeme="+", literal=None, line=1),
-    #     right=expr.Literal(value="World"),
-    # )
-    # expr.Binary(
-    #     left=expr.Literal(value=float(5)),
-    #     operator=Token(
-    #         type=TokenType.EQUAL_EQUAL, lexeme="==", literal=None, line=1
-    #     ),
-    #     right=expr.Literal(value=float(5)),
-    # )
-    # expr.Literal(value=float(10))
-    # expr.Unary(
-    #     operator=Token(type=TokenType.MINUS, lexeme="-", literal=None, line=1),
-    #     right=expr.Literal(value=float(10)),
-    # )
-    # expr.Unary(
-    #     operator=Token(type=TokenType.BANG, lexeme="!", literal=None, line=1),
-    #     right=expr.Literal(value=False),
-    # )
+    pass
