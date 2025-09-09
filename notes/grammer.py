@@ -95,7 +95,7 @@
 # - primary -> NUMBER | STRING | "true" | "false" | "nil"
 #            | "(" expr ")" ;
 #
-# NOTE: There is no place iin the grammar where both an expression and a
+# NOTE: There is no place in the grammar where both an expression and a
 # are allowed. The operands of, say, + are always expressions, never statments.
 # The body of a while loop is always a statement.
 #

@@ -1,24 +1,36 @@
+import builtins
 from dataclasses import dataclass
 from typing import Callable
 
-from . import expr
+from . import expr, stmt
 from .runtime_exception import RuntimeException
 from .token import Token
 from .token_type import TokenType
 
 
 @dataclass()
-class Interpreter(expr.Visitor[object]):
+class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     _error_callback: Callable[[RuntimeException], None]
 
-    def interpret(self, expression: expr.Expr) -> None:
+    def interpret(self, statements: list[stmt.Stmt]) -> None:
         # For testing purposes:
         # print(AstPrinter().print(expression))
         try:
-            value: object = self.__evaluate(expression)
-            print(self.__stringify(value))
+            # value: object = self.__evaluate(expression)
+            # print(self.__stringify(value))
+            for statement in statements:
+                self.__execute(statement)
         except RuntimeException as error:
             self._error_callback(error)
+
+    def __execute(self, statement: stmt.Stmt) -> None:
+        statement.accept(self)
+
+    def visit_print_stmt(self, print: stmt.Print) -> None:
+        builtins.print(self.__stringify(self.__evaluate(print.expression)))
+
+    def visit_expression_stmt(self, expression: stmt.Expression) -> None:
+        self.__evaluate(expression.expression)
 
     def __evaluate(self, expression: expr.Expr) -> object:
         return expression.accept(self)
@@ -140,11 +152,14 @@ class Interpreter(expr.Visitor[object]):
             return left == right
 
     def __stringify(self, obj: object) -> str:
-        if object is None:
+        if str(obj) == "None":
             return "nil"
 
         if isinstance(obj, float):
             return str(obj).split(".")[0]
+
+        if isinstance(obj, bool):
+            return str(obj).lower()
 
         return str(obj)
 

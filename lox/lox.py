@@ -1,10 +1,10 @@
 import sys
 
-from . import expr
 from .interpreter import Interpreter
 from .parser import Parser
 from .runtime_exception import RuntimeException
 from .scanner import Scanner
+from .stmt import Stmt
 from .token import Token
 from .token_type import TokenType
 
@@ -56,12 +56,12 @@ class Lox:
         scanner = Scanner(_source=source, _error_callback=self.lexical_error)
         tokens = scanner.scan_tokens()
         parser: Parser = Parser(_tokens=tokens, _error_callback=self.parse_error)
-        expression: expr.Expr | None = parser.parse()
+        statements: list[Stmt] = parser.parse()
 
         if self._had_error:
             return
 
-        self._interpreter.interpret(expression)  # type: ignore[arg-type]
+        self._interpreter.interpret(statements)
 
     def lexical_error(self, message: str, line: int) -> None:
         self.__report("Lexical", line, "", message)

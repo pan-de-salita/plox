@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 # Opportunity to use __init__.py?
-from . import expr
+from . import expr, stmt
 from .parse_error import ParseError
 from .token import Token
 from .token_type import TokenType
@@ -22,12 +22,30 @@ class Parser:
 
     _current: int = 0
 
-    def parse(self) -> expr.Expr | None:
-        """Parse tokens."""
-        try:
-            return self.__expression()
-        except ParseError:
-            return None
+    def parse(self) -> list[stmt.Stmt]:
+        """Parse a series of statements, as many as can be found until the end
+        of the input."""
+        statments: list[stmt.Stmt] = []
+        while not self.__is_at_end():
+            statments.append(self.__statement())
+
+        return statments
+
+    def __statement(self) -> stmt.Stmt:
+        if self.__match(TokenType.PRINT):
+            return self.__print_statement()
+
+        return self.__expression_statment()
+
+    def __print_statement(self) -> stmt.Stmt:
+        value: expr.Expr = self.__expression()
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return stmt.Print(expression=value)
+
+    def __expression_statment(self) -> stmt.Stmt:
+        value: expr.Expr = self.__expression()
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return stmt.Expression(expression=value)
 
     def __expression(self) -> expr.Expr:
         """Parse expression rule: expression -> comma_expresiion
