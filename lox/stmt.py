@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-09-09 21:20:12.012143).
+# Generated from GenerateAst class (2025-09-10 22:30:31.020772).
 
 from __future__ import annotations
 
@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from typing import Generic, TypeVar
 
 from lox.expr import Expr
+
+from lox.token import Token
 
 R = TypeVar("R")
 
@@ -18,6 +20,10 @@ class Visitor(ABC, Generic[R]):
 
     @abstractmethod
     def visit_print_stmt(self, print: Print) -> R:
+        pass
+
+    @abstractmethod
+    def visit_var_stmt(self, var: Var) -> R:
         pass
 
 
@@ -42,3 +48,12 @@ class Print(Stmt):
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_print_stmt(self)
+
+
+@dataclass(frozen=True)
+class Var(Stmt):
+    name: Token
+    expression: Expr
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_var_stmt(self)

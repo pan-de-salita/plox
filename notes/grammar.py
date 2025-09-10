@@ -76,9 +76,15 @@
 
 # New grammar from chapter 8:
 #
-# program -> statement* EOF
+# program -> declaration* EOF
+#
+# declaration -> var_decl
+#              | statement ;
+#
+# var_decl -> "var" IDENTIFIER ("=" expr)? ";" ;
+#
 # statement -> expr_stmt
-#            | print_stmt
+#            | print_stmt ;
 #
 # expr_stmt -> expr ";" ;
 # print_stmt -> "print" expr ";" ;
@@ -92,8 +98,10 @@
 # - factor -> unary ( ( "/" | "*" ) unary )* ;
 # - unary -> ("-" | "!") unary
 #          | primary ;
-# - primary -> NUMBER | STRING | "true" | "false" | "nil"
-#            | "(" expr ")" ;
+# - primary -> NUMBER | STRING
+#            | "true" | "false" | "nil"
+#            | "(" expr ")"
+#            | IDENTIFIER ;
 #
 # NOTE: There is no place in the grammar where both an expression and a
 # are allowed. The operands of, say, + are always expressions, never statments.

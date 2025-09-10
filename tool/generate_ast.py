@@ -35,6 +35,7 @@ class GenerateAst:
                 "Grouping : expression Expr",
                 "Literal  : value object",
                 "Unary    : operator Token, right Expr",
+                "Variable : name Token",
             ],
         )
         GenerateAst.__define_ast(
@@ -43,6 +44,7 @@ class GenerateAst:
             [
                 "Expression  : expression Expr",
                 "Print       : expression Expr",
+                "Var         : name Token, expression Expr",
             ],
         )
 
@@ -134,6 +136,7 @@ class GenerateAst:
                 imports.extend(["from lox.token import Token", ""])
             case "Stmt":
                 imports.extend(["from lox.expr import Expr", ""])
+                imports.extend(["from lox.token import Token", ""])
 
         return imports
 

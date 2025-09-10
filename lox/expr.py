@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-09-09 21:20:12.011888).
+# Generated from GenerateAst class (2025-09-10 22:30:31.020037).
 
 from __future__ import annotations
 
@@ -30,6 +30,10 @@ class Visitor(ABC, Generic[R]):
 
     @abstractmethod
     def visit_unary_expr(self, unary: Unary) -> R:
+        pass
+
+    @abstractmethod
+    def visit_variable_expr(self, variable: Variable) -> R:
         pass
 
 
@@ -83,3 +87,11 @@ class Unary(Expr):
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_unary_expr(self)
+
+
+@dataclass(frozen=True)
+class Variable(Expr):
+    name: Token
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_variable_expr(self)
