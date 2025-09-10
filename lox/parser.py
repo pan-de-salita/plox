@@ -27,9 +27,32 @@ class Parser:
         of the input."""
         statments: list[stmt.Stmt] = []
         while not self.__is_at_end():
-            statments.append(self.__statement())
+            statement: stmt.Stmt | None = self.__declaration()
+            if statement:
+                statments.append(statement)
 
         return statments
+
+    def __declaration(self) -> stmt.Stmt | None:
+        try:
+            if self.__match(TokenType.VAR):
+                return self.__var_declaration()
+
+            return self.__statement()
+        except ParseError:
+            self.__synchronize()
+            return None
+
+    def __var_declaration(self) -> stmt.Var:
+        name: Token = self.__consume(TokenType.IDENTIFIER, "Expect variable name.")
+
+        initializer: expr.Expr | None = None
+        if self.__match(TokenType.EQUAL):
+            initializer = self.__expression()
+
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+
+        return stmt.Var(name=name, expression=initializer)
 
     def __statement(self) -> stmt.Stmt:
         if self.__match(TokenType.PRINT):
@@ -37,12 +60,12 @@ class Parser:
 
         return self.__expression_statment()
 
-    def __print_statement(self) -> stmt.Stmt:
+    def __print_statement(self) -> stmt.Print:
         value: expr.Expr = self.__expression()
         self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return stmt.Print(expression=value)
 
-    def __expression_statment(self) -> stmt.Stmt:
+    def __expression_statment(self) -> stmt.Expression:
         value: expr.Expr = self.__expression()
         self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return stmt.Expression(expression=value)
@@ -226,6 +249,8 @@ class Parser:
             return expr.Literal(value=None)
         elif self.__match(TokenType.NUMBER, TokenType.STRING):
             return expr.Literal(value=self.__previous().literal)
+        elif self.__match(TokenType.IDENTIFIER):
+            return expr.Variable(name=self.__previous())
         elif self.__match(TokenType.LEFT_PAREN):
             expression: expr.Expr = self.__expression()
             self.__consume(

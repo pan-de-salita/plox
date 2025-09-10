@@ -44,7 +44,7 @@ class GenerateAst:
             [
                 "Expression  : expression Expr",
                 "Print       : expression Expr",
-                "Var         : name Token, expression Expr",
+                "Var         : name Token, expression Expr | None",
             ],
         )
 
@@ -98,14 +98,20 @@ class GenerateAst:
                 for attr_str in attr_strings:
                     attr_parts: list[str] = attr_str.split()
 
+                    if len(attr_parts) > 2:
+                        attr_parts = [
+                            attr_parts[0],
+                            " ".join(attr_parts[1:]),
+                        ]
+
                     if len(attr_parts) != 2:
                         print(
                             f"Unable to generate type definition. Incomplete attribute: {attr_str}"
                         )
                         sys.exit(64)
 
-                    attr_name, attr_type = attr_parts
-                    attributes.append((attr_name, attr_type))
+                    attr_name, attr_types = attr_parts
+                    attributes.append((attr_name, attr_types))
 
             type_definitions.append(TypeDefinition(name=name, attributes=attributes))
 
@@ -223,8 +229,8 @@ class GenerateAst:
         ]
         attributes = [
             *[
-                f"{TAB}{attr_name}: {attr_type}"
-                for attr_name, attr_type in type_definition.attributes
+                f"{TAB}{attr_name}: {attr_types}"
+                for attr_name, attr_types in type_definition.attributes
             ],
             "",
         ]
