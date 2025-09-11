@@ -24,14 +24,17 @@ class Parser:
 
     def parse(self) -> list[stmt.Stmt]:
         """Parse a series of statements, as many as can be found until the end
-        of the input."""
-        statments: list[stmt.Stmt] = []
+        of the input, generating a syntax tree."""
+        statements: list[stmt.Stmt] = []
         while not self.__is_at_end():
             statement: stmt.Stmt | None = self.__declaration()
-            if statement:
-                statments.append(statement)
 
-        return statments
+            if not statement:
+                continue
+
+            statements.append(statement)
+
+        return statements
 
     def __declaration(self) -> stmt.Stmt | None:
         try:
