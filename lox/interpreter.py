@@ -1,8 +1,9 @@
 import builtins
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable
 
 from . import expr, stmt
+from .environment import Environment
 from .runtime_exception import RuntimeException
 from .token import Token
 from .token_type import TokenType
@@ -11,6 +12,7 @@ from .token_type import TokenType
 @dataclass()
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     _error_callback: Callable[[RuntimeException], None]
+    _environment: Environment = field(default_factory=Environment)
 
     def interpret(self, statements: list[stmt.Stmt]) -> None:
         # For testing purposes:
@@ -31,6 +33,13 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_expression_stmt(self, expression: stmt.Expression) -> None:
         self.__evaluate(expression.expression)
+
+    def visit_var_stmt(self, var: stmt.Var) -> None:
+        value: None | object = None
+        if var.expression:
+            value = self.__evaluate(var.expression)
+
+        self._environment.define(name=var.name.lexeme, value=value)
 
     def __evaluate(self, expression: expr.Expr) -> object:
         return expression.accept(self)
@@ -114,6 +123,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
                 result = not self.__is_truthy(right)
 
         return result
+
+    def visit_variable_expr(self, variable: expr.Variable) -> object:
+        return self._environment.get(variable.name)
 
     def __check_number_operand(self, operator: Token, operand: object) -> None:
         if isinstance(operand, float):
