@@ -90,6 +90,8 @@
 # print_stmt -> "print" expr ";" ;
 #
 # - expr -> comma_expr ;
+# - assignment -> IDENTIFIER "=" assignment
+#              | comma_expr;
 # - comma_expr -> ternary ( "," ternary )* ;
 # - ternary -> ( equality "?" equality ":" ternary ) | equality ;
 # - equality -> comparison ( ( "!=" | "==" ) comparison )* ;

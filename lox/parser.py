@@ -53,7 +53,10 @@ class Parser:
         if self.__match(TokenType.EQUAL):
             initializer = self.__expression()
 
-        self.__consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        self.__consume(
+            token_type=TokenType.SEMICOLON,
+            message="Expect ';' after variable declaration.",
+        )
 
         return stmt.Var(name=name, expression=initializer)
 
@@ -65,21 +68,61 @@ class Parser:
 
     def __print_statement(self) -> stmt.Print:
         value: expr.Expr = self.__expression()
-        self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        self.__consume(
+            token_type=TokenType.SEMICOLON, message="Expect ';' after value."
+        )
         return stmt.Print(expression=value)
 
     def __expression_statment(self) -> stmt.Expression:
         value: expr.Expr = self.__expression()
-        self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        self.__consume(
+            token_type=TokenType.SEMICOLON, message="Expect ';' after value."
+        )
         return stmt.Expression(expression=value)
 
     def __expression(self) -> expr.Expr:
         """Parse expression rule: expression -> comma_expresiion
 
         This is the top-level rule for expressions. Currently just delegates
-        to comma_expression since that's the lowest precedence binary operator.
+        to assignment.
         """
-        return self.__comma_expression()
+        return self.__assignment()
+
+    def __assignment(self) -> expr.Expr:
+        """Parse expression rule: assignment -> IDENTIFIER '=' assignment
+        | comma_expression"""
+        expression: expr.Expr = (
+            self.__comma_expression()
+        )  # Or whatever is of higher precedence.
+
+        if self.__match(TokenType.EQUAL):
+            equals: Token = self.__previous()
+            value: expr.Expr = self.__assignment()
+
+            # Convert r-value expression node into an l-value representation.
+            # Important because if there was no match for TokenType.EQUAL -- i.e.
+            # the parser isn't handling an assignment expression -- the r-value
+            # expression could be validly evaluated. Example:
+            #
+            # NewPoint(x + 2, 0).y = 3      # Sets the field
+            # NewPoint(x + 2, 0).y          # Gets the field
+            #
+            # NOTE: Right now, the only valid target is a simple variable
+            # expression, but we'll add fields later. The end result of this
+            # trick is an assignment expression tree node that knows what it
+            # is assigning to and has an expression subtree for the value
+            # being assigned.
+            if isinstance(expression, expr.Variable):
+                name: Token = expression.name
+
+                return expr.Assign(name=name, value=value)
+
+            # We report an error if the left-hand side isn't a valid assignment
+            # target, but we don't throw it because the parser isn't in a
+            # confused state where we need to go into panic mode and synchronize.
+            self.__error(token=equals, message="Invalid assignment target.")
+
+        return expression
 
     def __comma_expression(self) -> expr.Expr:
         """Parse expression rule: comma_expression -> ternary ( "," ternary )

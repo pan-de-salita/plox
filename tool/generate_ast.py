@@ -30,6 +30,7 @@ class GenerateAst:
             output_dir,
             "Expr",
             [
+                "Assign   : name Token, value Expr",
                 "Ternary  : condition Expr, consequent Expr, alternative Expr",
                 "Binary   : left Expr, operator Token, right Expr",
                 "Grouping : expression Expr",
