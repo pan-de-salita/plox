@@ -39,10 +39,16 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         if var.expression:
             value = self.__evaluate(var.expression)
 
-        self._environment.define(name=var.name.lexeme, value=value)
+        self._environment.define(name_lexeme=var.name.lexeme, value=value)
 
     def __evaluate(self, expression: expr.Expr) -> object:
         return expression.accept(self)
+
+    def visit_assign_expr(self, assign: expr.Assign) -> object:
+        value: object = self.__evaluate(assign.value)
+        self._environment.assign(name=assign.name, value=value)
+
+        return value
 
     def visit_ternary_expr(self, ternary: expr.Ternary) -> object:
         condition: object = self.__evaluate(ternary.condition)
