@@ -24,7 +24,7 @@ class Environment:
     def assign(self, name: Token, value: object) -> None:
         if name.lexeme in self._values.keys():
             self._values[name.lexeme] = value
-
-        raise RuntimeException(
-            token=name, message=f"Undefined variable: {name.lexeme}."
-        )
+        else:
+            raise RuntimeException(
+                token=name, message=f"Undefined variable: {name.lexeme}."
+            )
