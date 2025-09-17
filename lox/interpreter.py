@@ -78,10 +78,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         result: object = None
 
         if self.__is_truthy(condition):
-            if condition:
-                result = self.__evaluate(ternary.consequent)
-            else:
-                result = self.__evaluate(ternary.alternative)
+            result = self.__evaluate(ternary.consequent)
+        else:
+            result = self.__evaluate(ternary.alternative)
 
         return result
 
@@ -173,6 +172,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         raise RuntimeException(operator, "Operands must be numbers.")
 
     def __is_truthy(self, obj: object) -> bool:
+        """Checks whether an obj can be evaluated to Lox's definition of
+        truthiness, i.e., false and nil are falsey, and everything else
+        is truthy."""
         if obj is None:
             return False
         elif isinstance(obj, bool):
