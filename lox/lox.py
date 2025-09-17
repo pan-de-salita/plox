@@ -48,10 +48,15 @@ class Lox:
             if not line:
                 break
 
-            self._interpreter._run_prompt = True
+            # Set _is_run_prompt to True so evaluated expressions are
+            # automatically printed.
+            self._interpreter._is_run_prompt = True
+
             self.__run(line)
 
-            self._interpreter._run_prompt = False
+            # Set _is_run_prompt back to False.
+            self._interpreter._is_run_prompt = False
+
             self._had_error = False
             self._had_runtime_error = False
 

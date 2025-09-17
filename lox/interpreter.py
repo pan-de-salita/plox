@@ -13,7 +13,7 @@ from .token_type import TokenType
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     _error_callback: Callable[[RuntimeException], None]
     _environment: Environment = field(default_factory=Environment)
-    _run_prompt: bool = False
+    _is_run_prompt: bool = False
 
     def interpret(self, statements: list[stmt.Stmt]) -> None:
         # For testing purposes:
@@ -49,7 +49,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def visit_expression_stmt(self, expression: stmt.Expression) -> None:
         value: object = self.__evaluate(expression.expression)
 
-        if self._run_prompt:
+        if self._is_run_prompt:
             print(value)
 
     def visit_print_stmt(self, print: stmt.Print) -> None:
