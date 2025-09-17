@@ -94,19 +94,28 @@ class Parser:
         return stmt.Expression(expression=value)
 
     def __expression(self) -> expr.Expr:
-        """Parse expression rule: expression -> comma_expresiion
+        """Parse expression rule: expression -> comma
 
         This is the top-level rule for expressions. Currently just delegates
         to assignment.
         """
-        return self.__assignment()
+        return self.__comma()
+
+    def __comma(self) -> expr.Expr:
+        """Parse expression rule: comma_expression -> ternary ( "," ternary )
+
+        Handles comma operators (,).
+        These have lower precedence than assignment.
+        Left-associative: a, b, c is parsed as ((a, b), c)
+        """
+        return self.__binary_left_associative(
+            nonterminal=self.__assignment, token_types=[TokenType.COMMA]
+        )
 
     def __assignment(self) -> expr.Expr:
         """Parse expression rule: assignment -> IDENTIFIER '=' assignment
         | comma_expression"""
-        expression: expr.Expr = (
-            self.__comma_expression()
-        )  # Or whatever is of higher precedence.
+        expression: expr.Expr = self.__ternary()  # Or whatever is of higher precedence.
 
         if self.__match(TokenType.EQUAL):
             equals: Token = self.__previous()
@@ -136,17 +145,6 @@ class Parser:
             self.__error(token=equals, message="Invalid assignment target.")
 
         return expression
-
-    def __comma_expression(self) -> expr.Expr:
-        """Parse expression rule: comma_expression -> ternary ( "," ternary )
-
-        Handles comma operators (,).
-        These have lower precedence than ternary operators.
-        Left-associative: a, b, c is parsed as ((a, b), c)
-        """
-        return self.__binary_left_associative(
-            nonterminal=self.__ternary, token_types=[TokenType.COMMA]
-        )
 
     def __ternary(self) -> expr.Expr:
         """Parse expression rule: ternary -> ( equality "?" equality ":" ternary ) | equality

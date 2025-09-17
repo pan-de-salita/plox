@@ -124,6 +124,8 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             case TokenType.LESS_EQUAL:
                 self.__check_number_operands(operator, left, right)
                 result = float(left) <= float(right)  # type: ignore[arg-type]
+            case TokenType.COMMA:
+                result = right  # type: ignore[arg-type]
 
         return result
 

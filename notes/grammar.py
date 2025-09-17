@@ -90,10 +90,10 @@
 # expr_stmt -> expr ";" ;
 # print_stmt -> "print" expr ";" ;
 #
-# - expr -> comma_expr ;
+# - expr -> comma ;
+# - comma -> ternary ( "," ternary )* ;
 # - assignment -> IDENTIFIER "=" assignment
-#              | comma_expr;
-# - comma_expr -> ternary ( "," ternary )* ;
+#              | ternary;
 # - ternary -> ( equality "?" equality ":" ternary ) | equality ;
 # - equality -> comparison ( ( "!=" | "==" ) comparison )* ;
 # - comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
