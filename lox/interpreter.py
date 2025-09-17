@@ -60,7 +60,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         if var.expression:
             value = self.__evaluate(var.expression)
 
-        self._environment.define(name_lexeme=var.name.lexeme, value=value)
+        self._environment.define(
+            name_lexeme=var.name.lexeme, value=value, is_initialized=var.is_initialized
+        )
 
     def __evaluate(self, expression: expr.Expr) -> object:
         return expression.accept(self)

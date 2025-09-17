@@ -46,7 +46,7 @@ class GenerateAst:
                 "Block       : statements list[Stmt]",
                 "Expression  : expression Expr",
                 "Print       : expression Expr",
-                "Var         : name Token, expression Expr | None",
+                "Var         : name Token, expression Expr | None, is_initialized bool",
             ],
         )
 

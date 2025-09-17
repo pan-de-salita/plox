@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-09-17 21:02:41.680181).
+# Generated from GenerateAst class (2025-09-17 23:17:33.551831).
 
 from __future__ import annotations
 
@@ -66,6 +66,7 @@ class Print(Stmt):
 class Var(Stmt):
     name: Token
     expression: Expr | None
+    is_initialized: bool
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_var_stmt(self)

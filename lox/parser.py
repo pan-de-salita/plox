@@ -63,15 +63,19 @@ class Parser:
         name: Token = self.__consume(TokenType.IDENTIFIER, "Expect variable name.")
 
         initializer: expr.Expr | None = None
+        is_initialized: bool = False
         if self.__match(TokenType.EQUAL):
             initializer = self.__expression()
+            is_initialized = True
 
         self.__consume(
             token_type=TokenType.SEMICOLON,
             message="Expect ';' after variable declaration.",
         )
 
-        return stmt.Var(name=name, expression=initializer)
+        return stmt.Var(
+            name=name, expression=initializer, is_initialized=is_initialized
+        )
 
     def __statement(self) -> stmt.Stmt:
         if self.__match(TokenType.PRINT):
@@ -97,7 +101,7 @@ class Parser:
         """Parse expression rule: expression -> comma
 
         This is the top-level rule for expressions. Currently just delegates
-        to assignment.
+        to comma.
         """
         return self.__comma()
 
