@@ -31,9 +31,11 @@ class Environment:
         """Assign a value to a name."""
         if name.lexeme in self._values.keys():
             self._values[name.lexeme] = value
+            return
 
         if self.enclosing:
-            return self.enclosing.assign(name=name, value=value)
+            self.enclosing.assign(name=name, value=value)
+            return
 
         raise RuntimeException(
             token=name, message=f"Undefined variable: {name.lexeme}."
