@@ -1,23 +1,19 @@
-// this is a comment
-(("string
-  continued"
-)){} // grouping stuff
-!*+-/=<> <= == // operators
-word orchid or for "word" 3.14 fun
-/*
-  *** /Block comment here. ***
-*/
-1 2 3 /*
-          An unterminated block comment?
-      * /
-
-/*
-  /*
-    Nope. A nested block comment.
-  */
-*/
-
-*
-
-
-/**/*/
+var a = "global a";
+var b = "global b";
+var c = "global c";
+{
+  var a = "outer a";
+  var b = "outer b";
+  {
+    var a = "inner a";
+    print a; // -> inner a
+    print b; // -> outer b
+    print c; // -> global c
+  }
+  print a; // -> outer a
+  print b; // -> outer b
+  print c; // -> global a
+}
+print a; // -> global a
+print b; // -> global b
+print c; // -> global c

@@ -28,10 +28,8 @@ class Parser:
         statements: list[stmt.Stmt] = []
         while not self.__is_at_end():
             statement: stmt.Stmt | None = self.__declaration()
-
             if not statement:
                 continue
-
             statements.append(statement)
 
         return statements
@@ -41,10 +39,25 @@ class Parser:
             if self.__match(TokenType.VAR):
                 return self.__var_declaration()
 
+            if self.__match(TokenType.LEFT_BRACE):
+                return stmt.Block(statements=self.__block())
+
             return self.__statement()
         except ParseError:
             self.__synchronize()
             return None
+
+    def __block(self) -> list[stmt.Stmt]:
+        statements: list[stmt.Stmt] = []
+        while not self.__check(TokenType.RIGHT_BRACE) and not self.__is_at_end():
+            statement: stmt.Stmt | None = self.__declaration()
+            if not statement:
+                continue
+            statements.append(statement)
+
+        self.__consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+
+        return statements
 
     def __var_declaration(self) -> stmt.Var:
         name: Token = self.__consume(TokenType.IDENTIFIER, "Expect variable name.")

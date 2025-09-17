@@ -17,7 +17,7 @@ class Environment:
     def get(self, name: Token) -> object:
         """Gets a variable's value if it's name exists in the Environment's
         values, else raise a RuntimeException."""
-        if name in self._values.keys():
+        if name.lexeme in self._values:
             return self._values[name.lexeme]
 
         if self.enclosing:
@@ -29,7 +29,7 @@ class Environment:
 
     def assign(self, name: Token, value: object) -> None:
         """Assign a value to a name."""
-        if name.lexeme in self._values.keys():
+        if name.lexeme in self._values:
             self._values[name.lexeme] = value
             return
 

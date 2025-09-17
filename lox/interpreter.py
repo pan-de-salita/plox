@@ -28,11 +28,28 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def __execute(self, statement: stmt.Stmt) -> None:
         statement.accept(self)
 
-    def visit_print_stmt(self, print: stmt.Print) -> None:
-        builtins.print(self.__stringify(self.__evaluate(print.expression)))
+    def visit_block_stmt(self, block: stmt.Block) -> None:
+        self.execute_block(
+            statements=block.statements,
+            environment=Environment(enclosing=self._environment),
+        )
+
+    def execute_block(
+        self, statements: list[stmt.Stmt], environment: Environment
+    ) -> None:
+        previous_environment: Environment = self._environment
+        try:
+            self._environment = environment
+            for statement in statements:
+                self.__execute(statement=statement)
+        finally:
+            self._environment = previous_environment
 
     def visit_expression_stmt(self, expression: stmt.Expression) -> None:
         self.__evaluate(expression.expression)
+
+    def visit_print_stmt(self, print: stmt.Print) -> None:
+        builtins.print(self.__stringify(self.__evaluate(print.expression)))
 
     def visit_var_stmt(self, var: stmt.Var) -> None:
         value: None | object = None

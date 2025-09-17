@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-09-16 22:05:48.076073).
+# Generated from GenerateAst class (2025-09-17 21:02:41.680181).
 
 from __future__ import annotations
 
@@ -14,6 +14,10 @@ R = TypeVar("R")
 
 
 class Visitor(ABC, Generic[R]):
+    @abstractmethod
+    def visit_block_stmt(self, block: Block) -> R:
+        pass
+
     @abstractmethod
     def visit_expression_stmt(self, expression: Expression) -> R:
         pass
@@ -32,6 +36,14 @@ class Stmt(ABC):
     @abstractmethod
     def accept(self, visitor: Visitor[R]) -> R:
         pass
+
+
+@dataclass(frozen=True)
+class Block(Stmt):
+    statements: list[Stmt]
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_block_stmt(self)
 
 
 @dataclass(frozen=True)

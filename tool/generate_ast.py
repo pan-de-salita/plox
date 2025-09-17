@@ -43,6 +43,7 @@ class GenerateAst:
             output_dir,
             "Stmt",
             [
+                "Block       : statements list[Stmt]",
                 "Expression  : expression Expr",
                 "Print       : expression Expr",
                 "Var         : name Token, expression Expr | None",

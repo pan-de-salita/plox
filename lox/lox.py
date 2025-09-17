@@ -82,4 +82,4 @@ class Lox:
 
 
 if __name__ == "__main__":
-    Lox().main([])
+    Lox().main(["./test.lox"])
