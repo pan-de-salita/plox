@@ -85,10 +85,13 @@
 #
 # statement -> expr_stmt
 #            | print_stmt
+#            | if_stmt
 #            | block;
 #
 # expr_stmt -> expr ";" ;
 # print_stmt -> "print" expr ";" ;
+# if_stmt -> "print" expr ";" ;
+# block -> "{" declaration* "}" ;
 #
 # - expr -> comma ;
 # - comma -> ternary ( "," ternary )* ;

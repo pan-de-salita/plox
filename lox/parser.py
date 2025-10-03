@@ -394,9 +394,9 @@ class Parser:
     def __synchronize(self) -> None:
         """Discard tokens until a statement boundary is found. For discarding
         unwanted tokens and resyncing the Parser's state after a ParseError."""
-        self.__advance()
-
         while not self.__is_at_end():
+            self.__advance()
+
             if self.__previous().type == TokenType.SEMICOLON:
                 return None
 
@@ -412,5 +412,3 @@ class Parser:
                     | TokenType.RETURN
                 ):
                     return None
-
-            self.__advance()

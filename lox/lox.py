@@ -81,14 +81,16 @@ class Lox:
             self.__report("Parse", token.line, f" at {token.lexeme}", message)
 
     def runtime_error(self, error: RuntimeException) -> None:
-        print(f"{str(error)}\n[line {error.token.line}]", file=sys.stderr)
+        print(
+            f"\nRuntimeError: {str(error)}\n[line {error.token.line}]", file=sys.stderr
+        )
         self._had_runtime_error = True
 
     def __report(self, type: str, line: int, where: str, message: str) -> None:
-        print(f"[line {line}] {type.title()} Error{where}: {message}", file=sys.stderr)
+        print(f"[line {line}] {type.title()}Error{where}: {message}", file=sys.stderr)
         self._had_error = True
 
 
 if __name__ == "__main__":
-    # Lox().main(["./test.lox"])
-    Lox().main([])
+    Lox().main(["./test.lox"])
+    # Lox().main([])

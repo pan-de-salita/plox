@@ -40,10 +40,14 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     ) -> None:
         previous_environment: Environment = self._environment
         try:
+            # Switch self's environment to be a new one with previous_environment
+            # as its enclosure. This allows for executed statments within the
+            # block to have access to the state in the enclosing environment(s).
             self._environment = environment
             for statement in statements:
-                self.__execute(statement=statement)
+                self.__execute(statement)
         finally:
+            # Restore old environment.
             self._environment = previous_environment
 
     def visit_expression_stmt(self, expression: stmt.Expression) -> None:

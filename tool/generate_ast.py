@@ -10,7 +10,7 @@ TAB = "    "
 
 @dataclass()
 class TypeDefinition:
-    """Type definition of Expr subclasses."""
+    """Type definition of subclasses."""
 
     name: str
     attributes: list[tuple[str, str]]
@@ -28,6 +28,17 @@ class GenerateAst:
         output_dir: Path = Path(args[0])
         GenerateAst.__define_ast(
             output_dir,
+            "Stmt",
+            [
+                "Block       : statements list[Stmt]",
+                "Expression  : expression Expr",
+                "Print       : expression Expr",
+                "If          : condition Expr, then_branch Stmt, else_branch Stmt",
+                "Var         : name Token, expression Expr | None, is_initialized bool",
+            ],
+        )
+        GenerateAst.__define_ast(
+            output_dir,
             "Expr",
             [
                 "Assign   : name Token, value Expr",
@@ -37,16 +48,6 @@ class GenerateAst:
                 "Literal  : value object",
                 "Unary    : operator Token, right Expr",
                 "Variable : name Token",
-            ],
-        )
-        GenerateAst.__define_ast(
-            output_dir,
-            "Stmt",
-            [
-                "Block       : statements list[Stmt]",
-                "Expression  : expression Expr",
-                "Print       : expression Expr",
-                "Var         : name Token, expression Expr | None, is_initialized bool",
             ],
         )
 
@@ -62,7 +63,7 @@ class GenerateAst:
             GenerateAst.__generate_type_definitions(types)
         )
         body: Iterator[str] = map(
-            lambda line: line + "\n",
+            lambda line: line + "\n",  # Add newline per spread line.
             [
                 *GenerateAst.__generate_documentation(),
                 *GenerateAst.__generate_imports(base_name),
