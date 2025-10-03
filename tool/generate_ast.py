@@ -32,8 +32,8 @@ class GenerateAst:
             [
                 "Block       : statements list[Stmt]",
                 "Expression  : expression Expr",
-                "Print       : expression Expr",
                 "If          : condition Expr, then_branch Stmt, else_branch Stmt",
+                "Print       : expression Expr",
                 "Var         : name Token, expression Expr | None, is_initialized bool",
             ],
         )

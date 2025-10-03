@@ -84,13 +84,13 @@
 # var_decl -> "var" IDENTIFIER ("=" expr)? ";" ;
 #
 # statement -> expr_stmt
-#            | print_stmt
 #            | if_stmt
+#            | print_stmt
 #            | block;
 #
 # expr_stmt -> expr ";" ;
-# print_stmt -> "print" expr ";" ;
 # if_stmt -> "print" expr ";" ;
+# print_stmt -> "print" expr ";" ;
 # block -> "{" declaration* "}" ;
 #
 # - expr -> comma ;
