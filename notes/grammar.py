@@ -98,6 +98,8 @@
 # - comma -> ternary ( "," ternary )* ;
 # - assignment -> IDENTIFIER "=" assignment
 #              | ternary;
+# - or ->
+# - and ->
 # - ternary -> ( equality "?" equality ":" ternary ) | equality ;
 # - equality -> comparison ( ( "!=" | "==" ) comparison )* ;
 # - comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;

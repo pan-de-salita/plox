@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 
 from .interpreter import Interpreter
 from .parser import Parser
@@ -7,6 +8,8 @@ from .scanner import Scanner
 from .stmt import Stmt
 from .token import Token
 from .token_type import TokenType
+
+LANGUAGE_VERSION = 0.9
 
 
 class Lox:
@@ -35,6 +38,7 @@ class Lox:
                 sys.exit(70)
 
     def __run_prompt(self) -> None:
+        print(f"Lox (v{LANGUAGE_VERSION} as of {datetime.now()})")
         while True:
             try:
                 line = input("> ")
@@ -92,5 +96,4 @@ class Lox:
 
 
 if __name__ == "__main__":
-    # Lox().main(["./test.lox"])
-    Lox().main([])
+    Lox().main(sys.argv[1:])
