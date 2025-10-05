@@ -5,6 +5,8 @@ from itertools import chain
 from pathlib import Path
 from typing import Iterator
 
+from lox.token_type import TokenType
+
 TAB = "    "
 
 
@@ -144,7 +146,7 @@ class GenerateAst:
             case "Expr":
                 imports.extend(["from lox.token import Token", ""])
             case "Stmt":
-                imports.extend(["from lox.expr import Expr", ""])
+                imports.extend(["from lox.expr import Expr"])
                 imports.extend(["from lox.token import Token", ""])
 
         return imports
@@ -160,7 +162,9 @@ class GenerateAst:
             chain.from_iterable(
                 [
                     f"{TAB}@abstractmethod",
-                    f"{TAB}def visit_{type_definition.name.lower()}_{base_name.lower()}(self, {type_definition.name.lower()}: {type_definition.name}) -> R:",
+                    GenerateAst.__generate_abstract_visit_method_signature(
+                        base_name, type_definition
+                    ),
                     f"{TAB}{TAB}pass",
                     "",
                 ]
@@ -185,6 +189,22 @@ class GenerateAst:
         # ]
 
         return generic + signature + abstract_visit_methods + spacing
+
+    @staticmethod
+    def __generate_abstract_visit_method_signature(
+        base_name: str, type_definition: TypeDefinition
+    ) -> str:
+        method_name: str = f"visit_{type_definition.name.lower()}_{base_name.lower()}"
+        params: str = "self, "
+
+        if type_definition.name.lower() not in [
+            name.lower() for name in TokenType._member_names_
+        ]:
+            params += type_definition.name.lower()
+        else:
+            params += type_definition.name.lower() + "_"
+
+        return f"{TAB}def {method_name}({params}: {type_definition.name}) -> R:"
 
     @staticmethod
     def __generate_base_class(base_name: str) -> list[str]:

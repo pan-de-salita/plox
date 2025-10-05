@@ -56,16 +56,18 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         if self._is_run_prompt:
             print(value)
 
-    def visit_print_stmt(self, print: stmt.Print) -> None:
-        builtins.print(self.__stringify(self.__evaluate(print.expression)))
+    def visit_print_stmt(self, print_: stmt.Print) -> None:
+        builtins.print(self.__stringify(self.__evaluate(print_.expression)))
 
-    def visit_var_stmt(self, var: stmt.Var) -> None:
+    def visit_var_stmt(self, var_: stmt.Var) -> None:
         value: None | object = None
-        if var.expression:
-            value = self.__evaluate(var.expression)
+        if var_.expression:
+            value = self.__evaluate(var_.expression)
 
         self._environment.define(
-            name_lexeme=var.name.lexeme, value=value, is_initialized=var.is_initialized
+            name_lexeme=var_.name.lexeme,
+            value=value,
+            is_initialized=var_.is_initialized,
         )
 
     def __evaluate(self, expression: expr.Expr) -> object:
