@@ -29,6 +29,23 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def __execute(self, statement: stmt.Stmt) -> None:
         statement.accept(self)
 
+    def visit_var_stmt(self, var_: stmt.Var) -> None:
+        value: None | object = None
+        if var_.expression:
+            value = self.__evaluate(var_.expression)
+
+        self._environment.define(
+            name_lexeme=var_.name.lexeme,
+            value=value,
+            is_initialized=var_.is_initialized,
+        )
+
+    def visit_if_stmt(self, if_: stmt.If) -> None:
+        if self.__is_truthy(self.__evaluate(if_.condition)):
+            self.__execute(if_.then_branch)
+        elif if_.else_branch is not None:
+            self.__execute(if_.else_branch)
+
     def visit_block_stmt(self, block: stmt.Block) -> None:
         self.execute_block(
             statements=block.statements,
@@ -50,25 +67,14 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             # Restore old environment.
             self._environment = previous_environment
 
+    def visit_print_stmt(self, print_: stmt.Print) -> None:
+        builtins.print(self.__stringify(self.__evaluate(print_.expression)))
+
     def visit_expression_stmt(self, expression: stmt.Expression) -> None:
         value: object = self.__evaluate(expression.expression)
 
         if self._is_run_prompt:
             print(value)
-
-    def visit_print_stmt(self, print_: stmt.Print) -> None:
-        builtins.print(self.__stringify(self.__evaluate(print_.expression)))
-
-    def visit_var_stmt(self, var_: stmt.Var) -> None:
-        value: None | object = None
-        if var_.expression:
-            value = self.__evaluate(var_.expression)
-
-        self._environment.define(
-            name_lexeme=var_.name.lexeme,
-            value=value,
-            is_initialized=var_.is_initialized,
-        )
 
     def __evaluate(self, expression: expr.Expr) -> object:
         return expression.accept(self)

@@ -13,7 +13,7 @@ var c = "global c";
   print a; // -> outer a
   print b; // -> outer b
   print c; // -> global c
-  print d; // -> global c
+  print c; // -> global c
 }
 print a; // -> global a
 print b; // -> global b
