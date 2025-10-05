@@ -89,7 +89,8 @@
 #            | block;
 #
 # expr_stmt -> expr ";" ;
-# if_stmt -> "print" expr ";" ;
+# if_stmt -> "if" "(" expr ")" stmt
+#            ( "else" stmt )? ;
 # print_stmt -> "print" expr ";" ;
 # block -> "{" declaration* "}" ;
 #
@@ -115,3 +116,26 @@
 #
 # Since the two syntaxes are disjoint, we don't need a single base class that
 # they all inherit from.
+
+# NOTE: Re If statments:
+# The seemingly innocuous optinal else has, in fact, opened up an ambiguity
+# in our grammar (see __if_statement() of Parser class). Consider:
+#
+# if (first) if (second) when_true(); else when_false();
+#
+# Which if statment does the else clause belong to?
+# - If we attach the else to the first if statement, then when_false() is called
+#   if first is falsey, regardless of what value second has.
+# - If we attach it to the second if statement, then when_false() is only called
+#   if first is truthy and second is falsey.
+#
+# Since else clauses are optinal, and there is no explicit delimiter marking the
+# end of the if statement, the grammar is ambiguous when you nest ifs in the
+# above way. This classic pitfall is called the dangling else problem.
+#
+# FIX: Most languages and parsers avoid this problem in an ad hoc way. No matter
+# what hack they use to get themselves out of the trouble, they always choose
+# the same interpretation -- the else is bound to the nearest if that precedes it.
+#
+# So if (first) if (second) when_true(); else when_false(); would have the else
+# clause belong to the second if statement.

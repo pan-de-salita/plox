@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-10-03 23:41:56.054339).
+# Generated from GenerateAst class (2025-10-03 23:58:16.275436).
 
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ class Expression(Stmt):
 class If(Stmt):
     condition: Expr
     then_branch: Stmt
-    else_branch: Stmt
+    else_branch: Stmt | None
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_if_stmt(self)

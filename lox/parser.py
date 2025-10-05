@@ -54,24 +54,42 @@ class Parser:
             is_initialized = True
 
         self.__consume(
-            token_type=TokenType.SEMICOLON,
-            message="Expect ';' after variable declaration.",
+            TokenType.SEMICOLON,
+            "Expect ';' after variable declaration.",
         )
 
-        return stmt.Var(
-            name=name, expression=initializer, is_initialized=is_initialized
-        )
+        return stmt.Var(name, initializer, is_initialized)
 
     def __statement(self) -> stmt.Stmt:
+        if self.__match(TokenType.IF):
+            return self.__if_statement()
+
         if self.__match(TokenType.LEFT_BRACE):
-            return stmt.Block(statements=self.__block())
+            return stmt.Block(self.__block_statement())
 
         if self.__match(TokenType.PRINT):
             return self.__print_statement()
 
         return self.__expression_statment()
 
-    def __block(self) -> list[stmt.Stmt]:
+    def __if_statement(self) -> stmt.If:
+        self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition: expr.Expr = self.__expression()
+        self.__consume(
+            TokenType.RIGHT_PAREN,
+            "Expect ')' after if condition.",
+        )
+
+        # The else branch is bound to the nearest if that precedes it. This is
+        # our solution to the dangling else problem.
+        then_branch: stmt.Stmt = self.__statement()
+        else_branch: stmt.Stmt | None = None
+        if self.__match(TokenType.ELSE):
+            else_branch = self.__statement()
+
+        return stmt.If(condition, then_branch, else_branch)
+
+    def __block_statement(self) -> list[stmt.Stmt]:
         statements: list[stmt.Stmt] = []
         while not self.__check(TokenType.RIGHT_BRACE) and not self.__is_at_end():
             statement: stmt.Stmt | None = self.__declaration()
@@ -85,17 +103,13 @@ class Parser:
 
     def __print_statement(self) -> stmt.Print:
         value: expr.Expr = self.__expression()
-        self.__consume(
-            token_type=TokenType.SEMICOLON, message="Expect ';' after value."
-        )
-        return stmt.Print(expression=value)
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return stmt.Print(value)
 
     def __expression_statment(self) -> stmt.Expression:
         value: expr.Expr = self.__expression()
-        self.__consume(
-            token_type=TokenType.SEMICOLON, message="Expect ';' after value."
-        )
-        return stmt.Expression(expression=value)
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return stmt.Expression(value)
 
     def __expression(self) -> expr.Expr:
         """Parse expression rule: expression -> comma
@@ -112,9 +126,7 @@ class Parser:
         These have lower precedence than assignment.
         Left-associative: a, b, c is parsed as ((a, b), c)
         """
-        return self.__binary_left_associative(
-            nonterminal=self.__assignment, token_types=[TokenType.COMMA]
-        )
+        return self.__binary_left_associative(self.__assignment, [TokenType.COMMA])
 
     def __assignment(self) -> expr.Expr:
         """Parse expression rule: assignment -> IDENTIFIER '=' assignment
@@ -141,12 +153,12 @@ class Parser:
             if isinstance(expression, expr.Variable):
                 name: Token = expression.name
 
-                return expr.Assign(name=name, value=value)
+                return expr.Assign(name, value)
 
             # We report an error if the left-hand side isn't a valid assignment
             # target, but we don't throw it because the parser isn't in a
             # confused state where we need to go into panic mode and synchronize.
-            self.__error(token=equals, message="Invalid assignment target.")
+            self.__error(equals, "Invalid assignment target.")
 
         return expression
 
@@ -171,9 +183,7 @@ class Parser:
             )
 
             alternative: expr.Expr = self.__ternary()
-            expression = expr.Ternary(
-                condition=condition, consequent=consequent, alternative=alternative
-            )
+            expression = expr.Ternary(condition, consequent, alternative)
 
         return expression
 
@@ -185,8 +195,8 @@ class Parser:
         Left-associative: a == b == c is parsed as ((a == b) == c)
         """
         return self.__binary_left_associative(
-            nonterminal=self.__comparison,
-            token_types=[TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL],
+            self.__comparison,
+            [TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL],
         )
 
     def __comparison(self) -> expr.Expr:
@@ -197,8 +207,8 @@ class Parser:
         Left-associative: a < b < c is parsed as ((a < b) < c)
         """
         return self.__binary_left_associative(
-            nonterminal=self.__term,
-            token_types=[
+            self.__term,
+            [
                 TokenType.GREATER,
                 TokenType.GREATER_EQUAL,
                 TokenType.LESS,
@@ -214,8 +224,8 @@ class Parser:
         Left-associative: a + b - c is parsed as ((a + b) - c)
         """
         return self.__binary_left_associative(
-            nonterminal=self.__factor,
-            token_types=[
+            self.__factor,
+            [
                 TokenType.MINUS,
                 TokenType.PLUS,
             ],
@@ -243,8 +253,8 @@ class Parser:
         # return expression
 
         return self.__binary_left_associative(
-            nonterminal=self.__unary,
-            token_types=[
+            self.__unary,
+            [
                 TokenType.SLASH,
                 TokenType.STAR,
             ],
@@ -288,7 +298,7 @@ class Parser:
 
             right: expr.Expr = self.__unary()
 
-            return expr.Unary(operator=operator, right=right)
+            return expr.Unary(operator, right)
         else:
             return self.__primary()
 
@@ -303,21 +313,19 @@ class Parser:
         except for grouped expressions which restart from the top.
         """
         if self.__match(TokenType.FALSE):
-            return expr.Literal(value=False)
+            return expr.Literal(False)
         elif self.__match(TokenType.TRUE):
-            return expr.Literal(value=True)
+            return expr.Literal(True)
         elif self.__match(TokenType.NIL):
-            return expr.Literal(value=None)
+            return expr.Literal(None)
         elif self.__match(TokenType.NUMBER, TokenType.STRING):
-            return expr.Literal(value=self.__previous().literal)
+            return expr.Literal(self.__previous().literal)
         elif self.__match(TokenType.IDENTIFIER):
-            return expr.Variable(name=self.__previous())
+            return expr.Variable(self.__previous())
         elif self.__match(TokenType.LEFT_PAREN):
             expression: expr.Expr = self.__expression()
-            self.__consume(
-                token_type=TokenType.RIGHT_PAREN, message="Expect ')' after expression."
-            )
-            return expr.Grouping(expression=expression)
+            self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
+            return expr.Grouping(expression)
         else:
             raise self.__error(self.__peek(), "Expect expression.")
 
@@ -334,7 +342,7 @@ class Parser:
         while self.__match(*token_types):
             operator: Token = self.__previous()
             right: expr.Expr = nonterminal()
-            expression = expr.Binary(left=expression, operator=operator, right=right)
+            expression = expr.Binary(expression, operator, right)
 
         return expression
 
