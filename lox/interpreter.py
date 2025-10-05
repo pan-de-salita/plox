@@ -74,7 +74,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         value: object = self.__evaluate(expression.expression)
 
         if self._is_run_prompt:
-            print(value)
+            print(self.__stringify(value))
 
     def __evaluate(self, expression: expr.Expr) -> object:
         return expression.accept(self)
@@ -212,7 +212,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         if str(obj) == "None":
             return "nil"
 
-        if isinstance(obj, float):
+        if isinstance(obj, float) and str(obj).endswith(".0"):
             return str(obj).split(".")[0]
 
         if isinstance(obj, bool):

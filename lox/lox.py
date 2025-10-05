@@ -39,6 +39,7 @@ class Lox:
 
     def __run_prompt(self) -> None:
         print(f"Lox (v{LANGUAGE_VERSION} as of {datetime.now()})")
+
         while True:
             try:
                 line = input("> ")

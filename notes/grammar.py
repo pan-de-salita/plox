@@ -74,7 +74,7 @@
 
 # True ? (True ? x : y) : z
 
-# New grammar from chapter 8:
+# Updated grammar:
 #
 # program -> declaration* EOF
 #
@@ -97,9 +97,9 @@
 # - expr -> comma ;
 # - comma -> ternary ( "," ternary )* ;
 # - assignment -> IDENTIFIER "=" assignment
-#              | ternary;
-# - or ->
-# - and ->
+#              | logic_or;
+# - logic_or -> logic_and ("or" logic_and)* ;
+# - logic_and -> ternary ("and" ternary)* ;
 # - ternary -> ( equality "?" equality ":" ternary ) | equality ;
 # - equality -> comparison ( ( "!=" | "==" ) comparison )* ;
 # - comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
@@ -141,3 +141,6 @@
 #
 # So if (first) if (second) when_true(); else when_false(); would have the else
 # clause belong to the second if statement.
+#
+# NOTE: Re logic_or and logic_and:
+# The syntax doesn't care that these expressions short-curcuit. That's a semantic concern.
