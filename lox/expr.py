@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-10-05 21:30:07.097574).
+# Generated from GenerateAst class (2025-10-05 23:00:18.381579).
 
 from __future__ import annotations
 
@@ -14,6 +14,10 @@ R = TypeVar("R")
 class Visitor(ABC, Generic[R]):
     @abstractmethod
     def visit_assign_expr(self, assign: Assign) -> R:
+        pass
+
+    @abstractmethod
+    def visit_logical_expr(self, logical: Logical) -> R:
         pass
 
     @abstractmethod
@@ -55,6 +59,16 @@ class Assign(Expr):
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_assign_expr(self)
+
+
+@dataclass(frozen=True)
+class Logical(Expr):
+    left: Expr
+    operator: Token
+    right: Expr
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_logical_expr(self)
 
 
 @dataclass(frozen=True)

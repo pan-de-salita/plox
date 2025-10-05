@@ -130,8 +130,10 @@ class Parser:
 
     def __assignment(self) -> expr.Expr:
         """Parse expression rule: assignment -> IDENTIFIER '=' assignment
-        | comma_expression"""
-        expression: expr.Expr = self.__ternary()  # Or whatever is of higher precedence.
+        | logic_or"""
+        expression: expr.Expr = (
+            self.__logic_or()
+        )  # Or whatever is of higher precedence.
 
         if self.__match(TokenType.EQUAL):
             equals: Token = self.__previous()
@@ -161,6 +163,16 @@ class Parser:
             self.__error(equals, "Invalid assignment target.")
 
         return expression
+
+    def __logic_or(self) -> expr.Expr:
+        return self.__logical_left_associative(
+            nonterminal=self.__logic_and, token_types=[TokenType.OR]
+        )
+
+    def __logic_and(self) -> expr.Expr:
+        return self.__logical_left_associative(
+            nonterminal=self.__ternary, token_types=[TokenType.AND]
+        )
 
     def __ternary(self) -> expr.Expr:
         """Parse expression rule: ternary -> ( equality "?" equality ":" ternary ) | equality
@@ -343,6 +355,19 @@ class Parser:
             operator: Token = self.__previous()
             right: expr.Expr = nonterminal()
             expression = expr.Binary(expression, operator, right)
+
+        return expression
+
+    def __logical_left_associative(
+        self, nonterminal: Callable, token_types: list[TokenType]
+    ) -> expr.Expr:
+        """Return a left-associative logical syntax tree."""
+        expression: expr.Expr = nonterminal()
+
+        while self.__match(*token_types):
+            operator: Token = self.__previous()
+            right: expr.Expr = nonterminal()
+            expression = expr.Logical(expression, operator, right)
 
         return expression
 

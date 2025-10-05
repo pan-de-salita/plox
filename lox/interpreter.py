@@ -16,11 +16,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     _is_run_prompt: bool = False
 
     def interpret(self, statements: list[stmt.Stmt]) -> None:
-        # For testing purposes:
-        # print(AstPrinter().print(expression))
         try:
-            # value: object = self.__evaluate(expression)
-            # print(self.__stringify(value))
             for statement in statements:
                 self.__execute(statement)
         except RuntimeException as error:
@@ -84,6 +80,18 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         self._environment.assign(name=assign.name, value=value)
 
         return value
+
+    def visit_logical_expr(self, logical: expr.Logical) -> object:
+        left: object = self.__evaluate(logical.left)
+
+        if logical.operator.type == TokenType.OR:
+            if self.__is_truthy(left):
+                return left
+        elif logical.operator.type == TokenType.AND:
+            if not self.__is_truthy(left):
+                return left
+
+        return self.__evaluate(logical.right)
 
     def visit_ternary_expr(self, ternary: expr.Ternary) -> object:
         condition: object = self.__evaluate(ternary.condition)
