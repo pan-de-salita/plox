@@ -61,6 +61,9 @@ class Parser:
         return stmt.Var(name, initializer, is_initialized)
 
     def __statement(self) -> stmt.Stmt:
+        if self.__match(TokenType.WHILE):
+            return self.__while_statement()
+
         if self.__match(TokenType.IF):
             return self.__if_statement()
 
@@ -71,6 +74,17 @@ class Parser:
             return self.__print_statement()
 
         return self.__expression_statment()
+
+    def __while_statement(self) -> stmt.While:
+        self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        condition: expr.Expr = self.__expression()
+        self.__consume(
+            TokenType.RIGHT_PAREN,
+            "Expect ')' after while condition.",
+        )
+        body: stmt.Stmt = self.__statement()
+
+        return stmt.While(condition=condition, body=body)
 
     def __if_statement(self) -> stmt.If:
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")

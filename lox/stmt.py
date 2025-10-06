@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-10-05 23:00:18.381331).
+# Generated from GenerateAst class (2025-10-06 21:12:44.617827).
 
 from __future__ import annotations
 
@@ -14,11 +14,15 @@ R = TypeVar("R")
 
 class Visitor(ABC, Generic[R]):
     @abstractmethod
-    def visit_block_stmt(self, block: Block) -> R:
+    def visit_var_stmt(self, var_: Var) -> R:
         pass
 
     @abstractmethod
     def visit_expression_stmt(self, expression: Expression) -> R:
+        pass
+
+    @abstractmethod
+    def visit_while_stmt(self, while_: While) -> R:
         pass
 
     @abstractmethod
@@ -30,7 +34,7 @@ class Visitor(ABC, Generic[R]):
         pass
 
     @abstractmethod
-    def visit_var_stmt(self, var_: Var) -> R:
+    def visit_block_stmt(self, block: Block) -> R:
         pass
 
 
@@ -42,11 +46,13 @@ class Stmt(ABC):
 
 
 @dataclass(frozen=True)
-class Block(Stmt):
-    statements: list[Stmt]
+class Var(Stmt):
+    name: Token
+    expression: Expr | None
+    is_initialized: bool
 
     def accept(self, visitor: Visitor[R]) -> R:
-        return visitor.visit_block_stmt(self)
+        return visitor.visit_var_stmt(self)
 
 
 @dataclass(frozen=True)
@@ -55,6 +61,15 @@ class Expression(Stmt):
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_expression_stmt(self)
+
+
+@dataclass(frozen=True)
+class While(Stmt):
+    condition: Expr
+    body: Stmt
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_while_stmt(self)
 
 
 @dataclass(frozen=True)
@@ -76,10 +91,8 @@ class Print(Stmt):
 
 
 @dataclass(frozen=True)
-class Var(Stmt):
-    name: Token
-    expression: Expr | None
-    is_initialized: bool
+class Block(Stmt):
+    statements: list[Stmt]
 
     def accept(self, visitor: Visitor[R]) -> R:
-        return visitor.visit_var_stmt(self)
+        return visitor.visit_block_stmt(self)

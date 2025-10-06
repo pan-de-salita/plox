@@ -32,11 +32,12 @@ class GenerateAst:
             output_dir,
             "Stmt",
             [
-                "Block       : statements list[Stmt]",
+                "Var         : name Token, expression Expr | None, is_initialized bool",
                 "Expression  : expression Expr",
+                "While       : condition Expr, body Stmt",
                 "If          : condition Expr, then_branch Stmt, else_branch Stmt | None",
                 "Print       : expression Expr",
-                "Var         : name Token, expression Expr | None, is_initialized bool",
+                "Block       : statements list[Stmt]",
             ],
         )
         GenerateAst.__define_ast(

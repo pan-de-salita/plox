@@ -19,14 +19,12 @@
 // print b; // -> global b
 // print c; // -> global c
 
-var greeting = "Hello.";
+print "beginning while loop.";
+var i = 10;
+while (i != 0) {
+  print "i is now " + i;
+  i = i - 1;
 
-if (10 > 0) {
-  greeting = "Hola.";
-  print "Ten is greater than zero.";
-} else {
-  greeting = "Uy.";
-  print "Zero is greater than ten.";
+  if (i == 5) print "pause muna.";
 }
-
-print greeting;
+print "ending while loop.";

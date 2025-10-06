@@ -84,11 +84,13 @@
 # var_decl -> "var" IDENTIFIER ("=" expr)? ";" ;
 #
 # statement -> expr_stmt
+#            | while_stmt
 #            | if_stmt
 #            | print_stmt
 #            | block;
 #
 # expr_stmt -> expr ";" ;
+# while_stmt -> "while" "(" expr ")" stmt ;
 # if_stmt -> "if" "(" expr ")" stmt
 #            ( "else" stmt )? ;
 # print_stmt -> "print" expr ";" ;

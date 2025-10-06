@@ -36,6 +36,10 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             is_initialized=var_.is_initialized,
         )
 
+    def visit_while_stmt(self, while_: stmt.While) -> None:
+        while self.__is_truthy(self.__evaluate(while_.condition)):
+            self.__execute(while_.body)
+
     def visit_if_stmt(self, if_: stmt.If) -> None:
         if self.__is_truthy(self.__evaluate(if_.condition)):
             self.__execute(if_.then_branch)
