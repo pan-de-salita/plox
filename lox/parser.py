@@ -64,6 +64,9 @@ class Parser:
         if self.__match(TokenType.WHILE):
             return self.__while_statement()
 
+        if self.__match(TokenType.FOR):
+            return self.__for_statement()
+
         if self.__match(TokenType.IF):
             return self.__if_statement()
 
@@ -73,7 +76,47 @@ class Parser:
         if self.__match(TokenType.PRINT):
             return self.__print_statement()
 
-        return self.__expression_statment()
+        return self.__expression_statement()
+
+    def __for_statement(self) -> stmt.Stmt:
+        self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
+
+        initializer: stmt.Var | stmt.Expression | None
+        if self.__match(TokenType.SEMICOLON):
+            initializer = None
+        elif self.__match(TokenType.VAR):
+            initializer = self.__var_declaration()
+        else:
+            initializer = self.__expression_statement()
+
+        condition: expr.Expr = expr.Literal(value=True)
+        if not self.__check(TokenType.SEMICOLON):
+            condition = self.__expression()
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after for-loop condition.")
+
+        increment: stmt.Expr | None = None
+        if not self.__check(TokenType.RIGHT_PAREN):
+            increment = self.__expression()
+        self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after for-loop clauses.")
+
+        body: stmt.Stmt = self.__statement()
+        # if increment:
+        #     if isinstance(body, stmt.Block):
+        #         body.statements.append(stmt.Expression(increment))
+        #     else:
+        #         body = stmt.Block(statements=[body, stmt.Expression(increment)])
+        # else:
+        #     if not isinstance(body, stmt.Block):
+        #         body = stmt.Block(statements=[body])
+        if increment:
+            body = stmt.Block(statements=[body, stmt.Expression(increment)])
+
+        if isinstance(initializer, stmt.Stmt):
+            return stmt.Block(
+                statements=[initializer, stmt.While(condition=condition, body=body)]
+            )
+        else:
+            return stmt.Block(statements=[stmt.While(condition=condition, body=body)])
 
     def __while_statement(self) -> stmt.While:
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
@@ -120,7 +163,7 @@ class Parser:
         self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return stmt.Print(value)
 
-    def __expression_statment(self) -> stmt.Expression:
+    def __expression_statement(self) -> stmt.Expression:
         value: expr.Expr = self.__expression()
         self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return stmt.Expression(value)

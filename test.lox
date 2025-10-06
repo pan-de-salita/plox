@@ -19,12 +19,28 @@
 // print b; // -> global b
 // print c; // -> global c
 
-print "beginning while loop.";
-var i = 10;
-while (i != 0) {
-  print "i is now " + i;
-  i = i - 1;
+// print "beginning while loop.";
+// var i = 10;
+// while (i != 0) {
+//   print "i is now " + i;
+//   i = i - 1;
+//
+//   if (i == 5) print "pause muna.";
+// }
+// print "ending while loop.";
 
-  if (i == 5) print "pause muna.";
+// var message = "Current number is ";
+// for (var i = 10; i != 0; i = i - 1) {
+//     print message + i;
+//
+//     for (i; i == 5; i = i - 1) print "MISSING NUMBER HERE.";
+// }
+
+var a = 0;
+var temp;
+
+for (var b = 1; a < 10000; b = temp + b) {
+  print a;
+  temp = a;
+  a = b;
 }
-print "ending while loop.";

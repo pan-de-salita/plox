@@ -85,12 +85,18 @@
 #
 # statement -> expr_stmt
 #            | while_stmt
+#            | for_stmt
 #            | if_stmt
 #            | print_stmt
 #            | block;
 #
 # expr_stmt -> expr ";" ;
 # while_stmt -> "while" "(" expr ")" stmt ;
+# for_stmt -> "for"
+#             "(" ( var_decl | expr_stmt | ";" ) <-- initializer
+#             expr? ";"                          <-- condition
+#             expr? ")"                          <-- increment
+#             stmt ;
 # if_stmt -> "if" "(" expr ")" stmt
 #            ( "else" stmt )? ;
 # print_stmt -> "print" expr ";" ;
@@ -146,3 +152,24 @@
 #
 # NOTE: Re logic_or and logic_and:
 # The syntax doesn't care that these expressions short-curcuit. That's a semantic concern.
+
+# NOTE: Desugaring a for loop so we don't need a dedicated for-loop node:
+#
+# for (var i = 10; i != 0; i = i - 1) print i;
+# // Equivalent to:
+# {
+#     var i = 10;
+#     while (i != 0) {
+#       print i;
+#       i = i - 1;
+#     }
+# }
+#
+# for (var i = 10;;) print i;
+# // Equivalent to:
+# {
+#     var i = 10;
+#     while (true) {
+#         print i;
+#     }
+# }
