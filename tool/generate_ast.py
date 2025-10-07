@@ -34,7 +34,8 @@ class GenerateAst:
             [
                 "Var         : name Token, expression Expr | None, is_initialized bool",
                 "Expression  : expression Expr",
-                "While       : condition Expr, body Stmt",
+                "While       : condition Expr, body Stmt, is_break bool = False",
+                "Break       : ",
                 "If          : condition Expr, then_branch Stmt, else_branch Stmt | None",
                 "Print       : expression Expr",
                 "Block       : statements list[Stmt]",
@@ -94,10 +95,7 @@ class GenerateAst:
 
             attributes: list[tuple[str, str]] = []
             if not attrs_part.strip():
-                print(
-                    f"Failed to generate type definition. Missing attributes: {type_spec}"
-                )
-                sys.exit(64)
+                pass
             else:
                 attr_strings: list[str] = [
                     attr.strip() for attr in attrs_part.split(",")
@@ -135,7 +133,7 @@ class GenerateAst:
     @staticmethod
     def __generate_imports(base_name: str) -> list[str]:
         """Generate imports."""
-        imports = [
+        imports: list[str] = [
             "from __future__ import annotations",
             "",
             "from abc import ABC, abstractmethod",
@@ -158,9 +156,9 @@ class GenerateAst:
         base_name: str, type_definitions: list[TypeDefinition]
     ) -> list[str]:
         """Generate Visitor interface."""
-        generic = ['R = TypeVar("R")', "", ""]
-        signature = ["class Visitor(ABC, Generic[R]):"]
-        abstract_visit_methods = list(
+        generic: list[str] = ['R = TypeVar("R")', "", ""]
+        signature: list[str] = ["class Visitor(ABC, Generic[R]):"]
+        abstract_visit_methods: list[str] = list(
             chain.from_iterable(
                 [
                     f"{TAB}@abstractmethod",
@@ -173,7 +171,7 @@ class GenerateAst:
                 for type_definition in type_definitions
             )
         )
-        spacing = [""]
+        spacing: list[str] = [""]
 
         # Iter 1 of abstract_visit_methods with nested loop:
         # abstract_visit_methods = [
@@ -211,16 +209,16 @@ class GenerateAst:
     @staticmethod
     def __generate_base_class(base_name: str) -> list[str]:
         """Generate base class."""
-        signature = [
+        signature: list[str] = [
             "@dataclass(frozen=True)",
             f"class {base_name}(ABC):",
         ]
-        abstract_accept_method = [
+        abstract_accept_method: list[str] = [
             f"{TAB}@abstractmethod",
             f"{TAB}def accept(self, visitor: Visitor[R]) -> R:",
             f"{TAB}{TAB}pass",
         ]
-        spacing = [
+        spacing: list[str] = [
             "",
             "",
         ]
@@ -248,18 +246,22 @@ class GenerateAst:
         base_name: str, type_definition: TypeDefinition
     ) -> list[str]:
         """Generate single child class based on type definition."""
-        signature = [
+        signature: list[str] = [
             "@dataclass(frozen=True)",
             f"class {type_definition.name}({base_name}):",
         ]
-        attributes = [
-            *[
-                f"{TAB}{attr_name}: {attr_types}"
-                for attr_name, attr_types in type_definition.attributes
-            ],
-            "",
-        ]
-        accept_method = [
+
+        attributes: list[str] = []
+        if type_definition.attributes:
+            attributes = [
+                *[
+                    f"{TAB}{attr_name}: {attr_types}"
+                    for attr_name, attr_types in type_definition.attributes
+                ],
+                "",
+            ]
+
+        accept_method: list[str] = [
             f"{TAB}def accept(self, visitor: Visitor[R]) -> R:",
             f"{TAB}{TAB}return visitor.visit_{type_definition.name.lower()}_{base_name.lower()}(self)",
         ]

@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-10-07 00:25:54.326084).
+# Generated from GenerateAst class (2025-10-07 23:01:23.603016).
 
 from __future__ import annotations
 
@@ -23,6 +23,10 @@ class Visitor(ABC, Generic[R]):
 
     @abstractmethod
     def visit_while_stmt(self, while_: While) -> R:
+        pass
+
+    @abstractmethod
+    def visit_break_stmt(self, break_: Break) -> R:
         pass
 
     @abstractmethod
@@ -67,9 +71,16 @@ class Expression(Stmt):
 class While(Stmt):
     condition: Expr
     body: Stmt
+    is_break: bool = False
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_while_stmt(self)
+
+
+@dataclass(frozen=True)
+class Break(Stmt):
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_break_stmt(self)
 
 
 @dataclass(frozen=True)
