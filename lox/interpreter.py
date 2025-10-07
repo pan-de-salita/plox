@@ -14,10 +14,15 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     _error_callback: Callable[[RuntimeException], None]
     _environment: Environment = field(default_factory=Environment)
     _is_run_prompt: bool = False
+    _is_break: bool = False
 
     def interpret(self, statements: list[stmt.Stmt]) -> None:
         try:
             for statement in statements:
+                if isinstance(statement, stmt.Break):
+                    # TODO: Make "'break' outside of loop." error a syntax error.
+                    raise RuntimeException(statement.token, "'break' outside of loop.")
+
                 self.__execute(statement)
         except RuntimeException as error:
             self._error_callback(error)
@@ -38,7 +43,15 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_while_stmt(self, while_: stmt.While) -> None:
         while self.__is_truthy(self.__evaluate(while_.condition)):
+            if self._is_break:
+                break
+
             self.__execute(while_.body)
+
+        self.__reset_is_break()
+
+    def visit_break_stmt(self, break_: stmt.Break) -> None:
+        self._is_break = True
 
     def visit_if_stmt(self, if_: stmt.If) -> None:
         if self.__is_truthy(self.__evaluate(if_.condition)):
@@ -48,12 +61,12 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_block_stmt(self, block: stmt.Block) -> None:
         self.execute_block(
-            statements=block.statements,
+            block_statements=block.statements,
             environment=Environment(enclosing=self._environment),
         )
 
     def execute_block(
-        self, statements: list[stmt.Stmt], environment: Environment
+        self, block_statements: list[stmt.Stmt], environment: Environment
     ) -> None:
         previous_environment: Environment = self._environment
         try:
@@ -61,8 +74,11 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             # as its enclosure. This allows for executed statments within the
             # block to have access to the state in the enclosing environment(s).
             self._environment = environment
-            for statement in statements:
-                self.__execute(statement)
+            for block_statement in block_statements:
+                if self._is_break:
+                    break
+
+                self.__execute(block_statement)
         finally:
             # Restore old environment.
             self._environment = previous_environment
@@ -231,6 +247,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             return str(obj).lower()
 
         return str(obj)
+
+    def __reset_is_break(self) -> None:
+        self._is_break = False
 
 
 if __name__ == "__main__":

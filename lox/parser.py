@@ -67,6 +67,9 @@ class Parser:
         if self.__match(TokenType.FOR):
             return self.__for_statement()
 
+        if self.__match(TokenType.BREAK):
+            return self.__break_statement()
+
         if self.__match(TokenType.IF):
             return self.__if_statement()
 
@@ -77,6 +80,17 @@ class Parser:
             return self.__print_statement()
 
         return self.__expression_statement()
+
+    def __while_statement(self) -> stmt.While:
+        self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        condition: expr.Expr = self.__expression()
+        self.__consume(
+            TokenType.RIGHT_PAREN,
+            "Expect ')' after while condition.",
+        )
+        body: stmt.Stmt = self.__statement()
+
+        return stmt.While(condition=condition, body=body)
 
     def __for_statement(self) -> stmt.Stmt:
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
@@ -118,16 +132,14 @@ class Parser:
         else:
             return stmt.Block(statements=[stmt.While(condition=condition, body=body)])
 
-    def __while_statement(self) -> stmt.While:
-        self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
-        condition: expr.Expr = self.__expression()
+    def __break_statement(self) -> stmt.Break:
+        token: Token = self.__previous()
         self.__consume(
-            TokenType.RIGHT_PAREN,
-            "Expect ')' after while condition.",
+            TokenType.SEMICOLON,
+            "Expect ';' after break statement.",
         )
-        body: stmt.Stmt = self.__statement()
 
-        return stmt.While(condition=condition, body=body)
+        return stmt.Break(token)
 
     def __if_statement(self) -> stmt.If:
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")

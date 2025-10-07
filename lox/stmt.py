@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-10-07 23:01:23.603016).
+# Generated from GenerateAst class (2025-10-08 00:59:57.546916).
 
 from __future__ import annotations
 
@@ -71,7 +71,6 @@ class Expression(Stmt):
 class While(Stmt):
     condition: Expr
     body: Stmt
-    is_break: bool = False
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_while_stmt(self)
@@ -79,6 +78,8 @@ class While(Stmt):
 
 @dataclass(frozen=True)
 class Break(Stmt):
+    token: Token
+
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_break_stmt(self)
 

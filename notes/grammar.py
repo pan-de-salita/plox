@@ -86,18 +86,25 @@
 # statement    -> expr_stmt
 #               | while_stmt
 #               | for_stmt                          <-- does not need its own node
-#               | break_stmt
 #               | if_stmt
 #               | print_stmt
 #               | block;
 #
+# loop_statement    -> expr_stmt
+#                    | while_stmt
+#                    | for_stmt
+#                    | break_stmt
+#                    | if_stmt
+#                    | print_stmt
+#                    | block;
+
 # expr_stmt    -> expr ";" ;
-# while_stmt   -> "while" "(" expr ")" statement ;
+# while_stmt   -> "while" "(" expr ")" loop_statement ;
 # for_stmt     -> "for"
 #                 "(" ( var_decl | expr_stmt | ";" ) <-- initializer
 #                 expr? ";"                          <-- condition
 #                 expr? ")"                          <-- increment
-#                 statement ;
+#                 loop_statement ;
 # break_stmt   -> "break" ";" ;
 # if_stmt      -> "if" "(" expr ")" statement
 #                 ( "else" statement )? ;

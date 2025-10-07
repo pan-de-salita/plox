@@ -22,6 +22,7 @@ KEYWORDS = [
     TokenType.TRUE,
     TokenType.VAR,
     TokenType.WHILE,
+    TokenType.BREAK,
 ]
 
 
