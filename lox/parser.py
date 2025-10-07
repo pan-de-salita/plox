@@ -21,6 +21,7 @@ class Parser:
     _error_callback: Callable[[str, Token], None]
 
     _current: int = 0
+    _is_break_outside_loop: bool = True
 
     def parse(self) -> list[stmt.Stmt]:
         """Parse a series of statements, as many as can be found until the end
@@ -82,6 +83,8 @@ class Parser:
         return self.__expression_statement()
 
     def __while_statement(self) -> stmt.While:
+        self._is_break_outside_loop = False
+
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
         condition: expr.Expr = self.__expression()
         self.__consume(
@@ -90,9 +93,13 @@ class Parser:
         )
         body: stmt.Stmt = self.__statement()
 
+        self._is_break_outside_loop = True
+
         return stmt.While(condition=condition, body=body)
 
     def __for_statement(self) -> stmt.Stmt:
+        self._is_break_outside_loop = False
+
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
 
         initializer: stmt.Var | stmt.Expression | None
@@ -125,6 +132,8 @@ class Parser:
         if increment:
             body = stmt.Block(statements=[body, stmt.Expression(increment)])
 
+        self._is_break_outside_loop = True
+
         if isinstance(initializer, stmt.Stmt):
             return stmt.Block(
                 statements=[initializer, stmt.While(condition=condition, body=body)]
@@ -134,6 +143,10 @@ class Parser:
 
     def __break_statement(self) -> stmt.Break:
         token: Token = self.__previous()
+
+        if self._is_break_outside_loop:
+            raise self.__error(token, "'Break' outside loop.")
+
         self.__consume(
             TokenType.SEMICOLON,
             "Expect ';' after break statement.",

@@ -19,10 +19,6 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def interpret(self, statements: list[stmt.Stmt]) -> None:
         try:
             for statement in statements:
-                if isinstance(statement, stmt.Break):
-                    # TODO: Make "'break' outside of loop." error a syntax error.
-                    raise RuntimeException(statement.token, "'break' outside of loop.")
-
                 self.__execute(statement)
         except RuntimeException as error:
             self._error_callback(error)
