@@ -78,47 +78,49 @@
 #
 # program -> declaration* EOF
 #
-# declaration -> var_decl
-#              | statement ;
+# declaration  -> var_decl
+#               | statement ;
 #
-# var_decl -> "var" IDENTIFIER ("=" expr)? ";" ;
+# var_decl     -> "var" IDENTIFIER ("=" expr)? ";" ;
 #
-# statement -> expr_stmt
-#            | while_stmt
-#            | for_stmt
-#            | if_stmt
-#            | print_stmt
-#            | block;
+# statement    -> expr_stmt
+#               | while_stmt
+#               | for_stmt                          <-- does not need its own node
+#               | break_stmt
+#               | if_stmt
+#               | print_stmt
+#               | block;
 #
-# expr_stmt -> expr ";" ;
-# while_stmt -> "while" "(" expr ")" stmt ;
-# for_stmt -> "for"
-#             "(" ( var_decl | expr_stmt | ";" ) <-- initializer
-#             expr? ";"                          <-- condition
-#             expr? ")"                          <-- increment
-#             stmt ;
-# if_stmt -> "if" "(" expr ")" stmt
-#            ( "else" stmt )? ;
-# print_stmt -> "print" expr ";" ;
-# block -> "{" declaration* "}" ;
+# expr_stmt    -> expr ";" ;
+# while_stmt   -> "while" "(" expr ")" statement ;
+# for_stmt     -> "for"
+#                 "(" ( var_decl | expr_stmt | ";" ) <-- initializer
+#                 expr? ";"                          <-- condition
+#                 expr? ")"                          <-- increment
+#                 statement ;
+# break_stmt   -> "break" ";" ;
+# if_stmt      -> "if" "(" expr ")" statement
+#                 ( "else" statement )? ;
+# print_stmt   -> "print" expr ";" ;
+# block        -> "{" declaration* "}" ;
 #
-# - expr -> comma ;
-# - comma -> ternary ( "," ternary )* ;
+# - expr       -> comma ;
+# - comma      -> ternary ( "," ternary )* ;
 # - assignment -> IDENTIFIER "=" assignment
 #              | logic_or;
-# - logic_or -> logic_and ("or" logic_and)* ;
-# - logic_and -> ternary ("and" ternary)* ;
-# - ternary -> ( equality "?" equality ":" ternary ) | equality ;
-# - equality -> comparison ( ( "!=" | "==" ) comparison )* ;
+# - logic_or   -> logic_and ("or" logic_and)* ;
+# - logic_and  -> ternary ("and" ternary)* ;
+# - ternary    -> ( equality "?" equality ":" ternary ) | equality ;
+# - equality   -> comparison ( ( "!=" | "==" ) comparison )* ;
 # - comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-# - term -> factor ( ( "-" | "+" ) factor )* ;
-# - factor -> unary ( ( "/" | "*" ) unary )* ;
-# - unary -> ("-" | "!") unary
-#          | primary ;
-# - primary -> NUMBER | STRING
-#            | "true" | "false" | "nil"
-#            | "(" expr ")"
-#            | IDENTIFIER ;
+# - term       -> factor ( ( "-" | "+" ) factor )* ;
+# - factor     -> unary ( ( "/" | "*" ) unary )* ;
+# - unary      -> ("-" | "!") unary
+#               | primary ;
+# - primary    -> NUMBER | STRING
+#               | "true" | "false" | "nil"
+#               | "(" expr ")"
+#               | IDENTIFIER ;
 #
 # NOTE: There is no place in the grammar where both an expression and a
 # are allowed. The operands of, say, + are always expressions, never statments.
@@ -139,7 +141,7 @@
 # - If we attach it to the second if statement, then when_false() is only called
 #   if first is truthy and second is falsey.
 #
-# Since else clauses are optinal, and there is no explicit delimiter marking the
+# Since else clauses are optional, and there is no explicit delimiter marking the
 # end of the if statement, the grammar is ambiguous when you nest ifs in the
 # above way. This classic pitfall is called the dangling else problem.
 #
