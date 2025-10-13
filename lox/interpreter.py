@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import builtins
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Callable
 
@@ -11,8 +12,13 @@ from .token import Token
 from .token_type import TokenType
 
 
-class LoxCallable:
+class LoxCallable(ABC):
+    @abstractmethod
     def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
+        pass
+
+    @abstractmethod
+    def arity(self) -> int:
         pass
 
 
@@ -188,6 +194,11 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             raise RuntimeException(call.paren, "Can only call functions and class.")
 
         function: LoxCallable = callee
+        if len(arguments) != function.arity():
+            raise RuntimeException(
+                call.paren,
+                f"Expected {function.arity()} arguments but got {len(arguments)}.",
+            )
 
         return function.call(self, arguments)
 
