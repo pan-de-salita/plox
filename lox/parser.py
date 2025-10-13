@@ -413,6 +413,27 @@ class Parser:
         #
         # return callee
 
+        # Rewrite:
+        # expression: expr.Expr = self.__primary()
+        #
+        # while self.__match(TokenType.LEFT_PAREN):
+        #     arguments: list[expr.Expr] = []
+        #     while not self.__check(TokenType.RIGHT_PAREN):
+        #         arguments.append(self.__expression())
+        #
+        #         if not self.__match(TokenType.COMMA):
+        #             break
+        #
+        #     paren: Token = self.__consume(
+        #         TokenType.COMMA, "Expect ')' after arguments."
+        #     )
+        #     expression = expr.Call(expression, paren, arguments)
+        #
+        # return expression
+
+        # Keeping current structure to facilitate implementation of properties
+        # on objects.
+
         expression: expr.Expr = self.__primary()
 
         while True:
@@ -427,6 +448,8 @@ class Parser:
         arguments: list[expr.Expr] = []
         if not self.__check(TokenType.RIGHT_PAREN):
             while True:
+                if len(arguments) >= 255:
+                    self.__error(self.__peek(), "Can't have more than 255 arguments.")
                 arguments.append(self.__expression())
 
                 if not self.__match(TokenType.COMMA):
