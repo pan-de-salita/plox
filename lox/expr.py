@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-10-08 00:59:57.547104).
+# Generated from GenerateAst class (2025-10-13 21:12:01.514625).
 
 from __future__ import annotations
 
@@ -26,6 +26,10 @@ class Visitor(ABC, Generic[R]):
 
     @abstractmethod
     def visit_binary_expr(self, binary: Binary) -> R:
+        pass
+
+    @abstractmethod
+    def visit_call_expr(self, call: Call) -> R:
         pass
 
     @abstractmethod
@@ -89,6 +93,16 @@ class Binary(Expr):
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_binary_expr(self)
+
+
+@dataclass(frozen=True)
+class Call(Expr):
+    callee: Expr
+    paren: Token
+    arguments: list[Expr]
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_call_expr(self)
 
 
 @dataclass(frozen=True)

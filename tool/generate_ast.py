@@ -49,6 +49,7 @@ class GenerateAst:
                 "Logical  : left Expr, operator Token, right Expr",
                 "Ternary  : condition Expr, consequent Expr, alternative Expr",
                 "Binary   : left Expr, operator Token, right Expr",
+                "Call     : callee Expr, paren Token, arguments list[Expr]",
                 "Grouping : expression Expr",
                 "Literal  : value object",
                 "Unary    : operator Token, right Expr",

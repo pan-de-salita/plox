@@ -394,7 +394,49 @@ class Parser:
 
             return expr.Unary(operator, right)
         else:
-            return self.__primary()
+            return self.__call()
+
+    def __call(self) -> expr.Expr:
+        # Own non-working attempt. Does not work because it doesn't account for
+        # successive calls, e.g. func(x)(y):
+        #
+        # callee: expr.Expr = self.__primary()
+        #
+        # if self.__match(TokenType.LEFT_PAREN):
+        #     paren: Token = self.__previous()
+        #
+        #     arguments: list[expr.Expr] = []
+        #     while not self.__match(TokenType.RIGHT_PAREN):
+        #         arguments.append(self.__expression())
+        #
+        #     return expr.Call(callee, paren, arguments)
+        #
+        # return callee
+
+        expression: expr.Expr = self.__primary()
+
+        while True:
+            if self.__match(TokenType.LEFT_PAREN):
+                expression = self.__finish_call(expression)
+            else:
+                break
+
+        return expression
+
+    def __finish_call(self, callee: expr.Expr) -> expr.Expr:
+        arguments: list[expr.Expr] = []
+        if not self.__check(TokenType.RIGHT_PAREN):
+            while True:
+                arguments.append(self.__expression())
+
+                if not self.__match(TokenType.COMMA):
+                    break
+
+        paren: Token = self.__consume(
+            TokenType.RIGHT_PAREN, "Expect ')' after arguments."
+        )
+
+        return expr.Call(callee, paren, arguments)
 
     def __primary(self) -> expr.Expr:
         """Parse primary rule: primary -> "true" | "false" | "nil" | NUMBER | STRING | "(" expression ")"

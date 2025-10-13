@@ -81,7 +81,7 @@
 # declaration  -> var_decl
 #               | statement ;
 #
-# var_decl     -> "var" IDENTIFIER ("=" expr)? ";" ;
+# var_decl     -> "var" IDENTIFIER ( "=" expr )? ";" ;
 #
 # statement    -> expr_stmt
 #               | while_stmt
@@ -123,11 +123,14 @@
 # - term       -> factor ( ( "-" | "+" ) factor )* ;
 # - factor     -> unary ( ( "/" | "*" ) unary )* ;
 # - unary      -> ("-" | "!") unary
-#               | primary ;
+#               | call ;
+# - call       -> primary ( "(" arguments? ")" )* ;
 # - primary    -> NUMBER | STRING
 #               | "true" | "false" | "nil"
 #               | "(" expr ")"
 #               | IDENTIFIER ;
+#
+# arguments    -> expr ( "," expr )* ;
 #
 # NOTE: There is no place in the grammar where both an expression and a
 # are allowed. The operands of, say, + are always expressions, never statments.
@@ -182,3 +185,7 @@
 #         print i;
 #     }
 # }
+
+# NOTE: Re calls: The name of the function (unless we're using Pascal) isn't
+# actualy part of the call syntax. The thing being called -- the callee -- can
+# be any expression that evaluates to a function.
