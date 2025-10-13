@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import builtins
 from dataclasses import dataclass, field
 from typing import Callable
@@ -9,7 +11,12 @@ from .token import Token
 from .token_type import TokenType
 
 
-@dataclass()
+class LoxCallable:
+    def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
+        pass
+
+
+@dataclass
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     _error_callback: Callable[[RuntimeException], None]
     _environment: Environment = field(default_factory=Environment)
@@ -169,6 +176,20 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
                 result = right  # type: ignore[arg-type]
 
         return result
+
+    def visit_call_expr(self, call: expr.Call) -> object:
+        callee: object = self.__evaluate(call.callee)
+
+        arguments: list[object] = []
+        for argument in call.arguments:
+            arguments.append(self.__evaluate(argument))
+
+        if not isinstance(callee, LoxCallable):
+            raise RuntimeException(call.paren, "Can only call functions and class.")
+
+        function: LoxCallable = callee
+
+        return function.call(self, arguments)
 
     def visit_grouping_expr(self, grouping: expr.Grouping) -> object:
         return self.__evaluate(grouping.expression)
