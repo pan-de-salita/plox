@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import builtins
+import time
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable
 
 from . import expr, stmt
@@ -23,11 +24,38 @@ class LoxCallable(ABC):
 
 
 @dataclass
+class AnonymousLoxCallable(LoxCallable):
+    _callable: Callable[[Interpreter, list[object]], object]
+    _arity: int
+
+    def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
+        return self._callable(interpreter, arguments)
+
+    def arity(self) -> int:
+        return self._arity
+
+    def __str__(self) -> str:
+        return "<native fn>"
+
+
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
-    _error_callback: Callable[[RuntimeException], None]
-    _environment: Environment = field(default_factory=Environment)
-    _is_run_prompt: bool = False
-    _is_break: bool = False
+    def __init__(self, error_callback: Callable[[RuntimeException], None]) -> None:
+        self.globals: Environment = (
+            Environment()
+        )  # Fixed reference to the outermost global environment
+
+        self._error_callback = error_callback
+        self._environment: Environment = self.globals
+        self._is_run_prompt: bool = False
+        self._is_break: bool = False
+
+        self.globals.define(
+            name_lexeme="clock",
+            value=AnonymousLoxCallable(
+                _callable=lambda interpreter, arguments: time.time(), _arity=0
+            ),
+            is_initialized=True,
+        )
 
     def interpret(self, statements: list[stmt.Stmt]) -> None:
         try:
