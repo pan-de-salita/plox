@@ -59,6 +59,8 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def interpret(self, statements: list[stmt.Stmt]) -> None:
         try:
+            print(statements)
+            return None
             for statement in statements:
                 self.__execute(statement)
         except RuntimeException as error:
@@ -89,6 +91,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_break_stmt(self, break_: stmt.Break) -> None:
         self._is_break = True
+
+    def visit_function_stmt(self, function: stmt.Function) -> None:
+        pass
 
     def visit_if_stmt(self, if_: stmt.If) -> None:
         if self.__is_truthy(self.__evaluate(if_.condition)):

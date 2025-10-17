@@ -37,6 +37,9 @@ class Parser:
 
     def __declaration(self) -> stmt.Stmt | None:
         try:
+            if self.__match(TokenType.FUN):
+                return self.__function("function")
+
             if self.__match(TokenType.VAR):
                 return self.__var_declaration()
 
@@ -44,6 +47,29 @@ class Parser:
         except ParseError:
             self.__synchronize()
             return None
+
+    def __function(self, kind: str) -> stmt.Function:
+        name: Token = self.__consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
+
+        self.__consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
+        params: list[Token] = []
+        if not self.__check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(params) >= 255:
+                    self.__error(self.__peek(), "Can't have more than 255 parameters.")
+
+                params.append(
+                    self.__consume(TokenType.IDENTIFIER, "Expect parameter name.")
+                )
+
+                if not self.__match(TokenType.COMMA):
+                    break
+        self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+
+        self.__consume(TokenType.LEFT_BRACE, "Expr '{' after parameters.")
+        body: list[stmt.Stmt] = self.__block_statement()
+
+        return stmt.Function(name, params, body)
 
     def __var_declaration(self) -> stmt.Var:
         name: Token = self.__consume(TokenType.IDENTIFIER, "Expect variable name.")
@@ -175,8 +201,10 @@ class Parser:
         statements: list[stmt.Stmt] = []
         while not self.__check(TokenType.RIGHT_BRACE) and not self.__is_at_end():
             statement: stmt.Stmt | None = self.__declaration()
+
             if not statement:
                 continue
+
             statements.append(statement)
 
         self.__consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
@@ -450,6 +478,7 @@ class Parser:
             while True:
                 if len(arguments) >= 255:
                     self.__error(self.__peek(), "Can't have more than 255 arguments.")
+
                 arguments.append(self.__expression())
 
                 if not self.__match(TokenType.COMMA):
