@@ -78,8 +78,14 @@
 #
 # program -> declaration* EOF
 #
-# declaration  -> var_decl
+# declaration  -> fun_decl
+#               | var_decl
 #               | statement ;
+#
+# fun_decl     -> "fun" function ;
+#
+# function     -> IDENTIFIER "(" parameters? ")" block ;
+# parameters   -> IDENTIFIER ( "," IDENTIFIER )* ;
 #
 # var_decl     -> "var" IDENTIFIER ( "=" expr )? ";" ;
 #
