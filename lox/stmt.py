@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-10-13 21:12:01.514361).
+# Generated from GenerateAst class (2025-10-17 22:11:06.235064).
 
 from __future__ import annotations
 
@@ -22,15 +22,19 @@ class Visitor(ABC, Generic[R]):
         pass
 
     @abstractmethod
+    def visit_function_stmt(self, function: Function) -> R:
+        pass
+
+    @abstractmethod
+    def visit_if_stmt(self, if_: If) -> R:
+        pass
+
+    @abstractmethod
     def visit_while_stmt(self, while_: While) -> R:
         pass
 
     @abstractmethod
     def visit_break_stmt(self, break_: Break) -> R:
-        pass
-
-    @abstractmethod
-    def visit_if_stmt(self, if_: If) -> R:
         pass
 
     @abstractmethod
@@ -68,6 +72,26 @@ class Expression(Stmt):
 
 
 @dataclass(frozen=True)
+class Function(Stmt):
+    name: Token
+    params: list[Token]
+    body: list[Stmt]
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_function_stmt(self)
+
+
+@dataclass(frozen=True)
+class If(Stmt):
+    condition: Expr
+    then_branch: Stmt
+    else_branch: Stmt | None
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_if_stmt(self)
+
+
+@dataclass(frozen=True)
 class While(Stmt):
     condition: Expr
     body: Stmt
@@ -82,16 +106,6 @@ class Break(Stmt):
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_break_stmt(self)
-
-
-@dataclass(frozen=True)
-class If(Stmt):
-    condition: Expr
-    then_branch: Stmt
-    else_branch: Stmt | None
-
-    def accept(self, visitor: Visitor[R]) -> R:
-        return visitor.visit_if_stmt(self)
 
 
 @dataclass(frozen=True)

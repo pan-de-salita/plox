@@ -34,9 +34,10 @@ class GenerateAst:
             [
                 "Var         : name Token, expression Expr | None, is_initialized bool",
                 "Expression  : expression Expr",
+                "Function    : name Token, params list[Token], body list[Stmt]",
+                "If          : condition Expr, then_branch Stmt, else_branch Stmt | None",
                 "While       : condition Expr, body Stmt",
                 "Break       : token Token",
-                "If          : condition Expr, then_branch Stmt, else_branch Stmt | None",
                 "Print       : expression Expr",
                 "Block       : statements list[Stmt]",
             ],
