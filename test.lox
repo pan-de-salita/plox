@@ -68,16 +68,29 @@
 //     }
 // }
 
-fun sayHi(name) {
-  if (name == "miguel") {
-    print "hi miggy boy";
-  } else {
-    print "hi..." + name;
+// fun sayHi(name) {
+//   if (name == "miguel") {
+//     print "hi miggy boy";
+//   } else {
+//     print "hi..." + name;
+//   }
+// }
+//
+// sayHi("john");
+// sayHi("miguel");
+
+
+var a = "Hey";
+if (true) {
+  var x = "Hello";
+
+  fun count(n) {
+    if (n > 1) count(n - 1);
+    print n;
+    print a;
+    print x;
   }
 
-  return "return statement"
+  count(3);
+  // print n; -> Would not error out if we used the same env for all function calls.
 }
-
-sayHi("john");
-sayHi("miguel");
-

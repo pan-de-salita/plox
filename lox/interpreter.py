@@ -40,26 +40,67 @@ class AnonymousLoxCallable(LoxCallable):
 
 @dataclass
 class LoxFunction(LoxCallable):
-    name: str
-    params: list[Token]
-    body: list[stmt.Stmt]
+    _declaration: stmt.Function
 
     def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
-        # initialize arg values through env definition
-        for idx, argument in enumerate(arguments):
-            interpreter.environment.define(
-                name=self.params[idx].lexeme, value=argument, is_initialized=True
+        # NOTE: Function parameters and local variables should be isolated from
+        # the outer scope, not dumped directly into it. This implementation
+        # correctly creates a new environment that acts as a barrier between
+        # the function's internals and the rest of the program.
+        #
+        # If we used interpreter.environment instead of creating a new
+        # environment (Environment(enclosing=interpreter.environment)),
+        # this code would work (which is not what should happen):
+        #
+        # fun testX(x) {
+        #   print x;
+        # }
+        #
+        # fun testY() {
+        #   print x;
+        # }
+        #
+        # testX("for x only.");
+        # testY();
+        #
+        # Parameters are core to functions, especially the fact that a function
+        # encapsulates its parameters -- no other code outside of the function
+        # can see them. This means each function gets its own environment where
+        # it stores those variables.
+        #
+        # Further, this environment must be created dynamically. Each function
+        # call gets its own environment. Otherwise, recursion would break. If
+        # there are multiple calls to the same functin in play at the same time,
+        # each needs its own environment, even though they are all calls to the
+        # same function.
+        #
+        # At the beginning of each function call (not at the function declaration),
+        # this call() method creates a new environment. Then it walks the
+        # parameter and argument lists in lockstep. For each pair, it creates a
+        # *new* variable with the paremeter's name and binds it to the argument's value.
+        # environment: Environment = Environment(
+        #     enclosing=interpreter.globals
+        # )  # Dynamic scoping
+        environment: Environment = Environment(
+            enclosing=interpreter.environment
+        )  # Lexical scoping
+
+        for idx, param in enumerate(self._declaration.params):
+            environment.define(
+                name=param.lexeme,
+                value=arguments[idx],
+                is_initialized=True,
             )
 
-        # execute each statement within body
-        interpreter.interpret(self.body)
-
-        # return executed statement
+        interpreter.execute_block(self._declaration.body, environment)
 
         return None
 
     def arity(self) -> int:
-        return len(self.params)
+        return len(self._declaration.params)
+
+    def __str__(self) -> str:
+        return f"<fn {self._declaration.name.lexeme}>"
 
 
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
@@ -117,9 +158,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def visit_function_stmt(self, function: stmt.Function) -> None:
         self.environment.define(
             name=function.name.lexeme,
-            value=LoxFunction(
-                name=function.name.lexeme, params=function.params, body=function.body
-            ),
+            value=LoxFunction(function),
             is_initialized=True,
         )
 
@@ -138,7 +177,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def execute_block(
         self, block_statements: list[stmt.Stmt], environment: Environment
     ) -> None:
-        previousenvironment: Environment = self.environment
+        previous_environment: Environment = self.environment
         try:
             # Switch self's environment to be a new one with previousenvironment
             # as its enclosure. This allows for executed statments within the
@@ -151,7 +190,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
                 self.__execute(block_statement)
         finally:
             # Restore old environment.
-            self.environment = previousenvironment
+            self.environment = previous_environment
 
     def visit_print_stmt(self, print_: stmt.Print) -> None:
         builtins.print(self.__stringify(self.__evaluate(print_.expression)))
