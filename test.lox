@@ -79,18 +79,9 @@
 // sayHi("john");
 // sayHi("miguel");
 
-
-var a = "Hey";
-if (true) {
-  var x = "Hello";
-
-  fun count(n) {
+fun count(n) {
     if (n > 1) count(n - 1);
     print n;
-    print a;
-    print x;
-  }
-
-  count(3);
-  // print n; -> Would not error out if we used the same env for all function calls.
 }
+
+count(5);

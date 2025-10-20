@@ -78,12 +78,7 @@ class LoxFunction(LoxCallable):
         # this call() method creates a new environment. Then it walks the
         # parameter and argument lists in lockstep. For each pair, it creates a
         # *new* variable with the paremeter's name and binds it to the argument's value.
-        # environment: Environment = Environment(
-        #     enclosing=interpreter.globals
-        # )  # Dynamic scoping
-        environment: Environment = Environment(
-            enclosing=interpreter.environment
-        )  # Lexical scoping
+        environment: Environment = Environment(enclosing=interpreter.globals)
 
         for idx, param in enumerate(self._declaration.params):
             environment.define(
