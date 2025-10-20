@@ -236,7 +236,11 @@ class Parser:
         These have lower precedence than assignment.
         Left-associative: a, b, c is parsed as ((a, b), c)
         """
-        return self.__binary_left_associative(self.__assignment, [TokenType.COMMA])
+
+        # TODO: Fix erroneous parsing of callables.
+        # return self.__binary_left_associative(self.__assignment, [TokenType.COMMA])
+
+        return self.__binary_left_associative(self.__assignment, [])
 
     def __assignment(self) -> expr.Expr:
         """Parse expression rule: assignment -> IDENTIFIER '=' assignment

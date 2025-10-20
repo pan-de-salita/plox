@@ -68,7 +68,16 @@
 //     }
 // }
 
-fun a_function(x, y) {
-  print x;
-  print y;
+fun sayHi(name) {
+  if (name == "miguel") {
+    print "hi miggy boy";
+  } else {
+    print "hi..." + name;
+  }
+
+  return "return statement"
 }
+
+sayHi("john");
+sayHi("miguel");
+

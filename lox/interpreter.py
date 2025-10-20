@@ -38,6 +38,30 @@ class AnonymousLoxCallable(LoxCallable):
         return "<native fn>"
 
 
+@dataclass
+class LoxFunction(LoxCallable):
+    name: str
+    params: list[Token]
+    body: list[stmt.Stmt]
+
+    def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
+        # initialize arg values through env definition
+        for idx, argument in enumerate(arguments):
+            interpreter.environment.define(
+                name=self.params[idx].lexeme, value=argument, is_initialized=True
+            )
+
+        # execute each statement within body
+        interpreter.interpret(self.body)
+
+        # return executed statement
+
+        return None
+
+    def arity(self) -> int:
+        return len(self.params)
+
+
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def __init__(self, error_callback: Callable[[RuntimeException], None]) -> None:
         self.globals: Environment = (
@@ -45,12 +69,12 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         )  # Fixed reference to the outermost global environment
 
         self._error_callback = error_callback
-        self._environment: Environment = self.globals
+        self.environment: Environment = self.globals
         self._is_run_prompt: bool = False
         self._is_break: bool = False
 
         self.globals.define(
-            name_lexeme="clock",
+            name="clock",
             value=AnonymousLoxCallable(
                 _callable=lambda interpreter, arguments: time.time(), _arity=0
             ),
@@ -59,8 +83,6 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def interpret(self, statements: list[stmt.Stmt]) -> None:
         try:
-            print(statements)
-            return None
             for statement in statements:
                 self.__execute(statement)
         except RuntimeException as error:
@@ -74,8 +96,8 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         if var_.expression:
             value = self.__evaluate(var_.expression)
 
-        self._environment.define(
-            name_lexeme=var_.name.lexeme,
+        self.environment.define(
+            name=var_.name.lexeme,
             value=value,
             is_initialized=var_.is_initialized,
         )
@@ -93,7 +115,13 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         self._is_break = True
 
     def visit_function_stmt(self, function: stmt.Function) -> None:
-        pass
+        self.environment.define(
+            name=function.name.lexeme,
+            value=LoxFunction(
+                name=function.name.lexeme, params=function.params, body=function.body
+            ),
+            is_initialized=True,
+        )
 
     def visit_if_stmt(self, if_: stmt.If) -> None:
         if self.__is_truthy(self.__evaluate(if_.condition)):
@@ -104,18 +132,18 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def visit_block_stmt(self, block: stmt.Block) -> None:
         self.execute_block(
             block_statements=block.statements,
-            environment=Environment(enclosing=self._environment),
+            environment=Environment(enclosing=self.environment),
         )
 
     def execute_block(
         self, block_statements: list[stmt.Stmt], environment: Environment
     ) -> None:
-        previous_environment: Environment = self._environment
+        previousenvironment: Environment = self.environment
         try:
-            # Switch self's environment to be a new one with previous_environment
+            # Switch self's environment to be a new one with previousenvironment
             # as its enclosure. This allows for executed statments within the
             # block to have access to the state in the enclosing environment(s).
-            self._environment = environment
+            self.environment = environment
             for block_statement in block_statements:
                 if self._is_break:
                     break
@@ -123,7 +151,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
                 self.__execute(block_statement)
         finally:
             # Restore old environment.
-            self._environment = previous_environment
+            self.environment = previousenvironment
 
     def visit_print_stmt(self, print_: stmt.Print) -> None:
         builtins.print(self.__stringify(self.__evaluate(print_.expression)))
@@ -139,7 +167,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_assign_expr(self, assign: expr.Assign) -> object:
         value: object = self.__evaluate(assign.value)
-        self._environment.assign(name=assign.name, value=value)
+        self.environment.assign(name=assign.name, value=value)
 
         return value
 
@@ -224,7 +252,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             arguments.append(self.__evaluate(argument))
 
         if not isinstance(callee, LoxCallable):
-            raise RuntimeException(call.paren, "Can only call functions and class.")
+            raise RuntimeException(call.paren, "Can only call functions and methods.")
 
         function: LoxCallable = callee
         if len(arguments) != function.arity():
@@ -256,7 +284,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         return result
 
     def visit_variable_expr(self, variable: expr.Variable) -> object:
-        return self._environment.get(variable.name)
+        return self.environment.get(variable.name)
 
     def __check_number_operand(self, operator: Token, operand: object) -> None:
         if isinstance(operand, float):

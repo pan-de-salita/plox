@@ -16,9 +16,9 @@ class Environment:
     _values: dict[str, Assigned] = field(default_factory=dict)
     enclosing: Self | None = None
 
-    def define(self, name_lexeme: str, value: object, is_initialized: bool) -> None:
+    def define(self, name: str, value: object, is_initialized: bool) -> None:
         """Define a variable."""
-        self._values[name_lexeme] = Assigned(value=value, is_initialized=is_initialized)
+        self._values[name] = Assigned(value=value, is_initialized=is_initialized)
 
     def get(self, name: Token) -> object:
         """Gets a variable's value if it's name exists in the Environment's
