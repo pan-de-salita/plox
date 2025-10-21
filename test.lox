@@ -79,15 +79,24 @@
 // sayHi("john");
 // sayHi("miguel");
 
-fun countOnlyEven(n) {
-    if (n > 1) countOnlyEven(n - 1);
-    if (n % 2 == 0) print n;
+// fun countOnlyEven(n) {
+//     if (n > 1) countOnlyEven(n - 1);
+//     if (n % 2 == 0) print n;
+// }
+//
+// countOnlyEven(10);
+//
+// fun test() {
+//     return 2;
+// }
+//
+// print test() + 2;
+
+fun fib(n) {
+  if (n <= 1) return n;
+  return fib(n - 2) + fib(n - 1);
 }
 
-countOnlyEven(10);
-
-fun test() {
-    return 2;
+for (var i = 0; i < 20; i = i + 1) {
+  print fib(i);
 }
-
-print test() + 2;
