@@ -45,56 +45,56 @@ class LoxFunction(LoxCallable):
     _declaration: stmt.Function
 
     def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
+        # NOTE: Function parameters and local variables should be isolated from
+        # the outer scope, not dumped directly into it. This implementation
+        # correctly creates a new environment that acts as a barrier between
+        # the function's internals and the rest of the program.
+        #
+        # If we used interpreter.environment instead of creating a new
+        # environment (Environment(enclosing=interpreter.environment)),
+        # this code would work (which is not what should happen):
+        #
+        # fun testX(x) {
+        #   print x;
+        # }
+        #
+        # fun testY() {
+        #   print x;
+        # }
+        #
+        # testX("for x only.");
+        # testY();
+        #
+        # Parameters are core to functions, especially the fact that a function
+        # encapsulates its parameters -- no other code outside of the function
+        # can see them. This means each function gets its own environment where
+        # it stores those variables.
+        #
+        # Further, this environment must be created dynamically. Each function
+        # call gets its own environment. Otherwise, recursion would break. If
+        # there are multiple calls to the same function in play at the same time,
+        # each needs its own environment, even though they are all calls to the
+        # same function.
+        #
+        # At the beginning of each function call (not at the function declaration),
+        # this call() method creates a new environment. Then it walks the
+        # parameter and argument lists in lockstep. For each pair, it creates a
+        # *new* variable with the paremeter's name and binds it to the argument's value.
+        environment: Environment = Environment(enclosing=interpreter.globals)
+
+        for idx, param in enumerate(self._declaration.params):
+            environment.define(
+                name=param.lexeme,
+                value=arguments[idx],
+                is_initialized=True,
+            )
+
         try:
-            # NOTE: Function parameters and local variables should be isolated from
-            # the outer scope, not dumped directly into it. This implementation
-            # correctly creates a new environment that acts as a barrier between
-            # the function's internals and the rest of the program.
-            #
-            # If we used interpreter.environment instead of creating a new
-            # environment (Environment(enclosing=interpreter.environment)),
-            # this code would work (which is not what should happen):
-            #
-            # fun testX(x) {
-            #   print x;
-            # }
-            #
-            # fun testY() {
-            #   print x;
-            # }
-            #
-            # testX("for x only.");
-            # testY();
-            #
-            # Parameters are core to functions, especially the fact that a function
-            # encapsulates its parameters -- no other code outside of the function
-            # can see them. This means each function gets its own environment where
-            # it stores those variables.
-            #
-            # Further, this environment must be created dynamically. Each function
-            # call gets its own environment. Otherwise, recursion would break. If
-            # there are multiple calls to the same functin in play at the same time,
-            # each needs its own environment, even though they are all calls to the
-            # same function.
-            #
-            # At the beginning of each function call (not at the function declaration),
-            # this call() method creates a new environment. Then it walks the
-            # parameter and argument lists in lockstep. For each pair, it creates a
-            # *new* variable with the paremeter's name and binds it to the argument's value.
-            environment: Environment = Environment(enclosing=interpreter.globals)
-
-            for idx, param in enumerate(self._declaration.params):
-                environment.define(
-                    name=param.lexeme,
-                    value=arguments[idx],
-                    is_initialized=True,
-                )
-
             interpreter.execute_block(self._declaration.body, environment)
-
-            return None
         except Return as return_:
             return return_.value
+
+        return None
 
     def arity(self) -> int:
         return len(self._declaration.params)
