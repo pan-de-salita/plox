@@ -79,9 +79,9 @@
 // sayHi("john");
 // sayHi("miguel");
 
-fun count(n) {
-    if (n > 1) count(n - 1);
-    print n;
+fun countOnlyEven(n) {
+    if (n > 1) countOnlyEven(n - 1);
+    if (n % 2 == 0) print n;
 }
 
-count(5);
+countOnlyEven(10);
