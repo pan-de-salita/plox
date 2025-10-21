@@ -104,18 +104,19 @@
 #                    | print_stmt
 #                    | block;
 
-# expr_stmt    -> expr ";" ;
-# while_stmt   -> "while" "(" expr ")" loop_statement ;
-# for_stmt     -> "for"
-#                 "(" ( var_decl | expr_stmt | ";" ) <-- initializer
-#                 expr? ";"                          <-- condition
-#                 expr? ")"                          <-- increment
-#                 loop_statement ;
-# break_stmt   -> "break" ";" ;
-# if_stmt      -> "if" "(" expr ")" statement
+# expr_stmt     -> expr ";" ;
+# while_stmt    -> "while" "(" expr ")" loop_statement ;
+# for_stmt      -> "for"
+#                  "(" ( var_decl | expr_stmt | ";" ) <-- initializer
+#                  expr? ";"                          <-- condition
+#                  expr? ")"                          <-- increment
+#                  loop_statement ;
+# break_stmt    -> "break" ";" ;
+# if_stmt       -> "if" "(" expr ")" statement
 #                 ( "else" statement )? ;
-# print_stmt   -> "print" expr ";" ;
-# block        -> "{" declaration* "}" ;
+# print_stmt    -> "print" expr ";" ;
+# return_stmt   -> "return" expr? ";" ;
+# block         -> "{" declaration* "}" ;
 #
 # - expr       -> comma ;
 # - comma      -> ternary ( "," ternary )* ;

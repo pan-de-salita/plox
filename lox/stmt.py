@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-10-17 22:11:06.235064).
+# Generated from GenerateAst class (2025-10-21 20:09:58.268065).
 
 from __future__ import annotations
 
@@ -39,6 +39,10 @@ class Visitor(ABC, Generic[R]):
 
     @abstractmethod
     def visit_print_stmt(self, print_: Print) -> R:
+        pass
+
+    @abstractmethod
+    def visit_return_stmt(self, return_: Return) -> R:
         pass
 
     @abstractmethod
@@ -114,6 +118,15 @@ class Print(Stmt):
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_print_stmt(self)
+
+
+@dataclass(frozen=True)
+class Return(Stmt):
+    keyword: Token
+    value: Expr | None
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_return_stmt(self)
 
 
 @dataclass(frozen=True)

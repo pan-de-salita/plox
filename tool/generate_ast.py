@@ -39,6 +39,7 @@ class GenerateAst:
                 "While       : condition Expr, body Stmt",
                 "Break       : token Token",
                 "Print       : expression Expr",
+                "Return      : keyword Token, value Expr | None",
                 "Block       : statements list[Stmt]",
             ],
         )
