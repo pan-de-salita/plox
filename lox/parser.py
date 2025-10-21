@@ -22,6 +22,7 @@ class Parser:
 
     _current: int = 0
     _is_break_outside_loop: bool = True
+    _is_return_outside_function: bool = True
 
     def parse(self) -> list[stmt.Stmt]:
         """Parse a series of statements, as many as can be found until the end
@@ -49,6 +50,8 @@ class Parser:
             return None
 
     def __function(self, kind: str) -> stmt.Function:
+        self._is_return_outside_function = False
+
         name: Token = self.__consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
 
         self.__consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
@@ -68,6 +71,8 @@ class Parser:
 
         self.__consume(TokenType.LEFT_BRACE, "Expr '{' after parameters.")
         body: list[stmt.Stmt] = self.__block_statement()
+
+        self._is_return_outside_function = True
 
         return stmt.Function(name, params, body)
 
@@ -221,6 +226,11 @@ class Parser:
 
     def __return_statement(self) -> stmt.Return:
         keyword: Token = self.__previous()
+        if self._is_return_outside_function:
+            self._error_callback(
+                "'return' outside of a function/method.", self.__previous()
+            )
+
         value: expr.Expr | None = None
 
         if not self.__check(TokenType.SEMICOLON):
