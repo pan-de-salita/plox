@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Callable
 
-# Opportunity to use __init__.py?
 from . import expr, stmt
 from .parse_error import ParseError
 from .token import Token
@@ -21,8 +20,8 @@ class Parser:
     _error_callback: Callable[[str, Token], None]
 
     _current: int = 0
-    _is_break_outside_loop: bool = True
-    _is_return_outside_function: bool = True
+    _loop_count: int = 0
+    _function_count: int = 0
 
     def parse(self) -> list[stmt.Stmt]:
         """Parse a series of statements, as many as can be found until the end
@@ -50,7 +49,7 @@ class Parser:
             return None
 
     def __function(self, kind: str) -> stmt.Function:
-        self._is_return_outside_function = False
+        self._function_count += 1
 
         name: Token = self.__consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
 
@@ -72,7 +71,7 @@ class Parser:
         self.__consume(TokenType.LEFT_BRACE, "Expr '{' after parameters.")
         body: list[stmt.Stmt] = self.__block_statement()
 
-        self._is_return_outside_function = True
+        self._function_count -= 1
 
         return stmt.Function(name, params, body)
 
@@ -117,7 +116,7 @@ class Parser:
         return self.__expression_statement()
 
     def __while_statement(self) -> stmt.While:
-        self._is_break_outside_loop = False
+        self._loop_count += 1
 
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
         condition: expr.Expr = self.__expression()
@@ -127,12 +126,12 @@ class Parser:
         )
         body: stmt.Stmt = self.__statement()
 
-        self._is_break_outside_loop = True
+        self._loop_count -= 1
 
         return stmt.While(condition=condition, body=body)
 
     def __for_statement(self) -> stmt.Stmt:
-        self._is_break_outside_loop = False
+        self._loop_count += 1
 
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
 
@@ -166,7 +165,7 @@ class Parser:
         if increment:
             body = stmt.Block(statements=[body, stmt.Expression(increment)])
 
-        self._is_break_outside_loop = True
+        self._loop_count -= 1
 
         if isinstance(initializer, stmt.Stmt):
             return stmt.Block(
@@ -178,7 +177,7 @@ class Parser:
     def __break_statement(self) -> stmt.Break:
         token: Token = self.__previous()
 
-        if self._is_break_outside_loop:
+        if not self._loop_count:
             raise self.__error(token, "'break' outside loop.")
 
         self.__consume(
@@ -226,11 +225,6 @@ class Parser:
 
     def __return_statement(self) -> stmt.Return:
         keyword: Token = self.__previous()
-        if self._is_return_outside_function:
-            self._error_callback(
-                "'return' outside of a function/method.", self.__previous()
-            )
-
         value: expr.Expr | None = None
 
         if not self.__check(TokenType.SEMICOLON):
