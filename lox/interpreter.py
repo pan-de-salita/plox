@@ -257,6 +257,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             case TokenType.SLASH:
                 self.__check_number_operands(operator, left, right)
                 result = float(left) / float(right)  # type: ignore[arg-type]
+            case TokenType.MODULO:
+                self.__check_number_operands(operator, left, right)
+                result = float(left) % float(right)  # type: ignore[arg-type]
             case TokenType.EQUAL_EQUAL:
                 result = self.__is_equal(left, right)  # type: ignore[arg-type]
             case TokenType.BANG_EQUAL:

@@ -15,6 +15,7 @@ class TokenType(Enum):
     SEMICOLON = auto()
     SLASH = auto()
     STAR = auto()
+    MODULO = auto()
     QUESTION = auto()
 
     # One-or-more-character tokens.

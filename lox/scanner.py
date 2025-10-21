@@ -82,6 +82,8 @@ class Scanner:
                 self.__add_token(TokenType.SEMICOLON)
             case "*":
                 self.__add_token(TokenType.STAR)
+            case "%":
+                self.__add_token(TokenType.MODULO)
             case "?":
                 self.__add_token(TokenType.QUESTION)
             case "!":

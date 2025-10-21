@@ -383,6 +383,7 @@ class Parser:
             [
                 TokenType.SLASH,
                 TokenType.STAR,
+                TokenType.MODULO,
             ],
         )
 
