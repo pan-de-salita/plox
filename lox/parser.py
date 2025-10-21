@@ -179,7 +179,7 @@ class Parser:
         token: Token = self.__previous()
 
         if self._is_break_outside_loop:
-            raise self.__error(token, "'Break' outside loop.")
+            raise self.__error(token, "'break' outside loop.")
 
         self.__consume(
             TokenType.SEMICOLON,

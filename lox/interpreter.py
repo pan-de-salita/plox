@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from . import expr, stmt
+from .break_ import Break
 from .environment import Environment
 from .return_ import Return
 from .runtime_exception import RuntimeException
@@ -111,7 +112,6 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         self._error_callback = error_callback
         self.environment: Environment = self.globals
         self._is_run_prompt: bool = False
-        self._is_break: bool = False
 
         self.globals.define(
             name="clock",
@@ -143,16 +143,14 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         )
 
     def visit_while_stmt(self, while_: stmt.While) -> None:
-        while self.__is_truthy(self.__evaluate(while_.condition)):
-            if self._is_break:
-                break
-
-            self.__execute(while_.body)
-
-        self.__reset_is_break()
+        try:
+            while self.__is_truthy(self.__evaluate(while_.condition)):
+                self.__execute(while_.body)
+        except Break:
+            return
 
     def visit_break_stmt(self, break_: stmt.Break) -> None:
-        self._is_break = True
+        raise Break()
 
     def visit_function_stmt(self, function: stmt.Function) -> None:
         self.environment.define(
@@ -183,9 +181,6 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             # block to have access to the state in the enclosing environment(s).
             self.environment = environment
             for block_statement in block_statements:
-                if self._is_break:
-                    break
-
                 self.__execute(block_statement)
         finally:
             # Restore old environment.
@@ -384,9 +379,6 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             return str(obj).lower()
 
         return str(obj)
-
-    def __reset_is_break(self) -> None:
-        self._is_break = False
 
 
 if __name__ == "__main__":
