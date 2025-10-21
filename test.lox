@@ -87,7 +87,7 @@ fun countOnlyEven(n) {
 countOnlyEven(10);
 
 fun test() {
-    return "from test()";
+    return 2;
 }
 
-print test();
+print test() + 2;
