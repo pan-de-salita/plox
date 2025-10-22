@@ -133,4 +133,4 @@ thrice(fun (a) {
   print a * 2;
 });
 
-fun () {};
+print fun () {};

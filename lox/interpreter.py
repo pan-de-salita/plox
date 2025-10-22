@@ -373,7 +373,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         return self.environment.get(variable.name)
 
     def visit_lambda_expr(self, lambda_: expr.Lambda) -> object:
-        return AnonymousLoxFunction(_declaration=lambda_, _closure=self.environment)
+        return AnonymousLoxFunction(lambda_, self.environment)
 
     def __check_number_operand(self, operator: Token, operand: object) -> None:
         if isinstance(operand, float):

@@ -37,8 +37,12 @@ class Parser:
 
     def __declaration(self) -> stmt.Stmt | None:
         try:
-            if self.__match(TokenType.FUN) and not self.__check(TokenType.LEFT_PAREN):
-                return self.__function("function")
+            if self.__match(TokenType.FUN):
+                if self.__check(TokenType.IDENTIFIER):
+                    return self.__function("function")
+                else:
+                    # Decrementing for lambda expressions as expression statements.
+                    self._current -= 1
 
             if self.__match(TokenType.VAR):
                 return self.__var_declaration()
@@ -236,10 +240,7 @@ class Parser:
 
     def __expression_statement(self) -> stmt.Expression:
         value: expr.Expr = self.__expression()
-
-        if not self.__previous().type == TokenType.FUN:
-            self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
-
+        self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return stmt.Expression(value)
 
     def __expression(self) -> expr.Expr:
@@ -442,7 +443,7 @@ class Parser:
                     operator,
                     f"Expressions beginning with '{operator.lexeme}' not allowed.",
                 )
-                return self.__primary()
+                return self.__call()
 
             right: expr.Expr = self.__unary()
 
@@ -552,6 +553,9 @@ class Parser:
         params: list[Token] = []
         if not self.__peek().type == TokenType.RIGHT_PAREN:
             while True:
+                if len(params) >= 255:
+                    self.__error(self.__peek(), "Can't have more than 255 arguments.")
+
                 params.append(self.__advance())
 
                 if not self.__match(TokenType.COMMA):
