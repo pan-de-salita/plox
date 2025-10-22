@@ -90,7 +90,7 @@ class LoxFunction(LoxCallable):
 
 
 @dataclass
-class AnonymousLoxFunction(LoxCallable):
+class LoxLambdaExpression(LoxCallable):
     _declaration: expr.Lambda
     _closure: Environment
 
@@ -373,7 +373,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         return self.environment.get(variable.name)
 
     def visit_lambda_expr(self, lambda_: expr.Lambda) -> object:
-        return AnonymousLoxFunction(lambda_, self.environment)
+        return LoxLambdaExpression(lambda_, self.environment)
 
     def __check_number_operand(self, operator: Token, operand: object) -> None:
         if isinstance(operand, float):
