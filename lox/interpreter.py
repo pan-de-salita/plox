@@ -91,7 +91,31 @@ class LoxFunction(LoxCallable):
 
 @dataclass
 class AnonymousLoxFunction(LoxCallable):
-    pass
+    _declaration: expr.Lambda
+    _closure: Environment
+
+    def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
+        environment: Environment = Environment(enclosing=self._closure)
+
+        for idx, param in enumerate(self._declaration.params):
+            environment.define(
+                name=param.lexeme,
+                value=arguments[idx],
+                is_initialized=True,
+            )
+
+        try:
+            interpreter.execute_block(self._declaration.body, environment)
+        except Return as return_:
+            return return_.value
+
+        return None
+
+    def arity(self) -> int:
+        return len(self._declaration.params)
+
+    def __str__(self) -> str:
+        return "<fn lambda>"
 
 
 @dataclass
@@ -347,6 +371,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_variable_expr(self, variable: expr.Variable) -> object:
         return self.environment.get(variable.name)
+
+    def visit_lambda_expr(self, lambda_: expr.Lambda) -> object:
+        return AnonymousLoxFunction(_declaration=lambda_, _closure=self.environment)
 
     def __check_number_operand(self, operator: Token, operand: object) -> None:
         if isinstance(operand, float):

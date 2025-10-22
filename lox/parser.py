@@ -37,7 +37,7 @@ class Parser:
 
     def __declaration(self) -> stmt.Stmt | None:
         try:
-            if self.__match(TokenType.FUN):
+            if self.__match(TokenType.FUN) and not self.__check(TokenType.LEFT_PAREN):
                 return self.__function("function")
 
             if self.__match(TokenType.VAR):
@@ -236,7 +236,10 @@ class Parser:
 
     def __expression_statement(self) -> stmt.Expression:
         value: expr.Expr = self.__expression()
-        self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
+
+        if not self.__previous().type == TokenType.FUN:
+            self.__consume(TokenType.SEMICOLON, "Expect ';' after value.")
+
         return stmt.Expression(value)
 
     def __expression(self) -> expr.Expr:
@@ -533,12 +536,32 @@ class Parser:
             return expr.Literal(self.__previous().literal)
         elif self.__match(TokenType.IDENTIFIER):
             return expr.Variable(self.__previous())
+        elif self.__match(TokenType.FUN):
+            return self.__lambda()
         elif self.__match(TokenType.LEFT_PAREN):
             expression: expr.Expr = self.__expression()
             self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return expr.Grouping(expression)
         else:
+            self.__peek()
             raise self.__error(self.__peek(), "Expect expression.")
+
+    def __lambda(self) -> expr.Lambda:
+        self.__consume(TokenType.LEFT_PAREN, "Expect '(' after lambda.")
+
+        params: list[Token] = []
+        if not self.__peek().type == TokenType.RIGHT_PAREN:
+            while True:
+                params.append(self.__advance())
+
+                if not self.__match(TokenType.COMMA):
+                    break
+        self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+
+        self.__consume(TokenType.LEFT_BRACE, "Expect '{' after parameters.")
+        body: list[stmt.Stmt] = self.__block_statement()
+
+        return expr.Lambda(params=params, body=body)
 
     def __binary_left_associative(
         self, nonterminal: Callable, token_types: list[TokenType]

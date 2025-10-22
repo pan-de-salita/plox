@@ -1,12 +1,10 @@
-# Generated from GenerateAst class (2025-10-22 22:51:55.009086).
+# Generated from GenerateAst class (2025-10-22 23:12:16.924677).
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Generic, TypeVar
-
-from lox.stmt import Stmt
 
 from lox.token import Token
 
@@ -146,6 +144,8 @@ class Variable(Expr):
 
 @dataclass(frozen=True)
 class Lambda(Expr):
+    from lox.stmt import Stmt
+
     params: list[Token]
     body: list[Stmt]
 

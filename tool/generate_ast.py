@@ -148,7 +148,6 @@ class GenerateAst:
 
         match base_name:
             case "Expr":
-                imports.extend(["from lox.stmt import Stmt", ""])
                 imports.extend(["from lox.token import Token", ""])
             case "Stmt":
                 imports.extend(["from lox.expr import Expr"])
@@ -255,6 +254,9 @@ class GenerateAst:
             "@dataclass(frozen=True)",
             f"class {type_definition.name}({base_name}):",
         ]
+
+        if type_definition.name.lower() == "lambda":
+            signature.extend([f"{TAB}from lox.stmt import Stmt", ""])
 
         attributes: list[str] = []
         if type_definition.attributes:
