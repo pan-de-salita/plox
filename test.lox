@@ -45,30 +45,32 @@
 //   a = b;
 // }
 
-// print "Here's a program that stops when the outer loop registers 2...";
-// var msg = "OUTER LOOP.............................. ";
-// var addon = "";
-// for (var i = 10; i != 0; i = i - 1) {
-//     if (i == 4) {
-//         addon = " (OH BOY)";
-//     }
-//
-//     if (i == 2) {
-//         print "OUTER LOOP NUMBER IS NOW 2!";
-//         print "STOPPING...";
-//         break;
-//     }
-//
-//     print msg + i + addon;
-//
-//     for (var j = i; j != 0; j = j - 1) {
-//         if (j == 2) {
-//           break;
-//         }
-//
-//         print "INNER LOOP.................. " + j;
-//     }
-// }
+print "Here's a program that stops when the outer loop registers 2...";
+var msg = "OUTER LOOP.............................. ";
+var addon = "";
+for (var i = 10; i != 0; i = i - 1) {
+    if (i == 4) {
+        addon = " (OH BOY)";
+    }
+
+    if (i == 2) {
+        print "OUTER LOOP NUMBER IS NOW 2!";
+        print "STOPPING...";
+        break;
+    }
+
+    print msg + i + addon;
+
+    for (var j = i; j != 0; j = j - 1) {
+        if (j == 2) {
+          break;
+        }
+
+        print "INNER LOOP.................. " + j;
+    }
+
+    break;
+}
 
 // fun sayHi(name) {
 //   if (name == "miguel") {
@@ -103,10 +105,13 @@
 //   print fib(i);
 // }
 
+var x = "global x";
+
 fun makeCounter() {
   var i = 0;
 
   fun count() {
+    print x;
     i = i + 1;
     print i;
   }

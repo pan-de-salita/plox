@@ -43,6 +43,7 @@ class AnonymousLoxCallable(LoxCallable):
 @dataclass
 class LoxFunction(LoxCallable):
     _declaration: stmt.Function
+    _closure: Environment
 
     def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
         # NOTE: Function parameters and local variables should be isolated from
@@ -80,7 +81,7 @@ class LoxFunction(LoxCallable):
         # this call() method creates a new environment. Then it walks the
         # parameter and argument lists in lockstep. For each pair, it creates a
         # *new* variable with the paremeter's name and binds it to the argument's value.
-        environment: Environment = Environment(enclosing=interpreter.globals)
+        environment: Environment = Environment(enclosing=self._closure)
 
         for idx, param in enumerate(self._declaration.params):
             environment.define(
@@ -155,7 +156,20 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def visit_function_stmt(self, function: stmt.Function) -> None:
         self.environment.define(
             name=function.name.lexeme,
-            value=LoxFunction(function),
+            value=LoxFunction(
+                _declaration=function,
+                # NOTE: This is the environment that is active when the function
+                # is declared not when it's called. It represents the lexical
+                # scope surrounding the function declaration. When we call the
+                # function, we use this environment as the call's parent instead
+                # of going straight to globals.
+                #
+                # This creates an environment chain that goes from the function's
+                # body out through the environments where the function is declared,
+                # all the way out to the global scope. The runtime environment
+                # chain matches the textual nesting of the source code like we want.
+                _closure=self.environment,
+            ),
             is_initialized=True,
         )
 
