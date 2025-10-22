@@ -1,10 +1,12 @@
-# Generated from GenerateAst class (2025-10-21 20:09:58.268247).
+# Generated from GenerateAst class (2025-10-22 22:51:55.009086).
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Generic, TypeVar
+
+from lox.stmt import Stmt
 
 from lox.token import Token
 
@@ -46,6 +48,10 @@ class Visitor(ABC, Generic[R]):
 
     @abstractmethod
     def visit_variable_expr(self, variable: Variable) -> R:
+        pass
+
+    @abstractmethod
+    def visit_lambda_expr(self, lambda_: Lambda) -> R:
         pass
 
 
@@ -136,3 +142,12 @@ class Variable(Expr):
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_variable_expr(self)
+
+
+@dataclass(frozen=True)
+class Lambda(Expr):
+    params: list[Token]
+    body: list[Stmt]
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_lambda_expr(self)

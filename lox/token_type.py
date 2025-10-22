@@ -51,5 +51,6 @@ class TokenType(Enum):
     VAR = auto()
     WHILE = auto()
     BREAK = auto()
+    LAMBDA = auto()
 
     EOF = auto()

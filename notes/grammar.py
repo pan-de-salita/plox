@@ -121,7 +121,7 @@
 # - expr       -> comma ;
 # - comma      -> ternary ( "," ternary )* ;
 # - assignment -> IDENTIFIER "=" assignment
-#              | logic_or;
+#               | logic_or;
 # - logic_or   -> logic_and ("or" logic_and)* ;
 # - logic_and  -> ternary ("and" ternary)* ;
 # - ternary    -> ( equality "?" equality ":" ternary ) | equality ;
@@ -135,8 +135,10 @@
 # - primary    -> NUMBER | STRING
 #               | "true" | "false" | "nil"
 #               | "(" expr ")"
-#               | IDENTIFIER ;
+#               | IDENTIFIER
+#               | lambda ;
 #
+# lambda       -> "fun" "(" parameters* ")" block ;
 # arguments    -> expr ( "," expr )* ;
 #
 # NOTE: There is no place in the grammar where both an expression and a

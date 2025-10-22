@@ -26,21 +26,6 @@ class LoxCallable(ABC):
 
 
 @dataclass
-class AnonymousLoxCallable(LoxCallable):
-    _callable: Callable[[Interpreter, list[object]], object]
-    _arity: int
-
-    def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
-        return self._callable(interpreter, arguments)
-
-    def arity(self) -> int:
-        return self._arity
-
-    def __str__(self) -> str:
-        return "<native fn>"
-
-
-@dataclass
 class LoxFunction(LoxCallable):
     _declaration: stmt.Function
     _closure: Environment
@@ -102,6 +87,26 @@ class LoxFunction(LoxCallable):
 
     def __str__(self) -> str:
         return f"<fn {self._declaration.name.lexeme}>"
+
+
+@dataclass
+class AnonymousLoxFunction(LoxCallable):
+    pass
+
+
+@dataclass
+class AnonymousLoxCallable(LoxCallable):
+    _callable: Callable[[Interpreter, list[object]], object]
+    _arity: int
+
+    def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
+        return self._callable(interpreter, arguments)
+
+    def arity(self) -> int:
+        return self._arity
+
+    def __str__(self) -> str:
+        return "<native fn>"
 
 
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):

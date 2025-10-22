@@ -56,6 +56,7 @@ class GenerateAst:
                 "Literal  : value object",
                 "Unary    : operator Token, right Expr",
                 "Variable : name Token",
+                "Lambda   : params list[Token], body list[Stmt]",
             ],
         )
 
@@ -147,6 +148,7 @@ class GenerateAst:
 
         match base_name:
             case "Expr":
+                imports.extend(["from lox.stmt import Stmt", ""])
                 imports.extend(["from lox.token import Token", ""])
             case "Stmt":
                 imports.extend(["from lox.expr import Expr"])
