@@ -129,8 +129,8 @@ fun thrice(fn) {
   }
 }
 
-thrice(fun (a) {
+var printNum = fun (a) {
   print a * 2;
-});
+};
 
-print fun () {};
+thrice(printNum);

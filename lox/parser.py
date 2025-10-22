@@ -41,7 +41,7 @@ class Parser:
                 if self.__check(TokenType.IDENTIFIER):
                     return self.__function("function")
                 else:
-                    # Decrementing for lambda expressions as expression statements.
+                    # Decrement for lambda expressions as expression statements.
                     self._current -= 1
 
             if self.__match(TokenType.VAR):
