@@ -105,13 +105,12 @@
 //   print fib(i);
 // }
 
-// var x = "global x";
-//
+// A variable usage refers to the preceding declaration with the same name in
+// the innermost scope that encloses the expression where the variable is used.
 // fun makeCounter() {
 //   var i = 0;
 //
 //   fun count() {
-//     print x;
 //     i = i + 1;
 //     print i;
 //   }
@@ -123,14 +122,25 @@
 // counter();
 // counter();
 
-fun thrice(fn) {
-  for (var i = 1; i <= 3; i = i + 1) {
-    fn(i);
+// fun thrice(fn) {
+//   for (var i = 1; i <= 3; i = i + 1) {
+//     fn(i);
+//   }
+// }
+//
+// var printNum = fun (a) {
+//   print a * 2;
+// };
+//
+// thrice(printNum);
+
+var a = "global";
+{
+  fun showA() {
+    print a;
   }
+
+  showA();
+  var a = "block";
+  showA();
 }
-
-var printNum = fun (a) {
-  print a * 2;
-};
-
-thrice(printNum);
