@@ -32,7 +32,7 @@ class GenerateAst:
             output_dir,
             "Stmt",
             [
-                "Var         : name Token, expression Expr | None, is_initialized bool",
+                "Var         : name Token, initializer Expr | None, is_initialized bool",
                 "Expression  : expression Expr",
                 "Function    : name Token, params list[Token], body list[Stmt]",
                 "If          : condition Expr, then_branch Stmt, else_branch Stmt | None",

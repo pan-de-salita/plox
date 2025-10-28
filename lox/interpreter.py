@@ -163,8 +163,8 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_var_stmt(self, var_: stmt.Var) -> None:
         value: None | object = None
-        if var_.expression:
-            value = self.__evaluate(var_.expression)
+        if var_.initializer:
+            value = self.__evaluate(var_.initializer)
 
         self.environment.define(
             name=var_.name.lexeme,

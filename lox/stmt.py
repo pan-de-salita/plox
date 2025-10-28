@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-10-22 23:12:16.924274).
+# Generated from GenerateAst class (2025-10-28 14:43:22.474984).
 
 from __future__ import annotations
 
@@ -60,7 +60,7 @@ class Stmt(ABC):
 @dataclass(frozen=True)
 class Var(Stmt):
     name: Token
-    expression: Expr | None
+    initializer: Expr | None
     is_initialized: bool
 
     def accept(self, visitor: Visitor[R]) -> R:
