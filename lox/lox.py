@@ -3,6 +3,7 @@ from datetime import datetime
 
 from .interpreter import Interpreter
 from .parser import Parser
+from .resolver import Resolver
 from .runtime_exception import RuntimeException
 from .scanner import Scanner
 from .stmt import Stmt
@@ -73,6 +74,11 @@ class Lox:
 
         if self._had_error:
             return
+
+        resolver: Resolver = Resolver(
+            _interpreter=self._interpreter, _error_callback=self.parse_error
+        )
+        resolver.resolve(statements)
 
         self._interpreter.interpret(statements)
 
