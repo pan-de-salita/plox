@@ -18,6 +18,9 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.resolve(block.statements)
         self.__end_scope()
 
+    def visit_expression_stmt(self, expression: stmt.Expression) -> None:
+        self.__resolve(expression.expression)
+
     def visit_function_stmt(self, function: stmt.Function) -> None:
         # Define the function name eagerly, before resolving its body. This
         # lets a function recursively refer to itself inside its own body.
@@ -26,11 +29,33 @@ class Resolver(expr.Visitor, stmt.Visitor):
 
         self.__resolve_function(function)
 
+    def visit_if_stmt(self, if_: stmt.If) -> None:
+        # Here we see how resolution is different from interpretation. When we
+        # resolve an if statement, there is no control flow. We resolve the
+        # condition and both branches. A static analysis is conservative -- it
+        # analyzes any branch that could be run. Since either one could be
+        # reached at runtime, we resolve both.
+        self.__resolve(if_.condition)
+        self.__resolve(if_.then_branch)
+        if if_.else_branch:
+            self.__resolve(if_.else_branch)
+
+    def visit_print_stmt(self, print_: stmt.Print) -> None:
+        self.__resolve(print_.expression)
+
+    def visit_return_stmt(self, return_: stmt.Return) -> None:
+        if return_.value:
+            self.__resolve(return_.value)
+
     def visit_var_stmt(self, var_: stmt.Var) -> None:
         self.__declare(var_.name)
         if var_.initializer:
             self.__resolve(var_.initializer)
         self.__define(var_.name)
+
+    def visit_while_stmt(self, while_: stmt.While) -> None:
+        self.__resolve(while_.condition)
+        self.__resolve(while_.body)
 
     def visit_assign_expr(self, assign: expr.Assign) -> None:
         # Resolve the expression for the assigned value in case it also contains
