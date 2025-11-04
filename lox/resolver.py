@@ -18,6 +18,14 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.resolve(block.statements)
         self.__end_scope()
 
+    def visit_function_stmt(self, function: stmt.Function) -> None:
+        # Define the function name eagerly, before resolving its body. This
+        # lets a function recursively refer to itself inside its own body.
+        self.__declare(function.name)
+        self.__define(function.name)
+
+        self.__resolve_function(function)
+
     def visit_var_stmt(self, var_: stmt.Var) -> None:
         self.__declare(var_.name)
         if var_.initializer:
@@ -55,6 +63,17 @@ class Resolver(expr.Visitor, stmt.Visitor):
     @__resolve.register(expr.Expr)
     def _(self, expression: expr.Expr) -> None:
         expression.accept(self)
+
+    def __resolve_function(self, function: stmt.Function) -> None:
+        self.__begin_scope()
+
+        for param in function.params:
+            self.__declare(param)
+            self.__define(param)
+
+        self.resolve(function.body)
+
+        self.__end_scope()
 
     def __begin_scope(self) -> None:
         self._scopes.append({})
