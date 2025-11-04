@@ -24,6 +24,14 @@ class Resolver(expr.Visitor, stmt.Visitor):
             self.__resolve(var_.initializer)
         self.__define(var_.name)
 
+    def visit_assign_expr(self, assign: expr.Assign) -> None:
+        # Resolve the expression for the assigned value in case it also contains
+        # references to other variables.
+        self.__resolve(assign.value)
+
+        # Resolve the variable that's being assigned to.
+        self.__resolve_local(assign, assign.name)
+
     def visit_var_expr(self, variable: expr.Variable) -> None:
         # Disallow access of variable inside its own initializer.
         # If the variable exists in the current scope but its value is false,
@@ -71,7 +79,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
     def __peek_scope(self) -> dict[str, bool]:
         return self._scopes[-1]
 
-    def __resolve_local(self, variable: expr.Variable, variable_name: Token) -> None:
+    def __resolve_local(self, variable: expr.Expr, variable_name: Token) -> None:
         # We start at the innermost scope and work outwards, looking in each
         # map for a matching name. If we find the variable, we resolve it,
         # passing in the number of scopes between the current innermost scope

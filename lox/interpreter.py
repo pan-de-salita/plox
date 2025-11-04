@@ -158,7 +158,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         except RuntimeException as error:
             self._error_callback(error)
 
-    def resolve(self, variable: expr.Variable, distance: int) -> None:
+    def resolve(self, variable: expr.Expr, distance: int) -> None:
         raise NotImplementedError
 
     def __execute(self, statement: stmt.Stmt) -> None:
