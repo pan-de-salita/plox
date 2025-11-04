@@ -9,6 +9,13 @@ from .token import Token
 
 @dataclass
 class Resolver(expr.Visitor, stmt.Visitor):
+    # Each time the Resolver visits a variable, it tells the interpreter how
+    # many scopes there are between the current scope and the scope where the
+    # variable is defined. At runtime, this corresponds exactly to the number
+    # of environments between the current one and the enclosing one where the
+    # interpreter can find the variable's value. The resolver hands this number
+    # to the interpreter by calling self._interpreter.resolve(expr, depth)
+
     _interpreter: Interpreter
     _error_callback: Callable[[str, Token], None]
     _scopes: list[dict[str, bool]] = field(default_factory=list)
@@ -57,6 +64,9 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__resolve(while_.condition)
         self.__resolve(while_.body)
 
+    def visit_break_stmt(self, break_: stmt.Break) -> None:
+        return
+
     def visit_assign_expr(self, assign: expr.Assign) -> None:
         # Resolve the expression for the assigned value in case it also contains
         # references to other variables.
@@ -87,10 +97,10 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__resolve(logical.left)
         self.__resolve(logical.right)
 
-    def visist_unary_expr(self, unary: expr.Unary) -> None:
+    def visit_unary_expr(self, unary: expr.Unary) -> None:
         self.__resolve(unary.right)
 
-    def visit_var_expr(self, variable: expr.Variable) -> None:
+    def visit_variable_expr(self, variable: expr.Variable) -> None:
         # Disallow access of variable inside its own initializer.
         # If the variable exists in the current scope but its value is false,
         # that means we have declared it but not yet defined it. This we treat
@@ -101,6 +111,14 @@ class Resolver(expr.Visitor, stmt.Visitor):
             )
 
         self.__resolve_local(variable, variable.name)
+
+    def visit_lambda_expr(self, lambda_: expr.Lambda) -> None:
+        self.__resolve_function(lambda_)
+
+    def visit_ternary_expr(self, ternary: expr.Ternary) -> None:
+        self.__resolve(ternary.condition)
+        self.__resolve(ternary.consequent)
+        self.__resolve(ternary.alternative)
 
     def resolve(self, statements: list[stmt.Stmt]) -> None:
         for statement in statements:
@@ -114,7 +132,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
     def _(self, expression: expr.Expr) -> None:
         expression.accept(self)
 
-    def __resolve_function(self, function: stmt.Function) -> None:
+    def __resolve_function(self, function: stmt.Function | expr.Lambda) -> None:
         self.__begin_scope()
 
         for param in function.params:

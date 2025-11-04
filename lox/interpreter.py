@@ -139,7 +139,8 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             Environment()
         )  # Fixed reference to the outermost global environment
 
-        self._error_callback = error_callback
+        self._locals: dict[expr.Expr, int] = {}
+        self._error_callback: Callable[[RuntimeException], None] = error_callback
         self.environment: Environment = self.globals
         self._is_run_prompt: bool = False
 
@@ -158,8 +159,8 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         except RuntimeException as error:
             self._error_callback(error)
 
-    def resolve(self, variable: expr.Expr, distance: int) -> None:
-        raise NotImplementedError
+    def resolve(self, variable: expr.Expr, depth: int) -> None:
+        self._locals
 
     def __execute(self, statement: stmt.Stmt) -> None:
         statement.accept(self)
