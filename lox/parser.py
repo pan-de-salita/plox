@@ -93,7 +93,7 @@ class Parser:
             "Expect ';' after variable declaration.",
         )
 
-        return stmt.Var(name, initializer, is_initialized)
+        return stmt.Var(name, is_initialized, initializer)
 
     def __statement(self) -> stmt.Stmt:
         if self.__match(TokenType.WHILE):

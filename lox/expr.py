@@ -1,9 +1,8 @@
-# Generated from GenerateAst class (2025-10-28 14:43:22.475201).
+# Generated from GenerateAst class (2025-11-05 00:38:06.556745).
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Generic, TypeVar
 
 from lox.token import Token
@@ -53,101 +52,100 @@ class Visitor(ABC, Generic[R]):
         pass
 
 
-@dataclass(frozen=True)
 class Expr(ABC):
     @abstractmethod
     def accept(self, visitor: Visitor[R]) -> R:
         pass
 
 
-@dataclass(frozen=True)
 class Assign(Expr):
-    name: Token
-    value: Expr
+    def __init__(self, name: Token, value: Expr) -> None:
+        self.name = name
+        self.value = value
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_assign_expr(self)
 
 
-@dataclass(frozen=True)
 class Logical(Expr):
-    left: Expr
-    operator: Token
-    right: Expr
+    def __init__(self, left: Expr, operator: Token, right: Expr) -> None:
+        self.left = left
+        self.operator = operator
+        self.right = right
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_logical_expr(self)
 
 
-@dataclass(frozen=True)
 class Ternary(Expr):
-    condition: Expr
-    consequent: Expr
-    alternative: Expr
+    def __init__(self, condition: Expr, consequent: Expr, alternative: Expr) -> None:
+        self.condition = condition
+        self.consequent = consequent
+        self.alternative = alternative
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_ternary_expr(self)
 
 
-@dataclass(frozen=True)
 class Binary(Expr):
-    left: Expr
-    operator: Token
-    right: Expr
+    def __init__(self, left: Expr, operator: Token, right: Expr) -> None:
+        self.left = left
+        self.operator = operator
+        self.right = right
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_binary_expr(self)
 
 
-@dataclass(frozen=True)
 class Call(Expr):
-    callee: Expr
-    paren: Token
-    arguments: list[Expr]
+    def __init__(self, callee: Expr, paren: Token, arguments: list[Expr]) -> None:
+        self.callee = callee
+        self.paren = paren
+        self.arguments = arguments
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_call_expr(self)
 
 
-@dataclass(frozen=True)
 class Grouping(Expr):
-    expression: Expr
+    def __init__(self, expression: Expr) -> None:
+        self.expression = expression
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_grouping_expr(self)
 
 
-@dataclass(frozen=True)
 class Literal(Expr):
-    value: object
+    def __init__(self, value: object) -> None:
+        self.value = value
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_literal_expr(self)
 
 
-@dataclass(frozen=True)
 class Unary(Expr):
-    operator: Token
-    right: Expr
+    def __init__(self, operator: Token, right: Expr) -> None:
+        self.operator = operator
+        self.right = right
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_unary_expr(self)
 
 
-@dataclass(frozen=True)
 class Variable(Expr):
-    name: Token
+    def __init__(self, name: Token) -> None:
+        self.name = name
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_variable_expr(self)
 
 
-@dataclass(frozen=True)
 class Lambda(Expr):
     from lox.stmt import Stmt
 
-    params: list[Token]
-    body: list[Stmt]
+    def __init__(self, params: list[Token], body: list[Stmt]) -> None:
+        self.params = params
+        self.body = body
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_lambda_expr(self)

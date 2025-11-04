@@ -32,14 +32,14 @@ class GenerateAst:
             output_dir,
             "Stmt",
             [
-                "Var         : name Token, initializer Expr | None, is_initialized bool",
+                "Var         : name Token, is_initialized bool, initializer Expr | None = None",
                 "Expression  : expression Expr",
                 "Function    : name Token, params list[Token], body list[Stmt]",
-                "If          : condition Expr, then_branch Stmt, else_branch Stmt | None",
+                "If          : condition Expr, then_branch Stmt, else_branch Stmt | None = None",
                 "While       : condition Expr, body Stmt",
                 "Break       : token Token",
                 "Print       : expression Expr",
-                "Return      : keyword Token, value Expr | None",
+                "Return      : keyword Token, value Expr | None = None",
                 "Block       : statements list[Stmt]",
             ],
         )
@@ -141,7 +141,7 @@ class GenerateAst:
             "from __future__ import annotations",
             "",
             "from abc import ABC, abstractmethod",
-            "from dataclasses import dataclass",
+            # "from dataclasses import dataclass",
             "from typing import Generic, TypeVar",
             "",
         ]
@@ -214,7 +214,7 @@ class GenerateAst:
     def __generate_base_class(base_name: str) -> list[str]:
         """Generate base class."""
         signature: list[str] = [
-            "@dataclass(frozen=True)",
+            # "@dataclass(frozen=True)",
             f"class {base_name}(ABC):",
         ]
         abstract_accept_method: list[str] = [
@@ -251,29 +251,35 @@ class GenerateAst:
     ) -> list[str]:
         """Generate single child class based on type definition."""
         signature: list[str] = [
-            "@dataclass(frozen=True)",
+            # "@dataclass(frozen=True)",
             f"class {type_definition.name}({base_name}):",
         ]
 
         if type_definition.name.lower() == "lambda":
             signature.extend([f"{TAB}from lox.stmt import Stmt", ""])
 
-        attributes: list[str] = []
-        if type_definition.attributes:
-            attributes = [
-                *[
-                    f"{TAB}{attr_name}: {attr_types}"
-                    for attr_name, attr_types in type_definition.attributes
-                ],
-                "",
+        attribute_params: str = ", ".join(
+            [
+                f"{attr_name}: {attr_types}"
+                for attr_name, attr_types in type_definition.attributes
             ]
+        )
+        attribute_initializers: list[str] = [
+            f"{TAB}{TAB}self.{attr_name} = {attr_name}"
+            for attr_name, _ in type_definition.attributes
+        ]
+        init_method: list[str] = [
+            f"{TAB}def __init__(self, {attribute_params}) -> None:",
+            *attribute_initializers,
+            "",
+        ]
 
         accept_method: list[str] = [
             f"{TAB}def accept(self, visitor: Visitor[R]) -> R:",
             f"{TAB}{TAB}return visitor.visit_{type_definition.name.lower()}_{base_name.lower()}(self)",
         ]
 
-        return signature + attributes + accept_method
+        return signature + init_method + accept_method
 
 
 if __name__ == "__main__":

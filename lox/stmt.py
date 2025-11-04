@@ -1,9 +1,8 @@
-# Generated from GenerateAst class (2025-10-28 14:43:22.474984).
+# Generated from GenerateAst class (2025-11-05 00:38:06.556523).
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Generic, TypeVar
 
 from lox.expr import Expr
@@ -50,88 +49,87 @@ class Visitor(ABC, Generic[R]):
         pass
 
 
-@dataclass(frozen=True)
 class Stmt(ABC):
     @abstractmethod
     def accept(self, visitor: Visitor[R]) -> R:
         pass
 
 
-@dataclass(frozen=True)
 class Var(Stmt):
-    name: Token
-    initializer: Expr | None
-    is_initialized: bool
+    def __init__(self, name: Token, is_initialized: bool, initializer: Expr | None = None) -> None:
+        self.name = name
+        self.is_initialized = is_initialized
+        self.initializer = initializer
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_var_stmt(self)
 
 
-@dataclass(frozen=True)
 class Expression(Stmt):
-    expression: Expr
+    def __init__(self, expression: Expr) -> None:
+        self.expression = expression
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_expression_stmt(self)
 
 
-@dataclass(frozen=True)
 class Function(Stmt):
-    name: Token
-    params: list[Token]
-    body: list[Stmt]
+    def __init__(self, name: Token, params: list[Token], body: list[Stmt]) -> None:
+        self.name = name
+        self.params = params
+        self.body = body
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_function_stmt(self)
 
 
-@dataclass(frozen=True)
 class If(Stmt):
-    condition: Expr
-    then_branch: Stmt
-    else_branch: Stmt | None
+    def __init__(self, condition: Expr, then_branch: Stmt, else_branch: Stmt | None = None) -> None:
+        self.condition = condition
+        self.then_branch = then_branch
+        self.else_branch = else_branch
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_if_stmt(self)
 
 
-@dataclass(frozen=True)
 class While(Stmt):
-    condition: Expr
-    body: Stmt
+    def __init__(self, condition: Expr, body: Stmt) -> None:
+        self.condition = condition
+        self.body = body
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_while_stmt(self)
 
 
-@dataclass(frozen=True)
 class Break(Stmt):
-    token: Token
+    def __init__(self, token: Token) -> None:
+        self.token = token
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_break_stmt(self)
 
 
-@dataclass(frozen=True)
 class Print(Stmt):
-    expression: Expr
+    def __init__(self, expression: Expr) -> None:
+        self.expression = expression
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_print_stmt(self)
 
 
-@dataclass(frozen=True)
 class Return(Stmt):
-    keyword: Token
-    value: Expr | None
+    def __init__(self, keyword: Token, value: Expr | None = None) -> None:
+        self.keyword = keyword
+        self.value = value
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_return_stmt(self)
 
 
-@dataclass(frozen=True)
 class Block(Stmt):
-    statements: list[Stmt]
+    def __init__(self, statements: list[Stmt]) -> None:
+        self.statements = statements
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_block_stmt(self)
