@@ -67,6 +67,18 @@ class Resolver(expr.Visitor, stmt.Visitor):
     def visit_break_stmt(self, break_: stmt.Break) -> None:
         return
 
+    def visit_variable_expr(self, variable: expr.Variable) -> None:
+        # Disallow access of variable inside its own initializer.
+        # If the variable exists in the current scope but its value is false,
+        # that means we have declared it but not yet defined it. This we treat
+        # as an error.
+        if self._scopes and self.__peek_scope().get(variable.name.lexeme) is False:
+            self._error_callback(
+                "Can't read local variable in its own initializer.", variable.name
+            )
+
+        self.__resolve_local(variable, variable.name)
+
     def visit_assign_expr(self, assign: expr.Assign) -> None:
         # Resolve the expression for the assigned value in case it also contains
         # references to other variables.
@@ -99,18 +111,6 @@ class Resolver(expr.Visitor, stmt.Visitor):
 
     def visit_unary_expr(self, unary: expr.Unary) -> None:
         self.__resolve(unary.right)
-
-    def visit_variable_expr(self, variable: expr.Variable) -> None:
-        # Disallow access of variable inside its own initializer.
-        # If the variable exists in the current scope but its value is false,
-        # that means we have declared it but not yet defined it. This we treat
-        # as an error.
-        if self._scopes and self.__peek_scope().get(variable.name.lexeme) is False:
-            self._error_callback(
-                "Can't read local variable in its own initializer.", variable.name
-            )
-
-        self.__resolve_local(variable, variable.name)
 
     def visit_lambda_expr(self, lambda_: expr.Lambda) -> None:
         self.__resolve_function(lambda_)
@@ -166,7 +166,9 @@ class Resolver(expr.Visitor, stmt.Visitor):
     def __peek_scope(self) -> dict[str, bool]:
         return self._scopes[-1]
 
-    def __resolve_local(self, variable: expr.Expr, variable_name: Token) -> None:
+    def __resolve_local(
+        self, variable: expr.Variable | expr.Assign, variable_name: Token
+    ) -> None:
         # We start at the innermost scope and work outwards, looking in each
         # map for a matching name. If we find the variable, we resolve it,
         # passing in the number of scopes between the current innermost scope

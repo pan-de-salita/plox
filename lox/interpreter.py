@@ -138,10 +138,10 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         self.globals: Environment = (
             Environment()
         )  # Fixed reference to the outermost global environment
+        self.environment: Environment = self.globals
 
         self._locals: dict[expr.Expr, int] = {}
         self._error_callback: Callable[[RuntimeException], None] = error_callback
-        self.environment: Environment = self.globals
         self._is_run_prompt: bool = False
 
         self.globals.define(
@@ -159,8 +159,8 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         except RuntimeException as error:
             self._error_callback(error)
 
-    def resolve(self, variable: expr.Expr, depth: int) -> None:
-        self._locals
+    def resolve(self, variable: expr.Variable | expr.Assign, depth: int) -> None:
+        self._locals[variable] = depth
 
     def __execute(self, statement: stmt.Stmt) -> None:
         statement.accept(self)
