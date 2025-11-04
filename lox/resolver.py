@@ -65,6 +65,31 @@ class Resolver(expr.Visitor, stmt.Visitor):
         # Resolve the variable that's being assigned to.
         self.__resolve_local(assign, assign.name)
 
+    def visit_binary_expr(self, binary: expr.Binary) -> None:
+        self.__resolve(binary.left)
+        self.__resolve(binary.right)
+
+    def visit_call_expr(self, call: expr.Call) -> None:
+        self.__resolve(call.callee)
+
+        for arg in call.arguments:
+            self.__resolve(arg)
+
+    def visit_grouping_expr(self, grouping: expr.Grouping) -> None:
+        self.__resolve(grouping.expression)
+
+    def visit_literal_expr(self, literal: expr.Literal) -> None:
+        # A literal expression doesn't mention any variables and doesn't contain
+        # any subexpressions so there is no work to do.
+        return
+
+    def visit_logical_expr(self, logical: expr.Logical) -> None:
+        self.__resolve(logical.left)
+        self.__resolve(logical.right)
+
+    def visist_unary_expr(self, unary: expr.Unary) -> None:
+        self.__resolve(unary.right)
+
     def visit_var_expr(self, variable: expr.Variable) -> None:
         # Disallow access of variable inside its own initializer.
         # If the variable exists in the current scope but its value is false,
