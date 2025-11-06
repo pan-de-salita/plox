@@ -154,6 +154,11 @@ class Resolver(expr.Visitor, stmt.Visitor):
             return
 
         scope: dict[str, bool] = self.__peek_scope()
+        if name.lexeme in scope:
+            self._error_callback(
+                "Already a variable with this name in this scope.", name
+            )
+
         scope[name.lexeme] = False
 
     def __define(self, name: Token) -> None:
