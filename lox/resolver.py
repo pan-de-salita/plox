@@ -103,7 +103,6 @@ class Resolver(expr.Visitor, stmt.Visitor):
 
     def visit_call_expr(self, call: expr.Call) -> None:
         self.__resolve(call.callee)
-
         for arg in call.arguments:
             self.__resolve(arg)
 
@@ -201,6 +200,6 @@ class Resolver(expr.Visitor, stmt.Visitor):
         # If we walk through all of the block scopes and never find the variable,
         # we leave it unresolved and assume it's global.
         for i, scope in enumerate(self._scopes):
-            if name in scope:
+            if name.lexeme in scope:
                 self._interpreter.resolve(variable, len(self._scopes) - 1 - i)
                 break

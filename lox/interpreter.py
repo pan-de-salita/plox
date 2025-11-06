@@ -379,13 +379,12 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         return result
 
     def visit_variable_expr(self, variable: expr.Variable) -> object:
-        # return self._environment.get(variable.name)
         return self.__look_up_variable(variable.name, variable)
 
     def __look_up_variable(self, name: Token, variable: expr.Variable) -> object:
         distance: int | None = self._locals.get(variable)
-        if not distance:
-            return self.globals.get(name)
+        if distance is None:
+            return self.globals.get_(name)
         return self._environment.get_at(distance, name.lexeme)
 
     def visit_lambda_expr(self, lambda_: expr.Lambda) -> object:

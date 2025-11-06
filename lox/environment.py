@@ -22,7 +22,9 @@ class Environment:
         self._values[name] = Assigned(value=value, is_initialized=is_initialized)
 
     def get_at(self, distance: int, name: str) -> object:
-        return self.ancestor(distance)._values.get(name)
+        assigned: Assigned | None = self.ancestor(distance)._values.get(name)
+        assert isinstance(assigned, Assigned)
+        return assigned.value
 
     def ancestor(self, distance: int) -> Self:
         def get_ancestor(env: Self, _) -> Self:
@@ -32,7 +34,7 @@ class Environment:
 
         return reduce(get_ancestor, range(distance), self)
 
-    def get(self, name: Token) -> object:
+    def get_(self, name: Token) -> object:
         """Gets a variable's value if it's name exists in the Environment's
         values, else raise a RuntimeException."""
         if name.lexeme in self._values:
@@ -45,7 +47,7 @@ class Environment:
             )
 
         if self.enclosing:
-            return self.enclosing.get(name=name)
+            return self.enclosing.get_(name=name)
 
         raise RuntimeException(
             token=name, message=f"Undefined variable: {name.lexeme}."
