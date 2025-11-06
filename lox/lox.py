@@ -16,7 +16,7 @@ LANGUAGE_VERSION = 0.9
 class Lox:
     def __init__(self) -> None:
         self._interpreter: Interpreter = Interpreter(self.runtime_error)
-        self._had_error: bool = False
+        self._had_syntax_error: bool = False
         self._had_runtime_error: bool = False
 
     def main(self, args: list[str]) -> None:
@@ -33,7 +33,7 @@ class Lox:
             bytes = file.read()
             self.__run(bytes)
 
-            if self._had_error:
+            if self._had_syntax_error:
                 sys.exit(65)  # UNIX/POSIX convention for data format error.
             if self._had_runtime_error:
                 sys.exit(70)
@@ -63,7 +63,7 @@ class Lox:
             # Set _is_run_prompt back to False.
             self._interpreter._is_run_prompt = False
 
-            self._had_error = False
+            self._had_syntax_error = False
             self._had_runtime_error = False
 
     def __run(self, source: str) -> None:
@@ -72,7 +72,8 @@ class Lox:
         parser: Parser = Parser(_tokens=tokens, _error_callback=self.parse_error)
         statements: list[Stmt] = parser.parse()
 
-        if self._had_error:
+        # Stop if there was a syntax error.
+        if self._had_syntax_error:
             return
 
         resolver: Resolver = Resolver(
@@ -99,7 +100,7 @@ class Lox:
 
     def __report(self, type: str, line: int, where: str, message: str) -> None:
         print(f"[line {line}] {type.title()}Error{where}: {message}", file=sys.stderr)
-        self._had_error = True
+        self._had_syntax_error = True
 
 
 if __name__ == "__main__":
