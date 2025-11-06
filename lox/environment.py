@@ -65,3 +65,8 @@ class Environment:
         raise RuntimeException(
             token=name, message=f"Undefined variable: {name.lexeme}."
         )
+
+    def assign_at(self, distance: int, name: Token, value: object) -> None:
+        ancestor: Environment = self.ancestor(distance)
+        ancestor._values[name.lexeme].value = value
+        ancestor._values[name.lexeme].is_initialized = True

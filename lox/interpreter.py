@@ -254,8 +254,11 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_assign_expr(self, assign: expr.Assign) -> object:
         value: object = self.__evaluate(assign.value)
-        self._environment.assign(name=assign.name, value=value)
-
+        distance: int | None = self._locals.get(assign)
+        if distance:
+            self._environment.assign_at(distance, assign.name, value)
+        else:
+            self.globals.assign(assign.name, value)
         return value
 
     def visit_logical_expr(self, logical: expr.Logical) -> object:
