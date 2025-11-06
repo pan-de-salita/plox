@@ -1,10 +1,16 @@
 from dataclasses import dataclass, field
+from enum import Enum, auto
 from functools import singledispatchmethod
 from typing import Callable
 
 from . import expr, stmt
 from .interpreter import Interpreter
 from .token import Token
+
+
+class FunctionType(Enum):
+    NONE = auto()
+    FUNCTION = auto()
 
 
 @dataclass
@@ -19,6 +25,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
     _interpreter: Interpreter
     _error_callback: Callable[[str, Token], None]
     _scopes: list[dict[str, bool]] = field(default_factory=list)
+    _current_function: FunctionType = FunctionType.NONE
 
     def visit_block_stmt(self, block: stmt.Block) -> None:
         self.__begin_scope()
@@ -34,7 +41,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__declare(function.name)
         self.__define(function.name)
 
-        self.__resolve_function(function)
+        self.__resolve_function(function, FunctionType.FUNCTION)
 
     def visit_if_stmt(self, if_: stmt.If) -> None:
         # Here we see how resolution is different from interpretation. When we
@@ -51,6 +58,9 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__resolve(print_.expression)
 
     def visit_return_stmt(self, return_: stmt.Return) -> None:
+        if self._current_function == FunctionType.NONE:
+            self._error_callback("Can't return from top-level code.", return_.keyword)
+
         if return_.value:
             self.__resolve(return_.value)
 
@@ -113,7 +123,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__resolve(unary.right)
 
     def visit_lambda_expr(self, lambda_: expr.Lambda) -> None:
-        self.__resolve_function(lambda_)
+        self.__resolve_function(lambda_, FunctionType.FUNCTION)
 
     def visit_ternary_expr(self, ternary: expr.Ternary) -> None:
         self.__resolve(ternary.condition)
@@ -132,16 +142,23 @@ class Resolver(expr.Visitor, stmt.Visitor):
     def _(self, expression: expr.Expr) -> None:
         expression.accept(self)
 
-    def __resolve_function(self, function: stmt.Function | expr.Lambda) -> None:
-        self.__begin_scope()
+    def __resolve_function(
+        self, function: stmt.Function | expr.Lambda, type_: FunctionType
+    ) -> None:
+        # Lox has local functions, so function declarations can be nested
+        # arbitrarily deeply. We need to track not just that we're in a function,
+        # but how many we're in.
+        enclosing_function: FunctionType = self._current_function
+        self._current_function = type_
 
+        self.__begin_scope()
         for param in function.params:
             self.__declare(param)
             self.__define(param)
-
         self.resolve(function.body)
-
         self.__end_scope()
+
+        self._current_function = enclosing_function
 
     def __begin_scope(self) -> None:
         self._scopes.append({})

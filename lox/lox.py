@@ -81,6 +81,10 @@ class Lox:
         )
         resolver.resolve(statements)
 
+        # Stop if there was a resolution error.
+        if self._had_syntax_error:
+            return
+
         self._interpreter.interpret(statements)
 
     def lexical_error(self, message: str, line: int) -> None:
@@ -98,8 +102,8 @@ class Lox:
         )
         self._had_runtime_error = True
 
-    def __report(self, type: str, line: int, where: str, message: str) -> None:
-        print(f"[line {line}] {type.title()}Error{where}: {message}", file=sys.stderr)
+    def __report(self, type_: str, line: int, where: str, message: str) -> None:
+        print(f"[line {line}] {type_.title()}Error{where}: {message}", file=sys.stderr)
         self._had_syntax_error = True
 
 

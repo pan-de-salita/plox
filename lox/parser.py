@@ -614,12 +614,12 @@ class Parser:
 
         raise self.__error(self.__peek(), message)
 
-    def __check(self, type: TokenType) -> bool:
+    def __check(self, type_: TokenType) -> bool:
         """Check if current token matches given type."""
         if self.__is_at_end():
             return False
 
-        return self.__peek().type == type
+        return self.__peek().type == type_
 
     def __advance(self) -> Token:
         """Consume and return the current token."""

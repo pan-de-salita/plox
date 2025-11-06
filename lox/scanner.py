@@ -124,7 +124,7 @@ class Scanner:
                 else:
                     self._error_callback("Unexpected character.", self._line)
 
-    def __add_token(self, type: TokenType, literal: Any = None) -> None:
+    def __add_token(self, type_: TokenType, literal: Any = None) -> None:
         """
         Add a token to self._tokens.
         """
@@ -132,7 +132,7 @@ class Scanner:
         # self.advance().
         text: str = self._source[self._start : self._current]
         self._tokens += [
-            Token(type=type, lexeme=text, literal=literal, line=self._line)
+            Token(type=type_, lexeme=text, literal=literal, line=self._line)
         ]
 
     def __advance(self) -> str:
