@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from functools import reduce
 from typing import Self
 
 from .runtime_exception import RuntimeException
@@ -19,6 +20,17 @@ class Environment:
     def define(self, name: str, value: object, is_initialized: bool) -> None:
         """Define a variable."""
         self._values[name] = Assigned(value=value, is_initialized=is_initialized)
+
+    def get_at(self, distance: int, name: str) -> object:
+        return self.ancestor(distance)._values.get(name)
+
+    def ancestor(self, distance: int) -> Self:
+        def get_ancestor(env: Self, _) -> Self:
+            assert env.enclosing
+            ancestor: Self = env.enclosing
+            return ancestor
+
+        return reduce(get_ancestor, range(distance), self)
 
     def get(self, name: Token) -> object:
         """Gets a variable's value if it's name exists in the Environment's

@@ -138,7 +138,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         self.globals: Environment = (
             Environment()
         )  # Fixed reference to the outermost global environment
-        self.environment: Environment = self.globals
+        self._environment: Environment = self.globals
 
         self._locals: dict[expr.Expr, int] = {}
         self._error_callback: Callable[[RuntimeException], None] = error_callback
@@ -170,7 +170,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         if var_.initializer:
             value = self.__evaluate(var_.initializer)
 
-        self.environment.define(
+        self._environment.define(
             name=var_.name.lexeme,
             value=value,
             is_initialized=var_.is_initialized,
@@ -187,7 +187,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         raise Break()
 
     def visit_function_stmt(self, function: stmt.Function) -> None:
-        self.environment.define(
+        self._environment.define(
             name=function.name.lexeme,
             value=LoxFunction(
                 _declaration=function,
@@ -201,7 +201,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
                 # body out through the environments where the function is declared,
                 # all the way out to the global scope. The runtime environment
                 # chain matches the textual nesting of the source code like we want.
-                _closure=self.environment,
+                _closure=self._environment,
             ),
             is_initialized=True,
         )
@@ -215,23 +215,23 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def visit_block_stmt(self, block: stmt.Block) -> None:
         self.execute_block(
             block_statements=block.statements,
-            environment=Environment(enclosing=self.environment),
+            environment=Environment(enclosing=self._environment),
         )
 
     def execute_block(
         self, block_statements: list[stmt.Stmt], environment: Environment
     ) -> None:
-        previous_environment: Environment = self.environment
+        previous_environment: Environment = self._environment
         try:
             # Switch self's environment to be a new one with previousenvironment
             # as its enclosure. This allows for executed statments within the
             # block to have access to the state in the enclosing environment(s).
-            self.environment = environment
+            self._environment = environment
             for block_statement in block_statements:
                 self.__execute(block_statement)
         finally:
             # Restore old environment.
-            self.environment = previous_environment
+            self._environment = previous_environment
 
     def visit_print_stmt(self, print_: stmt.Print) -> None:
         builtins.print(self.__stringify(self.__evaluate(print_.expression)))
@@ -254,7 +254,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_assign_expr(self, assign: expr.Assign) -> object:
         value: object = self.__evaluate(assign.value)
-        self.environment.assign(name=assign.name, value=value)
+        self._environment.assign(name=assign.name, value=value)
 
         return value
 
@@ -374,10 +374,17 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         return result
 
     def visit_variable_expr(self, variable: expr.Variable) -> object:
-        return self.environment.get(variable.name)
+        # return self._environment.get(variable.name)
+        return self.__look_up_variable(variable.name, variable)
+
+    def __look_up_variable(self, name: Token, variable: expr.Variable) -> object:
+        distance: int | None = self._locals.get(variable)
+        if not distance:
+            return self.globals.get(name)
+        return self._environment.get_at(distance, name.lexeme)
 
     def visit_lambda_expr(self, lambda_: expr.Lambda) -> object:
-        return LoxLambdaExpression(lambda_, self.environment)
+        return LoxLambdaExpression(lambda_, self._environment)
 
     def __check_number_operand(self, operator: Token, operand: object) -> None:
         if isinstance(operand, float):

@@ -167,7 +167,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
         return self._scopes[-1]
 
     def __resolve_local(
-        self, variable: expr.Variable | expr.Assign, variable_name: Token
+        self, variable: expr.Variable | expr.Assign, name: Token
     ) -> None:
         # We start at the innermost scope and work outwards, looking in each
         # map for a matching name. If we find the variable, we resolve it,
@@ -179,6 +179,6 @@ class Resolver(expr.Visitor, stmt.Visitor):
         # If we walk through all of the block scopes and never find the variable,
         # we leave it unresolved and assume it's global.
         for i, scope in enumerate(self._scopes):
-            if variable_name in scope:
+            if name in scope:
                 self._interpreter.resolve(variable, len(self._scopes) - 1 - i)
                 break
