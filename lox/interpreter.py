@@ -192,7 +192,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             value=LoxFunction(
                 _declaration=function,
                 # NOTE: This is the environment that is active when the function
-                # is declared not when it's called. It represents the lexical
+                # is declared, not when it's called. It represents the lexical
                 # scope surrounding the function declaration. When we call the
                 # function, we use this environment as the call's parent instead
                 # of going straight to globals.

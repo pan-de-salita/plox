@@ -38,14 +38,10 @@ class Resolver(expr.Visitor, stmt.Visitor):
         for statement in statements:
             self.__resolve(statement)
 
-        for scope in self._scopes:
-            for local_var in scope.values():
-                if not local_var.is_used:
-                    self._error_callback("Unused variable.", local_var.name)
-
     def visit_block_stmt(self, block: stmt.Block) -> None:
         self.__begin_scope()
         self.__resolve(block.statements)
+        self.__check_unused_variables()
         self.__end_scope()
 
     def visit_expression_stmt(self, expression: stmt.Expression) -> None:
@@ -172,6 +168,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
             self.__declare(param)
             self.__define(param)
         self.__resolve(function.body)
+        self.__check_unused_variables()
         self.__end_scope()
 
         self._current_function = enclosing_function
@@ -180,8 +177,12 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self._scopes.append({})
 
     def __end_scope(self) -> None:
-        if not self.__peek_scope():
-            self._scopes.pop()
+        self._scopes.pop()
+
+    def __check_unused_variables(self) -> None:
+        for local_var in self.__peek_scope().values():
+            if not local_var.is_used:
+                self._error_callback("Unused variable.", local_var.name)
 
     def __declare(self, name: Token) -> None:
         if not self._scopes:
