@@ -142,5 +142,7 @@ var a = "global";
 
   showA();
   var a = "block";
+  var b = a;
+  print b; // Should print "block"
   showA();
 }

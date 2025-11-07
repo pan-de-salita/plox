@@ -13,6 +13,13 @@ class FunctionType(Enum):
     FUNCTION = auto()
 
 
+class LocalVar:
+    def __init__(self, name: Token, is_defined: bool, is_used: bool) -> None:
+        self.name = name
+        self.is_defined = is_defined
+        self.is_used = is_used
+
+
 @dataclass
 class Resolver(expr.Visitor, stmt.Visitor):
     # Each time the Resolver visits a variable, it tells the interpreter how
@@ -24,12 +31,21 @@ class Resolver(expr.Visitor, stmt.Visitor):
 
     _interpreter: Interpreter
     _error_callback: Callable[[str, Token], None]
-    _scopes: list[dict[str, bool]] = field(default_factory=list)
+    _scopes: list[dict[str, LocalVar]] = field(default_factory=list)
     _current_function: FunctionType = FunctionType.NONE
+
+    def resolve(self, statements: list[stmt.Stmt]) -> None:
+        for statement in statements:
+            self.__resolve(statement)
+
+        for scope in self._scopes:
+            for local_var in scope.values():
+                if not local_var.is_used:
+                    self._error_callback("Unused variable.", local_var.name)
 
     def visit_block_stmt(self, block: stmt.Block) -> None:
         self.__begin_scope()
-        self.resolve(block.statements)
+        self.__resolve(block.statements)
         self.__end_scope()
 
     def visit_expression_stmt(self, expression: stmt.Expression) -> None:
@@ -129,12 +145,13 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__resolve(ternary.consequent)
         self.__resolve(ternary.alternative)
 
-    def resolve(self, statements: list[stmt.Stmt]) -> None:
-        for statement in statements:
-            self.__resolve(statement)
-
     @singledispatchmethod
-    def __resolve(self, statement: stmt.Stmt) -> None:
+    def __resolve(self, statements: list[stmt.Stmt]) -> None:
+        for statement in statements:
+            statement.accept(self)
+
+    @__resolve.register(stmt.Stmt)
+    def _(self, statement: stmt.Stmt) -> None:
         statement.accept(self)
 
     @__resolve.register(expr.Expr)
@@ -154,7 +171,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
         for param in function.params:
             self.__declare(param)
             self.__define(param)
-        self.resolve(function.body)
+        self.__resolve(function.body)
         self.__end_scope()
 
         self._current_function = enclosing_function
@@ -163,28 +180,29 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self._scopes.append({})
 
     def __end_scope(self) -> None:
-        self._scopes.pop()
+        if not self.__peek_scope():
+            self._scopes.pop()
 
     def __declare(self, name: Token) -> None:
         if not self._scopes:
             return
 
-        scope: dict[str, bool] = self.__peek_scope()
+        scope: dict[str, LocalVar] = self.__peek_scope()
         if name.lexeme in scope:
             self._error_callback(
                 "Already a variable with this name in this scope.", name
             )
 
-        scope[name.lexeme] = False
+        scope[name.lexeme] = LocalVar(name=name, is_defined=False, is_used=False)
 
     def __define(self, name: Token) -> None:
         if not self._scopes:
             return
 
-        scope: dict[str, bool] = self.__peek_scope()
-        scope[name.lexeme] = True
+        scope: dict[str, LocalVar] = self.__peek_scope()
+        scope[name.lexeme].is_defined = True
 
-    def __peek_scope(self) -> dict[str, bool]:
+    def __peek_scope(self) -> dict[str, LocalVar]:
         return self._scopes[-1]
 
     def __resolve_local(
@@ -201,5 +219,6 @@ class Resolver(expr.Visitor, stmt.Visitor):
         # we leave it unresolved and assume it's global.
         for i, scope in enumerate(self._scopes):
             if name.lexeme in scope:
+                scope[name.lexeme].is_used = True
                 self._interpreter.resolve(variable, len(self._scopes) - 1 - i)
                 break
