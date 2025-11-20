@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-11-05 00:38:06.556523).
+# Generated from GenerateAst class (2025-11-21 03:23:22.497281).
 
 from __future__ import annotations
 
@@ -22,6 +22,10 @@ class Visitor(ABC, Generic[R]):
 
     @abstractmethod
     def visit_function_stmt(self, function: Function) -> R:
+        pass
+
+    @abstractmethod
+    def visit_class_stmt(self, class_: Class) -> R:
         pass
 
     @abstractmethod
@@ -81,6 +85,15 @@ class Function(Stmt):
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_function_stmt(self)
+
+
+class Class(Stmt):
+    def __init__(self, name: Token, methods: list[Function]) -> None:
+        self.name = name
+        self.methods = methods
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_class_stmt(self)
 
 
 class If(Stmt):
