@@ -153,13 +153,16 @@ class LoxInstance:
         self.class_: LoxClass = class_
         self.fields: dict[str, object] = {}
 
-    def get(self, key: str) -> object:
-        if key in self.fields:
-            return self.fields.get(key)
-        return None  # TODO: Properly handle KeyError.
+    def get(self, key: Token) -> object:
+        if key.lexeme in self.fields:
+            return self.fields.get(key.lexeme)
 
-    def set(self, key: str, value: object) -> object:
-        self.fields[key] = value
+        raise RuntimeException(
+            key, f"{key.lexeme} is not a field of instance {self.class_.name}"
+        )
+
+    def set(self, key: Token, value: object) -> object:
+        self.fields[key.lexeme] = value
         return value
 
     def __str__(self) -> str:
@@ -403,7 +406,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
                 get.name,
                 "Expected instance.",
             )
-        return instance.get(get.name.lexeme)
+        return instance.get(get.name)
 
     def visit_set_expr(self, set: expr.Set) -> object:
         instance: object = self.__evaluate(set.object)
@@ -413,7 +416,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
                 "Expected instance.",
             )
         value: object = self.__evaluate(set.value)
-        return instance.set(set.name.lexeme, value)
+        return instance.set(set.name, value)
 
     def visit_grouping_expr(self, grouping: expr.Grouping) -> object:
         return self.__evaluate(grouping.expression)
