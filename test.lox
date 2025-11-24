@@ -157,3 +157,5 @@ print Test;
 var test = Test();
 test.score = 100;
 print test.score;
+
+test.test_method();
