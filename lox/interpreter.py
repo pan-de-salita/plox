@@ -89,20 +89,6 @@ class LoxFunction(LoxCallable):
         return f"<fn {self._declaration.name.lexeme}>"
 
 
-class LoxClass(LoxCallable):
-    def __init__(self, name: Token) -> None:
-        self.name = name
-
-    def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
-        return None
-
-    def arity(self) -> int:
-        return 0
-
-    def __str__(self) -> str:
-        return f"<class {self.name.lexeme}>"
-
-
 @dataclass
 class LoxLambdaExpression(LoxCallable):
     _declaration: expr.Lambda
@@ -145,6 +131,29 @@ class AnonymousLoxCallable(LoxCallable):
 
     def __str__(self) -> str:
         return "<native fn>"
+
+
+class LoxClass(LoxCallable):
+    def __init__(self, name: Token) -> None:
+        self.name = name
+
+    def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
+        instance: LoxInstance = LoxInstance(self)
+        return instance
+
+    def arity(self) -> int:
+        return 0
+
+    def __str__(self) -> str:
+        return f"<class {self.name.lexeme}>"
+
+
+class LoxInstance:
+    def __init__(self, class_: LoxClass) -> None:
+        self.class_ = class_
+
+    def __str__(self) -> str:
+        return f"<instance of class {self.class_.name.lexeme}>"
 
 
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):

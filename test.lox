@@ -153,3 +153,6 @@ class Test {
 }
 
 print Test;
+
+var test = Test();
+print test;
