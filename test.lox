@@ -145,3 +145,11 @@ var a = "global";
   var a = "block";
   print a;
 }
+
+class Test {
+  test_method() {
+    print "test method";
+  }
+}
+
+print Test;

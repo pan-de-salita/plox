@@ -60,7 +60,9 @@ class Stmt(ABC):
 
 
 class Var(Stmt):
-    def __init__(self, name: Token, is_initialized: bool, initializer: Expr | None = None) -> None:
+    def __init__(
+        self, name: Token, is_initialized: bool, initializer: Expr | None = None
+    ) -> None:
         self.name = name
         self.is_initialized = is_initialized
         self.initializer = initializer
@@ -97,7 +99,9 @@ class Class(Stmt):
 
 
 class If(Stmt):
-    def __init__(self, condition: Expr, then_branch: Stmt, else_branch: Stmt | None = None) -> None:
+    def __init__(
+        self, condition: Expr, then_branch: Stmt, else_branch: Stmt | None = None
+    ) -> None:
         self.condition = condition
         self.then_branch = then_branch
         self.else_branch = else_branch

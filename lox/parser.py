@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from . import expr, stmt
+from .function_type import FunctionType
 from .parse_error import ParseError
 from .token import Token
 from .token_type import TokenType
@@ -39,10 +40,13 @@ class Parser:
         try:
             if self.__match(TokenType.FUN):
                 if self.__check(TokenType.IDENTIFIER):
-                    return self.__function("function")
+                    return self.__function(FunctionType.FUNCTION.value)
                 else:
                     # Decrement for lambda expressions as expression statements.
                     self._current -= 1
+
+            if self.__match(TokenType.CLASS):
+                return self.__class()
 
             if self.__match(TokenType.VAR):
                 return self.__var_declaration()
@@ -78,6 +82,15 @@ class Parser:
         self._function_count -= 1
 
         return stmt.Function(name, params, body)
+
+    def __class(self) -> stmt.Class:
+        name: Token = self.__consume(TokenType.IDENTIFIER, "Expect class name.")
+        self.__consume(TokenType.LEFT_BRACE, "Expect left brace.")
+        methods: list[stmt.Function] = []
+        while not self.__check(TokenType.RIGHT_BRACE) and not self.__is_at_end():
+            methods.append(self.__function(FunctionType.METHOD.value))
+        self.__consume(TokenType.RIGHT_BRACE, "Expect right brace.")
+        return stmt.Class(name, methods)
 
     def __var_declaration(self) -> stmt.Var:
         name: Token = self.__consume(TokenType.IDENTIFIER, "Expect variable name.")

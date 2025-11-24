@@ -1,16 +1,11 @@
 from dataclasses import dataclass, field
-from enum import Enum, auto
 from functools import singledispatchmethod
 from typing import Callable
 
 from . import expr, stmt
+from .function_type import FunctionType
 from .interpreter import Interpreter
 from .token import Token
-
-
-class FunctionType(Enum):
-    NONE = auto()
-    FUNCTION = auto()
 
 
 class LocalVar:
@@ -54,6 +49,13 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__define(function.name)
 
         self.__resolve_function(function, FunctionType.FUNCTION)
+
+    def visit_class_stmt(self, class_: stmt.Class) -> None:
+        self.__declare(class_.name)
+        self.__define(class_.name)
+
+        for method in class_.methods:
+            self.__resolve_function(method, FunctionType.METHOD)
 
     def visit_if_stmt(self, if_: stmt.If) -> None:
         # Here we see how resolution is different from interpretation. When we

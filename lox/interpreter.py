@@ -89,6 +89,20 @@ class LoxFunction(LoxCallable):
         return f"<fn {self._declaration.name.lexeme}>"
 
 
+class LoxClass(LoxCallable):
+    def __init__(self, name: Token) -> None:
+        self.name = name
+
+    def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
+        return None
+
+    def arity(self) -> int:
+        return 0
+
+    def __str__(self) -> str:
+        return f"<class {self.name.lexeme}>"
+
+
 @dataclass
 class LoxLambdaExpression(LoxCallable):
     _declaration: expr.Lambda
@@ -205,6 +219,11 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             ),
             is_initialized=True,
         )
+
+    def visit_class_stmt(self, class_: stmt.Class) -> None:
+        self._environment.define(class_.name.lexeme, None, False)
+        klass: LoxClass = LoxClass(class_.name)
+        self._environment.assign(class_.name, klass)
 
     def visit_if_stmt(self, if_: stmt.If) -> None:
         if self.__is_truthy(self.__evaluate(if_.condition)):
