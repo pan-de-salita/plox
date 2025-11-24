@@ -287,6 +287,7 @@ class Parser:
         if self.__match(TokenType.EQUAL):
             equals: Token = self.__previous()
             value: expr.Expr = self.__assignment()
+            name: Token | None = None
 
             # Convert r-value expression node into an l-value representation.
             # Important because if there was no match for TokenType.EQUAL -- i.e.
@@ -302,9 +303,11 @@ class Parser:
             # is assigning to and has an expression subtree for the value
             # being assigned.
             if isinstance(expression, expr.Variable):
-                name: Token = expression.name
-
+                name = expression.name
                 return expr.Assign(name, value)
+
+            if isinstance(expression, expr.Get):
+                return expr.Set(expression.object, expression.name, value)
 
             # We report an error if the left-hand side isn't a valid assignment
             # target, but we don't throw it because the parser isn't in a
@@ -501,12 +504,14 @@ class Parser:
 
         # Keeping current structure to facilitate implementation of properties
         # on objects.
-
         expression: expr.Expr = self.__primary()
 
         while True:
             if self.__match(TokenType.LEFT_PAREN):
                 expression = self.__finish_call(expression)
+            if self.__match(TokenType.DOT):
+                name: Token = self.__consume(TokenType.IDENTIFIER, "Expected property.")
+                expression = expr.Get(expression, name)
             else:
                 break
 

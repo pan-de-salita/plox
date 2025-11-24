@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-11-21 03:23:22.497473).
+# Generated from GenerateAst class (2025-11-24 23:17:02.474665).
 
 from __future__ import annotations
 
@@ -49,6 +49,14 @@ class Visitor(ABC, Generic[R]):
 
     @abstractmethod
     def visit_lambda_expr(self, lambda_: Lambda) -> R:
+        pass
+
+    @abstractmethod
+    def visit_get_expr(self, get: Get) -> R:
+        pass
+
+    @abstractmethod
+    def visit_set_expr(self, set: Set) -> R:
         pass
 
 
@@ -149,3 +157,22 @@ class Lambda(Expr):
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_lambda_expr(self)
+
+
+class Get(Expr):
+    def __init__(self, object: Expr, name: Token) -> None:
+        self.object = object
+        self.name = name
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_get_expr(self)
+
+
+class Set(Expr):
+    def __init__(self, object: Expr, name: Token, value: Expr) -> None:
+        self.object = object
+        self.name = name
+        self.value = value
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_set_expr(self)

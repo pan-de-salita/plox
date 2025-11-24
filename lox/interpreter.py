@@ -134,7 +134,7 @@ class AnonymousLoxCallable(LoxCallable):
 
 
 class LoxClass(LoxCallable):
-    def __init__(self, name: Token) -> None:
+    def __init__(self, name: str) -> None:
         self.name = name
 
     def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
@@ -145,15 +145,25 @@ class LoxClass(LoxCallable):
         return 0
 
     def __str__(self) -> str:
-        return f"<class {self.name.lexeme}>"
+        return f"<class {self.name}>"
 
 
 class LoxInstance:
     def __init__(self, class_: LoxClass) -> None:
-        self.class_ = class_
+        self.class_: LoxClass = class_
+        self.fields: dict[str, object] = {}
+
+    def get(self, key: str) -> object:
+        if key in self.fields:
+            return self.fields.get(key)
+        return None  # TODO: Properly handle KeyError.
+
+    def set(self, key: str, value: object) -> object:
+        self.fields[key] = value
+        return value
 
     def __str__(self) -> str:
-        return f"<instance of class {self.class_.name.lexeme}>"
+        return f"<{self.class_.name} instance>"
 
 
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
@@ -231,7 +241,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_class_stmt(self, class_: stmt.Class) -> None:
         self._environment.define(class_.name.lexeme, None, False)
-        klass: LoxClass = LoxClass(class_.name)
+        klass: LoxClass = LoxClass(class_.name.lexeme)
         self._environment.assign(class_.name, klass)
 
     def visit_if_stmt(self, if_: stmt.If) -> None:
@@ -385,6 +395,25 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             )
 
         return function.call(self, arguments)
+
+    def visit_get_expr(self, get: expr.Get) -> object:
+        instance: object = self.__evaluate(get.object)
+        if not isinstance(instance, LoxInstance):
+            raise RuntimeException(
+                get.name,
+                "Expected instance.",
+            )
+        return instance.get(get.name.lexeme)
+
+    def visit_set_expr(self, set: expr.Set) -> object:
+        instance: object = self.__evaluate(set.object)
+        if not isinstance(instance, LoxInstance):
+            raise RuntimeException(
+                set.name,
+                "Expected instance.",
+            )
+        value: object = self.__evaluate(set.value)
+        return instance.set(set.name.lexeme, value)
 
     def visit_grouping_expr(self, grouping: expr.Grouping) -> object:
         return self.__evaluate(grouping.expression)

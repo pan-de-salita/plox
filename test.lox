@@ -155,4 +155,5 @@ class Test {
 print Test;
 
 var test = Test();
-print test;
+test.score = 100;
+print test.score;

@@ -58,6 +58,8 @@ class GenerateAst:
                 "Unary    : operator Token, right Expr",
                 "Variable : name Token",
                 "Lambda   : params list[Token], body list[Stmt]",
+                "Get      : object Expr, name Token",
+                "Set      : object Expr, name Token, value Expr",
             ],
         )
 
