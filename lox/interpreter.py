@@ -134,12 +134,9 @@ class AnonymousLoxCallable(LoxCallable):
 
 
 class LoxClass(LoxCallable):
-    def __init__(
-        self, name: str, methods: list[stmt.Function], environment: Environment
-    ) -> None:
+    def __init__(self, name: str, methods: dict[str, LoxFunction]) -> None:
         self.name = name
-        self.methods = {m.name.lexeme: m for m in methods}
-        self.environment = environment
+        self.methods = methods
 
     def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
         instance: LoxInstance = LoxInstance(self)
@@ -159,9 +156,8 @@ class LoxInstance:
 
     def get(self, key: Token) -> object:
         if key.lexeme in self.class_.methods:
-            method: stmt.Function | None = self.class_.methods.get(key.lexeme)
-            assert isinstance(method, stmt.Function)
-            return LoxFunction(method, self.class_.environment)
+            method: LoxFunction = self.class_.methods[key.lexeme]
+            return method
 
         if key.lexeme in self.fields:
             return self.fields.get(key.lexeme)
@@ -253,9 +249,10 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_class_stmt(self, class_: stmt.Class) -> None:
         self._environment.define(class_.name.lexeme, None, False)
-        klass: LoxClass = LoxClass(
-            class_.name.lexeme, class_.methods, self._environment
-        )
+        methods: dict[str, LoxFunction] = {
+            m.name.lexeme: LoxFunction(m, self._environment) for m in class_.methods
+        }
+        klass: LoxClass = LoxClass(class_.name.lexeme, methods)
         self._environment.assign(class_.name, klass)
 
     def visit_if_stmt(self, if_: stmt.If) -> None:
