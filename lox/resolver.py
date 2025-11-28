@@ -54,8 +54,13 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__declare(class_.name)
         self.__define(class_.name)
 
+        self.__begin_scope()
+        self.__peek_scope()["this"] = LocalVar(class_.name, True, True)
+
         for method in class_.methods:
             self.__resolve_function(method, FunctionType.METHOD)
+
+        self.__end_scope()
 
     def visit_if_stmt(self, if_: stmt.If) -> None:
         # Here we see how resolution is different from interpretation. When we
@@ -136,8 +141,6 @@ class Resolver(expr.Visitor, stmt.Visitor):
         return
 
     def visit_this_expr(self, this_: expr.This) -> None:
-        self.__declare(this_.keyword)
-        self.__define(this_.keyword)
         self.__resolve_local(this_, this_.keyword)
 
     def visit_logical_expr(self, logical: expr.Logical) -> None:
@@ -220,6 +223,9 @@ class Resolver(expr.Visitor, stmt.Visitor):
     def __peek_scope(self) -> dict[str, LocalVar]:
         return self._scopes[-1]
 
+    def __peek_prior_scope(self) -> dict[str, LocalVar]:
+        return self._scopes[-2]
+
     def __resolve_local(
         self, variable: expr.Variable | expr.Assign | expr.This, name: Token
     ) -> None:
@@ -232,6 +238,9 @@ class Resolver(expr.Visitor, stmt.Visitor):
         #
         # If we walk through all of the block scopes and never find the variable,
         # we leave it unresolved and assume it's global.
+
+        # For testing:
+        # print([[v for v in s.keys()] for s in self._scopes])
         for i, scope in enumerate(self._scopes):
             if name.lexeme in scope:
                 scope[name.lexeme].is_used = True

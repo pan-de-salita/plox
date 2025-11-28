@@ -441,7 +441,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         return literal.value
 
     def visit_this_expr(self, this_: expr.This) -> object:
-        return self._environment.get_(this_.keyword)
+        return self.__look_up_variable(this_.keyword, this_)
 
     def visit_unary_expr(self, unary: expr.Unary) -> object:
         operator: Token = unary.operator
@@ -460,7 +460,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def visit_variable_expr(self, variable: expr.Variable) -> object:
         return self.__look_up_variable(variable.name, variable)
 
-    def __look_up_variable(self, name: Token, variable: expr.Variable) -> object:
+    def __look_up_variable(
+        self, name: Token, variable: expr.Variable | expr.This
+    ) -> object:
         distance: int | None = self._locals.get(variable)
         if distance is None:
             return self.globals.get_(name)
