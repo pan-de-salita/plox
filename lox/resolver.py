@@ -141,6 +141,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
         return
 
     def visit_this_expr(self, this_: expr.This) -> None:
+        # `this` should already be initialized in visit_class_stmt.
         self.__resolve_local(this_, this_.keyword)
 
     def visit_logical_expr(self, logical: expr.Logical) -> None:
