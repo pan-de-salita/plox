@@ -55,7 +55,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__define(class_.name)
 
         self.__begin_scope()
-        self.__peek_scope()["this"] = LocalVar(class_.name, True, True)
+        self.__peek_scope()["this"] = LocalVar(class_.name, True, False)
 
         for method in class_.methods:
             self.__resolve_function(method, FunctionType.METHOD)
