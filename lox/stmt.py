@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-11-24 23:17:02.474466).
+# Generated from GenerateAst class (2025-11-28 12:24:38.658511).
 
 from __future__ import annotations
 

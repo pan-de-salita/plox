@@ -85,6 +85,11 @@ class LoxFunction(LoxCallable):
     def arity(self) -> int:
         return len(self._declaration.params)
 
+    def bind(self, instance: LoxInstance) -> None:
+        environment: Environment = Environment(enclosing=self._closure)
+        environment.define("this", instance, True)
+        self._closure = environment
+
     def __str__(self) -> str:
         return f"<fn {self._declaration.name.lexeme}>"
 
@@ -157,6 +162,7 @@ class LoxInstance:
     def get(self, key: Token) -> object:
         if key.lexeme in self.class_.methods:
             method: LoxFunction = self.class_.methods[key.lexeme]
+            method.bind(self)
             return method
 
         if key.lexeme in self.fields:
@@ -200,7 +206,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         except RuntimeException as error:
             self._error_callback(error)
 
-    def resolve(self, variable: expr.Variable | expr.Assign, depth: int) -> None:
+    def resolve(
+        self, variable: expr.Variable | expr.Assign | expr.This, depth: int
+    ) -> None:
         self._locals[variable] = depth
 
     def __execute(self, statement: stmt.Stmt) -> None:
@@ -431,6 +439,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_literal_expr(self, literal: expr.Literal) -> object:
         return literal.value
+
+    def visit_this_expr(self, this_: expr.This) -> object:
+        return self._environment.get_(this_.keyword)
 
     def visit_unary_expr(self, unary: expr.Unary) -> object:
         operator: Token = unary.operator

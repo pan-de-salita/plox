@@ -135,6 +135,11 @@ class Resolver(expr.Visitor, stmt.Visitor):
         # any subexpressions so there is no work to do.
         return
 
+    def visit_this_expr(self, this_: expr.This) -> None:
+        self.__declare(this_.keyword)
+        self.__define(this_.keyword)
+        self.__resolve_local(this_, this_.keyword)
+
     def visit_logical_expr(self, logical: expr.Logical) -> None:
         self.__resolve(logical.left)
         self.__resolve(logical.right)
@@ -216,7 +221,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
         return self._scopes[-1]
 
     def __resolve_local(
-        self, variable: expr.Variable | expr.Assign, name: Token
+        self, variable: expr.Variable | expr.Assign | expr.This, name: Token
     ) -> None:
         # We start at the innermost scope and work outwards, looking in each
         # map for a matching name. If we find the variable, we resolve it,

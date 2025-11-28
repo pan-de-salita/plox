@@ -107,20 +107,20 @@
 
 // A variable usage refers to the preceding declaration with the same name in
 // the innermost scope that encloses the expression where the variable is used.
-fun makeCounter() {
-  var i = 0;
-
-  fun count() {
-    i = i + 1;
-    print i;
-  }
-
-  return count;
-}
-
-var counter = makeCounter();
-counter();
-counter();
+// fun makeCounter() {
+//   var i = 0;
+//
+//   fun count() {
+//     i = i + 1;
+//     print i;
+//   }
+//
+//   return count;
+// }
+//
+// var counter = makeCounter();
+// counter();
+// counter();
 
 // fun thrice(fn) {
 //   for (var i = 1; i <= 3; i = i + 1) {
@@ -134,28 +134,29 @@ counter();
 //
 // thrice(printNum);
 
-var a = "global";
-{
-  fun showA() {
-    print a;
-  }
-
-  showA();
-  showA();
-  var a = "block";
-  print a;
-}
+// var a = "global";
+// {
+//   fun showA() {
+//     print a;
+//   }
+//
+//   showA();
+//   showA();
+//   var a = "block";
+//   print a;
+// }
 
 class Test {
   test_method() {
     print "test method";
   }
-}
 
-print Test;
+  say_score() {
+    print "test score is " + this.score;
+  }
+}
 
 var test = Test();
 test.score = 100;
-print test.score;
-
 test.test_method();
+test.say_score();

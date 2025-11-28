@@ -555,6 +555,8 @@ class Parser:
             return expr.Literal(self.__previous().literal)
         elif self.__match(TokenType.IDENTIFIER):
             return expr.Variable(self.__previous())
+        elif self.__match(TokenType.THIS):
+            return expr.This(self.__previous())
         elif self.__match(TokenType.FUN):
             return self.__lambda()
         elif self.__match(TokenType.LEFT_PAREN):

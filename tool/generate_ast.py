@@ -60,6 +60,7 @@ class GenerateAst:
                 "Lambda   : params list[Token], body list[Stmt]",
                 "Get      : object Expr, name Token",
                 "Set      : object Expr, name Token, value Expr",
+                "This     : keyword Token",
             ],
         )
 
