@@ -46,7 +46,7 @@ class Parser:
                     self._current -= 1
 
             if self.__match(TokenType.CLASS):
-                return self.__class()
+                return self.__class_declaration()
 
             if self.__match(TokenType.VAR):
                 return self.__var_declaration()
@@ -83,13 +83,16 @@ class Parser:
 
         return stmt.Function(name, params, body)
 
-    def __class(self) -> stmt.Class:
+    def __class_declaration(self) -> stmt.Class:
         name: Token = self.__consume(TokenType.IDENTIFIER, "Expect class name.")
         self.__consume(TokenType.LEFT_BRACE, "Expect left brace.")
+
         methods: list[stmt.Function] = []
         while not self.__check(TokenType.RIGHT_BRACE) and not self.__is_at_end():
             methods.append(self.__function(FunctionType.METHOD.value))
+
         self.__consume(TokenType.RIGHT_BRACE, "Expect right brace.")
+
         return stmt.Class(name, methods)
 
     def __var_declaration(self) -> stmt.Var:
@@ -287,7 +290,6 @@ class Parser:
         if self.__match(TokenType.EQUAL):
             equals: Token = self.__previous()
             value: expr.Expr = self.__assignment()
-            name: Token | None = None
 
             # Convert r-value expression node into an l-value representation.
             # Important because if there was no match for TokenType.EQUAL -- i.e.
@@ -303,10 +305,9 @@ class Parser:
             # is assigning to and has an expression subtree for the value
             # being assigned.
             if isinstance(expression, expr.Variable):
-                name = expression.name
-                return expr.Assign(name, value)
+                return expr.Assign(expression.name, value)
 
-            if isinstance(expression, expr.Get):
+            elif isinstance(expression, expr.Get):
                 return expr.Set(expression.object, expression.name, value)
 
             # We report an error if the left-hand side isn't a valid assignment
@@ -510,7 +511,9 @@ class Parser:
             if self.__match(TokenType.LEFT_PAREN):
                 expression = self.__finish_call(expression)
             if self.__match(TokenType.DOT):
-                name: Token = self.__consume(TokenType.IDENTIFIER, "Expected property.")
+                name: Token = self.__consume(
+                    TokenType.IDENTIFIER, "Expected property name after '.'."
+                )
                 expression = expr.Get(expression, name)
             else:
                 break

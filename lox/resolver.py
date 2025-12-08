@@ -57,8 +57,9 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__begin_scope()
         self.__peek_scope()["this"] = LocalVar(class_.name, True, False)
 
+        declaration: FunctionType = FunctionType.METHOD
         for method in class_.methods:
-            self.__resolve_function(method, FunctionType.METHOD)
+            self.__resolve_function(method, declaration)
 
         self.__end_scope()
 
@@ -116,10 +117,6 @@ class Resolver(expr.Visitor, stmt.Visitor):
         # Resolve the variable that's being assigned to.
         self.__resolve_local(assign, assign.name)
 
-    def visit_set_expr(self, set: expr.Set) -> None:
-        self.__resolve(set.value)
-        self.__resolve(set.object)
-
     def visit_binary_expr(self, binary: expr.Binary) -> None:
         self.__resolve(binary.left)
         self.__resolve(binary.right)
@@ -131,6 +128,10 @@ class Resolver(expr.Visitor, stmt.Visitor):
 
     def visit_get_expr(self, get: expr.Get) -> None:
         self.__resolve(get.object)
+
+    def visit_set_expr(self, set: expr.Set) -> None:
+        self.__resolve(set.value)
+        self.__resolve(set.object)
 
     def visit_grouping_expr(self, grouping: expr.Grouping) -> None:
         self.__resolve(grouping.expression)

@@ -155,29 +155,32 @@ class LoxClass(LoxCallable):
 
 
 class LoxInstance:
-    def __init__(self, class_: LoxClass) -> None:
-        self.class_: LoxClass = class_
+    def __init__(self, klass: LoxClass) -> None:
+        self.klass: LoxClass = klass
         self.fields: dict[str, object] = {}
 
-    def get(self, key: Token) -> object:
-        if key.lexeme in self.class_.methods:
-            method: LoxFunction = self.class_.methods[key.lexeme]
+    def get(self, name: Token) -> object:
+        if name.lexeme in self.fields:
+            return self.fields.get(name.lexeme)
+
+        method: LoxFunction | None = self.__find_method(name.lexeme)
+        if method is not None:
             method.bind(self)
             return method
 
-        if key.lexeme in self.fields:
-            return self.fields.get(key.lexeme)
+        raise RuntimeException(name, f"Undefined property {name.lexeme}.")
 
-        raise RuntimeException(
-            key, f"{key.lexeme} is not a field of instance {self.class_.name}"
-        )
-
-    def set(self, key: Token, value: object) -> object:
+    def set(self, key: Token, value: object) -> None:
         self.fields[key.lexeme] = value
-        return value
+
+    def __find_method(self, name: str) -> LoxFunction | None:
+        if name in self.klass.methods:
+            return self.klass.methods[name]
+
+        return None
 
     def __str__(self) -> str:
-        return f"<{self.class_.name} instance>"
+        return f"<{self.klass.name} instance>"
 
 
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
@@ -256,10 +259,17 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         )
 
     def visit_class_stmt(self, class_: stmt.Class) -> None:
+        # Declare the class in the current environment.
         self._environment.define(class_.name.lexeme, None, False)
+
         methods: dict[str, LoxFunction] = {
-            m.name.lexeme: LoxFunction(m, self._environment) for m in class_.methods
+            method.name.lexeme: LoxFunction(method, self._environment)
+            for method in class_.methods
         }
+
+        # Store the class object in the previously declared variable.
+        # This two-stage variable binding process allows references to the
+        # class inside its own methods.
         klass: LoxClass = LoxClass(class_.name.lexeme, methods)
         self._environment.assign(class_.name, klass)
 
@@ -417,22 +427,27 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
     def visit_get_expr(self, get: expr.Get) -> object:
         instance: object = self.__evaluate(get.object)
+
         if not isinstance(instance, LoxInstance):
             raise RuntimeException(
                 get.name,
-                "Expected instance.",
+                "Only instances have properties.",
             )
+
         return instance.get(get.name)
 
     def visit_set_expr(self, set: expr.Set) -> object:
         instance: object = self.__evaluate(set.object)
+
         if not isinstance(instance, LoxInstance):
             raise RuntimeException(
                 set.name,
-                "Expected instance.",
+                "Only instances have fields.",
             )
+
         value: object = self.__evaluate(set.value)
-        return instance.set(set.name, value)
+        instance.set(set.name, value)
+        return value
 
     def visit_grouping_expr(self, grouping: expr.Grouping) -> object:
         return self.__evaluate(grouping.expression)
