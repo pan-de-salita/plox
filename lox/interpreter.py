@@ -164,7 +164,7 @@ class LoxInstance:
             return self.fields.get(name.lexeme)
 
         method: LoxFunction | None = self.__find_method(name.lexeme)
-        if method is not None:
+        if method:
             method.bind(self)
             return method
 
@@ -290,14 +290,31 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     ) -> None:
         previous_environment: Environment = self._environment
         try:
-            # Switch self's environment to be a new one with previousenvironment
-            # as its enclosure. This allows for executed statments within the
+            # Switch self's environment to be a new one with previous_environment
+            # as its enclosure. This allows for executed statements within the
             # block to have access to the state in the enclosing environment(s).
+            #
+            # E.g.:
+            # var a = 1;
+            # {
+            #     var b = a;
+            #     {
+            #         var c = a + b;
+            #         print c; // => 2
+            #     }
+            # }
+            #
+            # - Global environment. No inherited environment.
+            # - First block environment. Inherits from, and therefore accesses,
+            #   global environment (previous_environment).
+            # - Second block environment:
+            #   - Directly inherits from: first block environment (previous_environment)
+            #   - Indirectly accesses: global environment (via chain through first block)
             self._environment = environment
             for block_statement in block_statements:
                 self.__execute(block_statement)
         finally:
-            # Restore old environment.
+            # Restore old environment at the end of the block.
             self._environment = previous_environment
 
     def visit_print_stmt(self, print_: stmt.Print) -> None:
