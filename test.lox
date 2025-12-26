@@ -146,39 +146,80 @@
 //   print a;
 // }
 
-class Test {
-  test_method() {
-    print "test method";
-  }
+// class Test {
+//   test_method() {
+//     print "test method";
+//   }
+//
+//   say_score() {
+//     if (this.score) {
+//       if (true) {
+//         print "test score is " + this.score;
+//       }
+//     } else {
+//       print "no test score yet.";
+//     }
+//   }
+// }
+//
+// class Test_2 {
+//   test_method() {
+//     print "test method";
+//   }
+//
+//   say_score() {
+//     if (this.score) {
+//       print "test score is " + this.score;
+//     } else {
+//       print "no test score yet.";
+//     }
+//   }
+// }
+//
+// var test = Test();
+// var test_2 = Test_2();
+// test.score = 100;
+// test_2.score = 80;
+// test.say_score();
+// test_2.say_score();
 
-  say_score() {
-    if (this.score) {
-      if (true) {
-        print "test score is " + this.score;
-      }
-    } else {
-      print "no test score yet.";
+// var a = "global";
+// {
+//   fun showA() {
+//     print a;
+//   }
+//
+//   showA();
+//   var a = "block";
+//   showA();
+//   print a;
+// }
+
+// class Cake {
+//   taste() {
+//     var adjective = "delicious";
+//     print "The " + this.flavor + " cake is " + adjective + "!";
+//   }
+// }
+//
+// var cake = Cake();
+// cake.flavor = "German chocolate";
+// cake.taste();
+
+fun test() {
+  print "test";
+}
+
+class Thing {
+  getCallback() {
+    fun localFunction() {
+      print this;
     }
+
+    print this.getCallback;
+    return localFunction;
   }
 }
 
-class Test_2 {
-  test_method() {
-    print "test method";
-  }
-
-  say_score() {
-    if (this.score) {
-      print "test score is " + this.score;
-    } else {
-      print "no test score yet.";
-    }
-  }
-}
-
-var test = Test();
-var test_2 = Test_2();
-test.score = 100;
-test_2.score = 80;
-test.say_score();
-test_2.say_score();
+var callback = Thing().getCallback();
+callback();

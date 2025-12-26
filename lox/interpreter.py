@@ -203,6 +203,10 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         )
 
     def interpret(self, statements: list[stmt.Stmt]) -> None:
+        print([v.name if "name" in dir(v) else v.keyword for v in self._locals])
+        print(self._locals)
+        # print(statements)
+
         try:
             for statement in statements:
                 self.__execute(statement)
@@ -340,7 +344,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         value: object = self.__evaluate(assign.value)
         distance: int | None = self._locals.get(assign)
 
-        if distance:
+        if distance is not None:  # Distance can be 0.
             self._environment.assign_at(distance, assign.name, value)
         else:
             self.globals.assign(assign.name, value)

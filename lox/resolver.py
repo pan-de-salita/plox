@@ -22,7 +22,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
     # variable is defined. At runtime, this corresponds exactly to the number
     # of environments between the current one and the enclosing one where the
     # interpreter can find the variable's value. The resolver hands this number
-    # to the interpreter by calling self._interpreter.resolve(expr, depth)
+    # to the interpreter by calling self._interpreter.resolve(expr, depth).
 
     _interpreter: Interpreter
     _error_callback: Callable[[str, Token], None]
@@ -235,7 +235,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
         # map for a matching name. If we find the variable, we resolve it,
         # passing in the number of scopes between the current innermost scope
         # and the scope where the variable was found (the distance). E.g., if
-        # the the variable was found in the current scope, we pass in 0. If it's
+        # the variable was found in the current scope, we pass in 0. If it's
         # in the immediately enclosing scope, 1.
         #
         # If we walk through all of the block scopes and never find the variable,
