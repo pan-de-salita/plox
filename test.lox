@@ -223,3 +223,9 @@ class Thing {
 
 var callback = Thing().getCallback();
 callback();
+
+print this;
+
+fun notAMethod() {
+  print this;
+}

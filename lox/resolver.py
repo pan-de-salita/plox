@@ -4,6 +4,7 @@ from typing import Callable
 
 from . import expr, stmt
 from .function_type import FunctionType
+from .class_type import ClassType
 from .interpreter import Interpreter
 from .token import Token
 
@@ -28,6 +29,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
     _error_callback: Callable[[str, Token], None]
     _scopes: list[dict[str, LocalVar]] = field(default_factory=list)
     _current_function: FunctionType = FunctionType.NONE
+    _current_class: ClassType = ClassType.NONE
 
     def resolve(self, statements: list[stmt.Stmt]) -> None:
         for statement in statements:
@@ -51,6 +53,9 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__resolve_function(function, FunctionType.FUNCTION)
 
     def visit_class_stmt(self, class_: stmt.Class) -> None:
+        enclosing_class = self._current_class
+        self._current_class = ClassType.CLASS
+
         self.__declare(class_.name)
         self.__define(class_.name)
 
@@ -62,6 +67,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
             self.__resolve_function(method, declaration)
 
         self.__end_scope()
+        self._current_class = ClassType.NONE
 
     def visit_if_stmt(self, if_: stmt.If) -> None:
         # Here we see how resolution is different from interpretation. When we
@@ -142,6 +148,9 @@ class Resolver(expr.Visitor, stmt.Visitor):
         return
 
     def visit_this_expr(self, this_: expr.This) -> None:
+        if self._current_class == ClassType.NONE:
+            self._error_callback("Can't use 'this' outside of a class.", this_.keyword)
+
         # `this` should already be initialized in visit_class_stmt.
         self.__resolve_local(this_, this_.keyword)
 
