@@ -203,8 +203,8 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         )
 
     def interpret(self, statements: list[stmt.Stmt]) -> None:
-        print([v.name if "name" in dir(v) else v.keyword for v in self._locals])
-        print(self._locals)
+        # print([v.name if "name" in dir(v) else v.keyword for v in self._locals])
+        # print(self._locals)
         # print(statements)
 
         try:
