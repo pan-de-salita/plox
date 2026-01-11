@@ -3,8 +3,8 @@ from functools import singledispatchmethod
 from typing import Callable
 
 from . import expr, stmt
-from .function_type import FunctionType
 from .class_type import ClassType
+from .function_type import FunctionType
 from .interpreter import Interpreter
 from .token import Token
 
@@ -53,7 +53,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__resolve_function(function, FunctionType.FUNCTION)
 
     def visit_class_stmt(self, class_: stmt.Class) -> None:
-        enclosing_class = self._current_class
+        enclosing_class: ClassType = self._current_class
         self._current_class = ClassType.CLASS
 
         self.__declare(class_.name)
@@ -67,7 +67,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
             self.__resolve_function(method, declaration)
 
         self.__end_scope()
-        self._current_class = ClassType.NONE
+        self._current_class = enclosing_class
 
     def visit_if_stmt(self, if_: stmt.If) -> None:
         # Here we see how resolution is different from interpretation. When we
