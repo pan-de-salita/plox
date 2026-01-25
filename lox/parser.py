@@ -1,5 +1,7 @@
+from __future__ import annotations
+
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from . import expr, stmt
 from .function_type import FunctionType
@@ -574,7 +576,7 @@ class Parser:
         self.__consume(TokenType.LEFT_PAREN, "Expect '(' after lambda.")
 
         params: list[Token] = []
-        if not self.__peek().type == TokenType.RIGHT_PAREN:
+        if self.__peek().type != TokenType.RIGHT_PAREN:
             while True:
                 if len(params) >= 255:
                     self.__error(self.__peek(), "Can't have more than 255 arguments.")

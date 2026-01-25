@@ -3,8 +3,8 @@ from __future__ import annotations
 import builtins
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from . import expr, stmt
 from .break_ import Break
@@ -85,10 +85,11 @@ class LoxFunction(LoxCallable):
     def arity(self) -> int:
         return len(self._declaration.params)
 
-    def bind(self, instance: LoxInstance) -> None:
+    def bind(self, instance: LoxInstance) -> LoxFunction:
         environment: Environment = Environment(enclosing=self._closure)
         environment.define("this", instance, True)
-        self._closure = environment
+
+        return LoxFunction(self._declaration, environment)
 
     def __str__(self) -> str:
         return f"<fn {self._declaration.name.lexeme}>"
@@ -165,8 +166,7 @@ class LoxInstance:
 
         method: LoxFunction | None = self.__find_method(name.lexeme)
         if method:
-            method.bind(self)
-            return method
+            return method.bind(self)
 
         raise RuntimeException(name, f"Undefined property {name.lexeme}.")
 
@@ -354,12 +354,11 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def visit_logical_expr(self, logical: expr.Logical) -> object:
         left: object = self.__evaluate(logical.left)
 
-        if logical.operator.type == TokenType.OR:
-            if self.__is_truthy(left):
-                return left
-        elif logical.operator.type == TokenType.AND:
-            if not self.__is_truthy(left):
-                return left
+        if logical.operator.type == TokenType.OR and self.__is_truthy(left):
+            return left
+
+        if logical.operator.type == TokenType.AND and not self.__is_truthy(left):
+            return left
 
         return self.__evaluate(logical.right)
 

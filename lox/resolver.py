@@ -1,6 +1,8 @@
+from __future__ import annotations
+
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from functools import singledispatchmethod
-from typing import Callable
 
 from . import expr, stmt
 from .class_type import ClassType
@@ -60,6 +62,10 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__define(class_.name)
 
         self.__begin_scope()
+
+        # Initialize `this` in the class scope before resolving methods.
+        # Methods will reference `this`, so it must be available in an
+        # enclosing scope when visit_this_expr() is called during method resolution.
         self.__peek_scope()["this"] = LocalVar(class_.name, True, False)
 
         declaration: FunctionType = FunctionType.METHOD

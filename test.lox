@@ -206,26 +206,86 @@
 // cake.flavor = "German chocolate";
 // cake.taste();
 
-fun test() {
-  print "test";
-}
+// fun test() {
+//   print "test";
+// }
+//
+// class Thing {
+//   getCallback() {
+//     fun localFunction() {
+//       print this;
+//     }
+//
+//     print this.getCallback;
+//     return localFunction;
+//   }
+// }
+//
+// var callback = Thing().getCallback();
+// callback();
+//
+// print this;
+//
+// fun notAMethod() {
+//   print this;
+// }
+//
+// class Egotist {
+//    speak() {
+//      print this;
+//    }
+// }
 
-class Thing {
-  getCallback() {
-    fun localFunction() {
-      print this;
-    }
+// var method = Egotist().speak; // Access the method. Remembers the instance of the class it was accessed from.
+// method();                     // Call the method.
 
-    print this.getCallback;
-    return localFunction;
+class Cake {
+  taste(description) {
+    var test = "thing";
+    print test;
+    print "This " + this.flavor + " cake is " + description + "!";
+  }
+
+  taste_test(description) {
+    print "This " + this.flavor + " cake is " + description + "!";
   }
 }
 
-var callback = Thing().getCallback();
-callback();
+var cake = Cake();
+cake.flavor = "chocolate";
+var method = cake.taste;
+method("delicious");
+// cake.taste_test("yummy");
 
-print this;
+// when we first evaluate the class definition, we create a LoxFunction for taste(). its closure is
+// the environment surrounding the class, in this case the global one.
+//
+// when we evaluate the cake.taste get expression, we create a new environment that binds
+// this to the object the method is accessed from (here, cake). then we make a new
+// LoxFunction with the same code as the original but using that new environment as its closure.
+//
+// this is the LoxFunction that gets returned when evaluating the get expression for the method
+// name. when that function is later called by a () expression, we create an environment for the
+// method body as usual.
+//
+// the parent of the body environment is the environment we created earlier to bind this to the
+// current object. thus any use of this inside the body successfully resolves to that instance.
 
-fun notAMethod() {
-  print this;
-}
+// class Thing {
+//   getCallback() {
+//     fun localFunction() {
+//       print this;
+//     }
+//
+//     return localFunction;
+//   }
+// }
+
+// var callback = Thing().getCallback();
+// get expr binds instance to this expr. when immediately called with (),
+// getCallback's body is evaluated, defining localFunction.
+// localFunction's closure captures getCallback's environment, which has
+// 'this' bound to the instance.callback();
+
+// callback();
+// localFunction is then able to access this (the instance) via its parent closure.

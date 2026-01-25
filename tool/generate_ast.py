@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime
 from itertools import chain
 from pathlib import Path
-from typing import Iterator
 
 from lox.token_type import TokenType
 
@@ -75,16 +77,16 @@ class GenerateAst:
         type_definitions: list[TypeDefinition] = (
             GenerateAst.__generate_type_definitions(types)
         )
-        body: Iterator[str] = map(
-            lambda line: line + "\n",  # Add newline per spread line.
-            [
+        body: Iterator[str] = [
+            line + "\n"
+            for line in [
                 *GenerateAst.__generate_documentation(),
                 *GenerateAst.__generate_imports(base_name),
                 *GenerateAst.__generate_visitor(base_name, type_definitions),
                 *GenerateAst.__generate_base_class(base_name),
                 *GenerateAst.__generate_child_classes(base_name, type_definitions),
-            ],
-        )
+            ]
+        ]
 
         with open(path, "w", encoding="utf-8") as writer:
             writer.writelines(body)

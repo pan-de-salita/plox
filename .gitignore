@@ -211,3 +211,6 @@ __marimo__/
 
 # Obsidian
 .obsidian/
+
+# PyLsp
+pyproject.toml

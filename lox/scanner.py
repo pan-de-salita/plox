@@ -1,6 +1,9 @@
+from __future__ import annotations
+
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import Any, Callable, ClassVar
+from typing import Any, ClassVar
 
 from .token import Token
 from .token_type import TokenType
