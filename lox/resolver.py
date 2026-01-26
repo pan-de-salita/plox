@@ -73,6 +73,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
             self.__resolve_function(method, declaration)
 
         self.__end_scope()
+
         self._current_class = enclosing_class
 
     def visit_if_stmt(self, if_: stmt.If) -> None:

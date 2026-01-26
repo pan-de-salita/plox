@@ -143,13 +143,26 @@ class LoxClass(LoxCallable):
     def __init__(self, name: str, methods: dict[str, LoxFunction]) -> None:
         self.name = name
         self.methods = methods
+        print(self.arity())
 
     def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
         instance: LoxInstance = LoxInstance(self)
+
+        initializer: LoxFunction = self.find_method("init")
+        if initializer is not None:
+            initializer.bind(instance).call(interpreter, arguments)
+
         return instance
 
     def arity(self) -> int:
+        initializer: LoxFunction = self.find_method("init")
+        if initializer is not None:
+            return self.methods.get("init").arity()
+
         return 0
+
+    def find_method(self, name: str) -> LoxFunction | None:
+        return self.methods.get("name")
 
     def __str__(self) -> str:
         return f"<class {self.name}>"
@@ -164,7 +177,7 @@ class LoxInstance:
         if name.lexeme in self.fields:
             return self.fields.get(name.lexeme)
 
-        method: LoxFunction | None = self.__find_method(name.lexeme)
+        method: LoxFunction | None = self.klass.find_method(name.lexeme)
         if method:
             return method.bind(self)
 
@@ -172,12 +185,6 @@ class LoxInstance:
 
     def set(self, key: Token, value: object) -> None:
         self.fields[key.lexeme] = value
-
-    def __find_method(self, name: str) -> LoxFunction | None:
-        if name in self.klass.methods:
-            return self.klass.methods[name]
-
-        return None
 
     def __str__(self) -> str:
         return f"<{self.klass.name} instance>"

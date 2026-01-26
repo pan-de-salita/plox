@@ -239,22 +239,7 @@
 // var method = Egotist().speak; // Access the method. Remembers the instance of the class it was accessed from.
 // method();                     // Call the method.
 
-class Cake {
-  taste(description) {
-    var test = "thing";
-    print test;
-    print "This " + this.flavor + " cake is " + description + "!";
-  }
-
-  taste_test(description) {
-    print "This " + this.flavor + " cake is " + description + "!";
-  }
-}
-
-var cake = Cake();
-cake.flavor = "chocolate";
-var method = cake.taste;
-method("delicious");
+// method("delicious");
 // cake.taste_test("yummy");
 
 // when we first evaluate the class definition, we create a LoxFunction for taste(). its closure is
@@ -289,3 +274,10 @@ method("delicious");
 
 // callback();
 // localFunction is then able to access this (the instance) via its parent closure.
+
+class Foo {
+      init(thing, otherThing) {
+             print this;
+             print thing + otherThing;
+      }
+}
