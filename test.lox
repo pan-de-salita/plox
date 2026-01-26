@@ -277,7 +277,9 @@
 
 class Foo {
       init(thing, otherThing) {
-             print this;
-             print thing + otherThing;
+            print thing;
+            print otherThing;
       }
 }
+
+var instance = Foo("thing", "other thing");

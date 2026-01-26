@@ -143,7 +143,6 @@ class LoxClass(LoxCallable):
     def __init__(self, name: str, methods: dict[str, LoxFunction]) -> None:
         self.name = name
         self.methods = methods
-        print(self.arity())
 
     def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
         instance: LoxInstance = LoxInstance(self)
@@ -162,7 +161,7 @@ class LoxClass(LoxCallable):
         return 0
 
     def find_method(self, name: str) -> LoxFunction | None:
-        return self.methods.get("name")
+        return self.methods.get(name)
 
     def __str__(self) -> str:
         return f"<class {self.name}>"
