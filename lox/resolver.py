@@ -70,6 +70,9 @@ class Resolver(expr.Visitor, stmt.Visitor):
 
         declaration: FunctionType = FunctionType.METHOD
         for method in class_.methods:
+            if method.name == "init":
+                declaration = FunctionType.INITIALIZER
+
             self.__resolve_function(method, declaration)
 
         self.__end_scope()
@@ -95,6 +98,11 @@ class Resolver(expr.Visitor, stmt.Visitor):
             self._error_callback("Can't return from top-level code.", return_.keyword)
 
         if return_.value:
+            if self._current_function == FunctionType.INITIALIZER:
+                self._error_callback(
+                    "Can't return a value from an initializer.", return_.keyword
+                )
+
             self.__resolve(return_.value)
 
     def visit_var_stmt(self, var_: stmt.Var) -> None:

@@ -277,9 +277,19 @@
 
 class Foo {
       init(thing, otherThing) {
-            print thing;
-            print otherThing;
+            print "Initializing Foo instance...";
+
+            this.thing = thing;
+            this.otherThing = otherThing;
       }
 }
 
 var instance = Foo("thing", "other thing");
+print instance.thing;
+print instance.otherThing;
+
+fun init() {
+    print "not init";
+}
+
+init();
