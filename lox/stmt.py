@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2025-12-26 19:13:07.671647).
+# Generated from GenerateAst class (2026-01-27 14:16:08.715120).
 
 from __future__ import annotations
 
@@ -78,10 +78,11 @@ class Expression(Stmt):
 
 
 class Function(Stmt):
-    def __init__(self, name: Token, params: list[Token], body: list[Stmt]) -> None:
+    def __init__(self, name: Token, params: list[Token], body: list[Stmt], is_static: bool = False) -> None:
         self.name = name
         self.params = params
         self.body = body
+        self.is_static = is_static
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_function_stmt(self)

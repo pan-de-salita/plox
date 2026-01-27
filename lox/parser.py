@@ -59,7 +59,7 @@ class Parser:
             return None
 
     def __function(self, kind: str) -> stmt.Function:
-        self._function_count += 1
+        is_static: bool = self.__match(TokenType.CLASS)
 
         name: Token = self.__consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
 
@@ -81,9 +81,7 @@ class Parser:
         self.__consume(TokenType.LEFT_BRACE, "Expr '{' after parameters.")
         body: list[stmt.Stmt] = self.__block_statement()
 
-        self._function_count -= 1
-
-        return stmt.Function(name, params, body)
+        return stmt.Function(name, params, body, is_static)
 
     def __class_declaration(self) -> stmt.Class:
         name: Token = self.__consume(TokenType.IDENTIFIER, "Expect class name.")

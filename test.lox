@@ -275,21 +275,25 @@
 // callback();
 // localFunction is then able to access this (the instance) via its parent closure.
 
-class Foo {
-      init(thing, otherThing) {
-            print "Initializing Foo instance...";
+// class Foo {
+//       init(thing, otherThing) {
+//             print "Initializing Foo instance...";
+//
+//             this.thing = thing;
+//             this.otherThing = otherThing;
+//       }
+// }
+//
+// var instance = Foo("thing", "other thing");
+// print instance.thing;
+// print instance.otherThing;
 
-            this.thing = thing;
-            this.otherThing = otherThing;
+class Math {
+      class square(n) {
+            return n * n;
       }
 }
 
-var instance = Foo("thing", "other thing");
-print instance.thing;
-print instance.otherThing;
-
-fun init() {
-    print "not init";
-}
-
-init();
+print Math.square(3);
+var math = Math();
+print math.square(3);

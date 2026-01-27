@@ -27,9 +27,17 @@ class LoxCallable(ABC):
 
 @dataclass
 class LoxFunction(LoxCallable):
-    _declaration: stmt.Function
-    _closure: Environment
-    _is_initializer: bool = False
+    def __init__(
+        self,
+        declaration: stmt.Function,
+        closure: Environment,
+        is_initializer: bool = False,
+        is_static: bool = False,
+    ):
+        self._declaration = declaration
+        self._closure = closure
+        self.is_initializer = is_initializer
+        self.is_static = is_static
 
     # NOTE: Function parameters and local variables should be isolated from
     # the outer scope, not dumped directly into it. This implementation
@@ -80,14 +88,14 @@ class LoxFunction(LoxCallable):
         try:
             interpreter.execute_block(self._declaration.body, environment)
         except Return as return_:
-            if self._is_initializer:
+            if self.is_initializer:
                 # After a method is bound to a class instance, `this`
                 # (the only variable) would exist in index 0 of the immediate closure.
                 return self._closure.get_at(0, "this")
 
             return return_.value
 
-        if self._is_initializer:
+        if self.is_initializer:
             return self._closure.get_at(0, "this")
 
         return None
@@ -98,8 +106,7 @@ class LoxFunction(LoxCallable):
     def bind(self, instance: LoxInstance) -> LoxFunction:
         environment: Environment = Environment(enclosing=self._closure)
         environment.define("this", instance, True)
-
-        return LoxFunction(self._declaration, environment, True)
+        return LoxFunction(self._declaration, environment, self.is_initializer)
 
     def __str__(self) -> str:
         return f"<fn {self._declaration.name.lexeme}>"
@@ -149,10 +156,52 @@ class AnonymousLoxCallable(LoxCallable):
         return "<native fn>"
 
 
-class LoxClass(LoxCallable):
-    def __init__(self, name: str, methods: dict[str, LoxFunction]) -> None:
+class LoxInstance:
+    def __init__(self, klass: LoxClass) -> None:
+        self.klass: LoxClass = klass
+        self.fields: dict[str, object] = {}
+
+    def get(self, name: Token) -> object:
+        if name.lexeme in self.fields:
+            return self.fields.get(name.lexeme)
+
+        method: LoxFunction | None = self.klass.find_method(name.lexeme)
+        if method:
+            return method.bind(self)
+
+        raise RuntimeException(name, f"Undefined property {name.lexeme}.")
+
+    def set(self, key: Token, value: object) -> None:
+        self.fields[key.lexeme] = value
+
+    def __str__(self) -> str:
+        return f"<{self.klass.name} instance>"
+
+
+class LoxClass(LoxInstance, LoxCallable):
+    def __init__(
+        self,
+        name: str,
+        methods: dict[str, LoxFunction],
+        metaclass: LoxClass | None = None,
+    ) -> None:
         self.name = name
-        self.methods = methods
+
+        if metaclass is None:
+            instance_methods = {
+                name: func for name, func in methods.items() if not func.is_static
+            }
+            static_methods = {
+                name: func for name, func in methods.items() if func.is_static
+            }
+
+            self.methods = instance_methods
+            super().__init__(LoxClass(f"Meta{name}", static_methods, self))
+        else:
+            self.methods = methods
+            super().__init__(metaclass)
+
+        # print(self)
 
     def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
         instance: LoxInstance = LoxInstance(self)
@@ -174,29 +223,7 @@ class LoxClass(LoxCallable):
         return self.methods.get(name)
 
     def __str__(self) -> str:
-        return f"<class {self.name}>"
-
-
-class LoxInstance:
-    def __init__(self, klass: LoxClass) -> None:
-        self.klass: LoxClass = klass
-        self.fields: dict[str, object] = {}
-
-    def get(self, name: Token) -> object:
-        if name.lexeme in self.fields:
-            return self.fields.get(name.lexeme)
-
-        method: LoxFunction | None = self.klass.find_method(name.lexeme)
-        if method:
-            return method.bind(self)
-
-        raise RuntimeException(name, f"Undefined property {name.lexeme}.")
-
-    def set(self, key: Token, value: object) -> None:
-        self.fields[key.lexeme] = value
-
-    def __str__(self) -> str:
-        return f"<{self.klass.name} instance>"
+        return f"<class> {self.name} (metaclass: {self.klass.name})"
 
 
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
@@ -285,7 +312,10 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
         methods: dict[str, LoxFunction] = {
             method.name.lexeme: LoxFunction(
-                method, self._environment, method.name.lexeme == "init"
+                method,
+                self._environment,
+                method.name.lexeme == "init",
+                method.is_static,
             )
             for method in class_.methods
         }
