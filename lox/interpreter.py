@@ -308,7 +308,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         self._environment.define(
             name=function.name.lexeme,
             value=LoxFunction(
-                _declaration=function,
+                declaration=function,
                 # NOTE: This is the environment that is active when the function
                 # is declared, not when it's called. It represents the lexical
                 # scope surrounding the function declaration. When we call the
@@ -319,7 +319,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
                 # body out through the environments where the function is declared,
                 # all the way out to the global scope. The runtime environment
                 # chain matches the textual nesting of the source code like we want.
-                _closure=self._environment,
+                closure=self._environment,
                 is_initializer=False,
             ),
             is_initialized=True,
@@ -331,11 +331,11 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
 
         methods: dict[str, LoxFunction] = {
             method.name.lexeme: LoxFunction(
-                method,
-                self._environment,
-                method.name.lexeme == "init",
-                method.is_static,
-                method.is_getter,
+                declaration=method,
+                closure=self._environment,
+                is_initializer=method.name.lexeme == "init",
+                is_statis=method.is_static,
+                is_getter=method.is_getter,
             )
             for method in class_.methods
         }

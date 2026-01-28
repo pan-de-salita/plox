@@ -314,4 +314,13 @@ class Circle {
 }
 
 var circle = Circle(4);
-print circle.area;
+var getArea = circle.area;
+print(getArea);
+
+fun doSomething() {
+    print "do something";
+}
+
+circle.doSomething = doSomething;
+print circle.doSomething;
+print circle.doSomething();
