@@ -63,7 +63,22 @@ class Parser:
 
         name: Token = self.__consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
 
+        params: list[Token]
+        is_getter: bool = False
+        if kind != FunctionType.METHOD.value or self.__check(TokenType.LEFT_PAREN):
+            params = self.__params(kind)
+        else:
+            params = []
+            is_getter = True
+
+        self.__consume(TokenType.LEFT_BRACE, "Expr '{' after parameters.")
+        body: list[stmt.Stmt] = self.__block_statement()
+
+        return stmt.Function(name, params, body, is_static, is_getter)
+
+    def __params(self, kind: str) -> list[Token]:
         self.__consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
+
         params: list[Token] = []
         if not self.__check(TokenType.RIGHT_PAREN):
             while True:
@@ -76,12 +91,10 @@ class Parser:
 
                 if not self.__match(TokenType.COMMA):
                     break
+
         self.__consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
 
-        self.__consume(TokenType.LEFT_BRACE, "Expr '{' after parameters.")
-        body: list[stmt.Stmt] = self.__block_statement()
-
-        return stmt.Function(name, params, body, is_static)
+        return params
 
     def __class_declaration(self) -> stmt.Class:
         name: Token = self.__consume(TokenType.IDENTIFIER, "Expect class name.")

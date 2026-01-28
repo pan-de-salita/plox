@@ -33,11 +33,13 @@ class LoxFunction(LoxCallable):
         closure: Environment,
         is_initializer: bool = False,
         is_static: bool = False,
+        is_getter: bool = False,
     ):
         self._declaration = declaration
         self._closure = closure
         self.is_initializer = is_initializer
         self.is_static = is_static
+        self.is_getter = is_getter
 
     # NOTE: Function parameters and local variables should be isolated from
     # the outer scope, not dumped directly into it. This implementation
@@ -106,7 +108,13 @@ class LoxFunction(LoxCallable):
     def bind(self, instance: LoxInstance) -> LoxFunction:
         environment: Environment = Environment(enclosing=self._closure)
         environment.define("this", instance, True)
-        return LoxFunction(self._declaration, environment, self.is_initializer)
+        return LoxFunction(
+            self._declaration,
+            environment,
+            self.is_initializer,
+            self.is_static,
+            self.is_getter,
+        )
 
     def __str__(self) -> str:
         return f"<fn {self._declaration.name.lexeme}>"
@@ -172,7 +180,7 @@ class LoxInstance:
         raise RuntimeException(name, f"Undefined property {name.lexeme}.")
 
     def set(self, key: Token, value: object) -> None:
-        if key.lexeme in self.load_defualt_fields():
+        if key.lexeme in self.load_default_fields():
             raise RuntimeException(key, f"{key.lexeme} is a reserved field.")
 
         self.fields[key.lexeme] = value
@@ -327,6 +335,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
                 self._environment,
                 method.name.lexeme == "init",
                 method.is_static,
+                method.is_getter,
             )
             for method in class_.methods
         }
@@ -514,7 +523,11 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
                 "Only instances have properties.",
             )
 
-        return instance.get(get.name)
+        get_expr: object = instance.get(get.name)
+        if isinstance(get_expr, LoxFunction) and get_expr.is_getter:
+            return get_expr.call(self, [])
+
+        return get_expr
 
     def visit_set_expr(self, set: expr.Set) -> object:
         instance: object = self.__evaluate(set.object)
