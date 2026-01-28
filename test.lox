@@ -296,4 +296,9 @@ class Math {
 
 print Math.square(3);
 var math = Math();
-print math.square(3);
+math.test = 100;
+print math.test;
+print Math.klass;
+print math.klass;
+print math.klass.methods;
+print math.methods;

@@ -159,7 +159,7 @@ class AnonymousLoxCallable(LoxCallable):
 class LoxInstance:
     def __init__(self, klass: LoxClass) -> None:
         self.klass: LoxClass = klass
-        self.fields: dict[str, object] = {}
+        self.fields: dict[str, object] = {**self.load_default_fields()}
 
     def get(self, name: Token) -> object:
         if name.lexeme in self.fields:
@@ -172,7 +172,19 @@ class LoxInstance:
         raise RuntimeException(name, f"Undefined property {name.lexeme}.")
 
     def set(self, key: Token, value: object) -> None:
+        if key.lexeme in self.load_defualt_fields():
+            raise RuntimeException(key, f"{key.lexeme} is a reserved field.")
+
         self.fields[key.lexeme] = value
+
+    def load_default_fields(self) -> dict[str, object]:
+        return {
+            "klass": self.klass,
+            "methods": self.get_methods(),
+        }
+
+    def get_methods(self) -> list[LoxFunction]:
+        return list(self.klass.methods)
 
     def __str__(self) -> str:
         return f"<{self.klass.name} instance>"
@@ -185,23 +197,22 @@ class LoxClass(LoxInstance, LoxCallable):
         methods: dict[str, LoxFunction],
         metaclass: LoxClass | None = None,
     ) -> None:
-        self.name = name
+        self.methods: dict[str, LoxFunction]
+        self.name: str = name
 
         if metaclass is None:
-            instance_methods = {
-                name: func for name, func in methods.items() if not func.is_static
+            instance_methods: dict[str, LoxFunction] = {
+                name: decl for name, decl in methods.items() if not decl.is_static
             }
-            static_methods = {
-                name: func for name, func in methods.items() if func.is_static
+            static_methods: dict[str, LoxFunction] = {
+                name: decl for name, decl in methods.items() if decl.is_static
             }
 
             self.methods = instance_methods
             super().__init__(LoxClass(f"Meta{name}", static_methods, self))
         else:
             self.methods = methods
-            super().__init__(metaclass)
-
-        # print(self)
+            super().__init__(self)
 
     def call(self, interpreter: Interpreter, arguments: list[object]) -> object:
         instance: LoxInstance = LoxInstance(self)
@@ -223,7 +234,7 @@ class LoxClass(LoxInstance, LoxCallable):
         return self.methods.get(name)
 
     def __str__(self) -> str:
-        return f"<class> {self.name} (metaclass: {self.klass.name})"
+        return f"<class> {self.name}"
 
 
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
