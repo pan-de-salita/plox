@@ -204,9 +204,11 @@ class LoxClass(LoxInstance, LoxCallable):
         name: str,
         methods: dict[str, LoxFunction],
         metaclass: LoxClass | None = None,
+        superclass: LoxClass | None = None,
     ) -> None:
         self.methods: dict[str, LoxFunction]
         self.name: str = name
+        self.superclass: LoxClass | None = superclass
 
         if metaclass is None:
             instance_methods: dict[str, LoxFunction] = {
@@ -242,7 +244,7 @@ class LoxClass(LoxInstance, LoxCallable):
         return self.methods.get(name)
 
     def __str__(self) -> str:
-        return f"<class> {self.name}"
+        return f"<class> {self.name} | superclass: {self.superclass}"
 
 
 class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
@@ -329,12 +331,18 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         # Declare the class in the current environment.
         self._environment.define(class_.name.lexeme, None, False)
 
+        superclass: LoxClass | None = None
+        if class_.superclass:
+            superclass = self.__evaluate(class_.superclass)
+            if not isinstance(superclass, LoxClass):
+                self._error_callback("Superclass must be a class.")
+
         methods: dict[str, LoxFunction] = {
             method.name.lexeme: LoxFunction(
                 declaration=method,
                 closure=self._environment,
                 is_initializer=method.name.lexeme == "init",
-                is_statis=method.is_static,
+                is_static=method.is_static,
                 is_getter=method.is_getter,
             )
             for method in class_.methods
@@ -343,7 +351,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         # Store the class object in the previously declared variable.
         # This two-stage variable binding process allows references to the
         # class inside its own methods.
-        klass: LoxClass = LoxClass(class_.name.lexeme, methods)
+        klass: LoxClass = LoxClass(
+            class_.name.lexeme, methods, metaclass=None, superclass=superclass
+        )
         self._environment.assign(class_.name, klass)
 
     def visit_if_stmt(self, if_: stmt.If) -> None:

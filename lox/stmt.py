@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2026-01-28 20:35:48.217485).
+# Generated from GenerateAst class (2026-02-14 19:03:29.326485).
 
 from __future__ import annotations
 
@@ -90,9 +90,10 @@ class Function(Stmt):
 
 
 class Class(Stmt):
-    def __init__(self, name: Token, methods: list[Function]) -> None:
+    def __init__(self, name: Token, methods: list[Function], superclass: Expr.Variable | None = None) -> None:
         self.name = name
         self.methods = methods
+        self.superclass = superclass
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_class_stmt(self)

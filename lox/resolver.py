@@ -61,6 +61,12 @@ class Resolver(expr.Visitor, stmt.Visitor):
         self.__declare(class_.name)
         self.__define(class_.name)
 
+        if class_.superclass and class_.name.lexeme == class_.superclass.name.lexeme:
+            self._error_callback("A class can't inherit from itself.")
+
+        if class_.superclass:
+            self.__resolve(class_.superclass)
+
         self.__begin_scope()
 
         # Initialize `this` in the class scope before resolving methods.

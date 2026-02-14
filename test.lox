@@ -288,39 +288,55 @@
 // print instance.thing;
 // print instance.otherThing;
 
-class Math {
-      class square(n) {
-            return n * n;
+// class Math {
+//       class square(n) {
+//             return n * n;
+//       }
+// }
+//
+// print Math.square(3);
+// var math = Math();
+// math.test = 100;
+// print math.test;
+// print Math.klass;
+// print math.klass;
+// print math.klass.methods;
+// print math.methods;
+//
+// class Circle {
+//       init(radius) {
+//             this.radius = radius;
+//       }
+//
+//       area {
+//             return 3.14 * this.radius * this.radius;
+//       }
+// }
+//
+// var circle = Circle(4);
+// var getArea = circle.area;
+// print(getArea);
+//
+// fun doSomething() {
+//     print "do something";
+// }
+//
+// circle.doSomething = doSomething;
+// print circle.doSomething;
+// print circle.doSomething();
+//
+
+class Doughnut {
+      speak() {
+              print this;
       }
 }
 
-print Math.square(3);
-var math = Math();
-math.test = 100;
-print math.test;
-print Math.klass;
-print math.klass;
-print math.klass.methods;
-print math.methods;
-
-class Circle {
-      init(radius) {
-            this.radius = radius;
-      }
-
-      area {
-            return 3.14 * this.radius * this.radius;
+class BostonCream < Doughnut {
+      speak() {
+              print this;
       }
 }
 
-var circle = Circle(4);
-var getArea = circle.area;
-print(getArea);
-
-fun doSomething() {
-    print "do something";
-}
-
-circle.doSomething = doSomething;
-print circle.doSomething;
-print circle.doSomething();
+print Doughnut;
+print BostonCream;
