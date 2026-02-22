@@ -241,7 +241,13 @@ class LoxClass(LoxInstance, LoxCallable):
         return 0
 
     def find_method(self, name: str) -> LoxFunction | None:
-        return self.methods.get(name)
+        method: LoxFunction | None = self.methods.get(name)
+
+        if method:
+            return method
+
+        if self.superclass:
+            return self.superclass.find_method(name)
 
     def __str__(self) -> str:
         return f"<class> {self.name} | superclass: {self.superclass}"
