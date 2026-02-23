@@ -327,16 +327,19 @@
 //
 
 class Doughnut {
-      speak() {
-              print this;
+      cook() {
+              print "Fry until golden brown.";
       }
 }
 
 class BostonCream < Doughnut {
-      speak() {
-              print this;
+      cook() {
+              super.cook();
+              print "Pipe full of custard and coat with chocolate.";
       }
 }
 
-print Doughnut;
-print BostonCream;
+BostonCream().cook();
+// Expected output:
+// Fry until golden brown.
+// Pipe full of custard and coat with chocolate.

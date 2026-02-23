@@ -584,6 +584,13 @@ class Parser:
             return expr.Variable(self.__previous())
         elif self.__match(TokenType.THIS):
             return expr.This(self.__previous())
+        elif self.__match(TokenType.SUPER):
+            keyword: Token = self.__previous()
+            self.__consume(TokenType.DOT, "Expect '.' after super.")
+            method: Token = self.__consume(
+                TokenType.IDENTIFIER, "Expect superclass method name."
+            )
+            return expr.Super(keyword, method)
         elif self.__match(TokenType.FUN):
             return self.__lambda()
         elif self.__match(TokenType.LEFT_PAREN):

@@ -63,6 +63,7 @@ class GenerateAst:
                 "Get         : object Expr, name Token",
                 "Set         : object Expr, name Token, value Expr",
                 "This        : keyword Token",
+                "Super       : keyword Token, method Token",
             ],
         )
 
