@@ -98,6 +98,17 @@ class Parser:
 
     def __class_declaration(self) -> stmt.Class:
         name: Token = self.__consume(TokenType.IDENTIFIER, "Expect class name.")
+
+        # Own implementation, which is wrong:
+        # superclass: expr.Expr | None = None
+        # if self.__match(TokenType.LESS):
+        #     superclass = self.__expression() # No safeguards for lack of superclass!
+
+        superclass: expr.Variable | None = None
+        if self.__match(TokenType.LESS):
+            self.__consume(TokenType.IDENTIFIER, "Expect superclass name.")
+            superclass = expr.Variable(self.__previous())
+
         self.__consume(TokenType.LEFT_BRACE, "Expect left brace.")
 
         methods: list[stmt.Function] = []
@@ -106,7 +117,7 @@ class Parser:
 
         self.__consume(TokenType.RIGHT_BRACE, "Expect right brace.")
 
-        return stmt.Class(name, methods)
+        return stmt.Class(name, methods, superclass)
 
     def __var_declaration(self) -> stmt.Var:
         name: Token = self.__consume(TokenType.IDENTIFIER, "Expect variable name.")
@@ -573,6 +584,13 @@ class Parser:
             return expr.Variable(self.__previous())
         elif self.__match(TokenType.THIS):
             return expr.This(self.__previous())
+        elif self.__match(TokenType.SUPER):
+            keyword: Token = self.__previous()
+            self.__consume(TokenType.DOT, "Expect '.' after super.")
+            method: Token = self.__consume(
+                TokenType.IDENTIFIER, "Expect superclass method name."
+            )
+            return expr.Super(keyword, method)
         elif self.__match(TokenType.FUN):
             return self.__lambda()
         elif self.__match(TokenType.LEFT_PAREN):

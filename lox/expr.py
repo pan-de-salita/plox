@@ -1,4 +1,4 @@
-# Generated from GenerateAst class (2026-01-28 20:35:48.217729).
+# Generated from GenerateAst class (2026-02-23 20:24:54.155610).
 
 from __future__ import annotations
 
@@ -61,6 +61,10 @@ class Visitor(ABC, Generic[R]):
 
     @abstractmethod
     def visit_this_expr(self, this_: This) -> R:
+        pass
+
+    @abstractmethod
+    def visit_super_expr(self, super_: Super) -> R:
         pass
 
 
@@ -188,3 +192,12 @@ class This(Expr):
 
     def accept(self, visitor: Visitor[R]) -> R:
         return visitor.visit_this_expr(self)
+
+
+class Super(Expr):
+    def __init__(self, keyword: Token, method: Token) -> None:
+        self.keyword = keyword
+        self.method = method
+
+    def accept(self, visitor: Visitor[R]) -> R:
+        return visitor.visit_super_expr(self)
