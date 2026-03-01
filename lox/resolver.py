@@ -189,6 +189,11 @@ class Resolver(expr.Visitor, stmt.Visitor):
                 "Can't use 'super' outside of a class.", super_.keyword
             )
 
+        if self._current_class != ClassType.SUBCLASS:
+            self._error_callback(
+                "Can't use 'super' in a class with no superclass.", super_.keyword
+            )
+
         self.__resolve_local(super_, super_.keyword)
 
     def visit_logical_expr(self, logical: expr.Logical) -> None:
