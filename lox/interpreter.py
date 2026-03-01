@@ -108,6 +108,10 @@ class LoxFunction(LoxCallable):
     def bind(self, instance: LoxInstance) -> LoxFunction:
         environment: Environment = Environment(enclosing=self._closure)
         environment.define("this", instance, True)
+
+        if instance.klass.superclass:
+            environment.define("super", instance, True)
+
         return LoxFunction(
             self._declaration,
             environment,
@@ -168,6 +172,20 @@ class LoxInstance:
     def __init__(self, klass: LoxClass) -> None:
         self.klass: LoxClass = klass
         self.fields: dict[str, object] = {**self.load_default_fields()}
+
+    def get_super(self, name: Token) -> object:
+        ancestry: list[LoxClass] = []
+        klass: LoxClass = self.klass
+        while klass:
+            ancestry.append(klass)
+            klass = klass.superclass
+
+        for klass in reversed(ancestry):
+            method: LoxFunction | None = klass.find_method(name.lexeme)
+            if method:
+                return method.bind(self)
+
+        raise RuntimeException(name, f"Undefined super method: {name.lexeme}.")
 
     def get(self, name: Token) -> object:
         if name.lexeme in self.fields:
@@ -284,7 +302,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
             self._error_callback(error)
 
     def resolve(
-        self, variable: expr.Variable | expr.Assign | expr.This, depth: int
+        self, variable: expr.Variable | expr.Assign | expr.This | expr.Super, depth: int
     ) -> None:
         self._locals[variable] = depth
 
@@ -567,6 +585,9 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
     def visit_this_expr(self, this_: expr.This) -> object:
         return self.__look_up_variable(this_.keyword, this_)
 
+    def visit_super_expr(self, super_: expr.Super) -> object:
+        return self.__look_up_variable(super_.keyword, super_).get_super(super_.method)
+
     def visit_unary_expr(self, unary: expr.Unary) -> object:
         operator: Token = unary.operator
         right: object = self.__evaluate(unary.right)
@@ -585,7 +606,7 @@ class Interpreter(expr.Visitor[object], stmt.Visitor[None]):
         return self.__look_up_variable(variable.name, variable)
 
     def __look_up_variable(
-        self, name: Token, variable: expr.Variable | expr.This
+        self, name: Token, variable: expr.Variable | expr.This | expr.Super
     ) -> object:
         distance: int | None = self._locals.get(variable)
         if distance is None:

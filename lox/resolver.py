@@ -73,6 +73,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
         # Methods will reference `this`, so it must be available in an
         # enclosing scope when visit_this_expr() is called during method resolution.
         self.__peek_scope()["this"] = LocalVar(class_.name, True, False)
+        self.__peek_scope()["super"] = LocalVar(class_.name, True, False)
 
         declaration: FunctionType = FunctionType.METHOD
         for method in class_.methods:
@@ -175,6 +176,17 @@ class Resolver(expr.Visitor, stmt.Visitor):
         # `this` should already be initialized in visit_class_stmt.
         self.__resolve_local(this_, this_.keyword)
 
+    def visit_super_expr(self, super_: expr.Super) -> None:
+        if self._current_class == ClassType.NONE:
+            self._error_callback(
+                "Can't use 'super' outside of a class.", super_.keyword
+            )
+
+        self.__peek_prior_scope()[super_.method.lexeme] = LocalVar(
+            super_.method, True, False
+        )
+        self.__resolve_local(super_, super_.keyword)
+
     def visit_logical_expr(self, logical: expr.Logical) -> None:
         self.__resolve(logical.left)
         self.__resolve(logical.right)
@@ -259,7 +271,9 @@ class Resolver(expr.Visitor, stmt.Visitor):
         return self._scopes[-2]
 
     def __resolve_local(
-        self, variable: expr.Variable | expr.Assign | expr.This, name: Token
+        self,
+        variable: expr.Variable | expr.Assign | expr.This | expr.Super,
+        name: Token,
     ) -> None:
         # We start at the innermost scope and work outwards, looking in each
         # map for a matching name. If we find the variable, we resolve it,

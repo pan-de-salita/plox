@@ -335,7 +335,6 @@ class Doughnut {
 class BostonCream < Doughnut {
       cook() {
               super.cook();
-              print "Pipe full of custard and coat with chocolate.";
       }
 }
 
@@ -343,3 +342,27 @@ BostonCream().cook();
 // Expected output:
 // Fry until golden brown.
 // Pipe full of custard and coat with chocolate.
+
+class A {
+      method() {
+               print "A method";
+               print this;
+      }
+}
+
+class B < A {
+      method() {
+               print "B method";
+      }
+
+      test() {
+               super.method();
+               print this;
+      }
+}
+
+class C < B {}
+
+C().test();
+
+// Lookup should start on the superclass of the class containing the super expression.
