@@ -65,6 +65,7 @@ class Resolver(expr.Visitor, stmt.Visitor):
             self._error_callback("A class can't inherit from itself.")
 
         if class_.superclass:
+            self._current_class = ClassType.SUBCLASS
             self.__resolve(class_.superclass)
 
         if class_.superclass:
