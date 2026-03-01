@@ -182,9 +182,6 @@ class Resolver(expr.Visitor, stmt.Visitor):
                 "Can't use 'super' outside of a class.", super_.keyword
             )
 
-        self.__peek_prior_scope()[super_.method.lexeme] = LocalVar(
-            super_.method, True, False
-        )
         self.__resolve_local(super_, super_.keyword)
 
     def visit_logical_expr(self, logical: expr.Logical) -> None:
