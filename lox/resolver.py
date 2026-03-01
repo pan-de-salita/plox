@@ -67,13 +67,17 @@ class Resolver(expr.Visitor, stmt.Visitor):
         if class_.superclass:
             self.__resolve(class_.superclass)
 
+        if class_.superclass:
+            # Creates the environment containing the present class's superclass.
+            self.__begin_scope()
+            self.__peek_scope()["super"] = LocalVar(class_.name, True, False)
+
         self.__begin_scope()
 
         # Initialize `this` in the class scope before resolving methods.
         # Methods will reference `this`, so it must be available in an
         # enclosing scope when visit_this_expr() is called during method resolution.
         self.__peek_scope()["this"] = LocalVar(class_.name, True, False)
-        self.__peek_scope()["super"] = LocalVar(class_.name, True, False)
 
         declaration: FunctionType = FunctionType.METHOD
         for method in class_.methods:
@@ -83,6 +87,9 @@ class Resolver(expr.Visitor, stmt.Visitor):
             self.__resolve_function(method, declaration)
 
         self.__end_scope()
+
+        if class_.superclass:
+            self.__end_scope()
 
         self._current_class = enclosing_class
 
