@@ -1,31 +1,32 @@
 # plox
 
-A Python implementation of the **Lox** language from Robert Nystrom's *Crafting Interpreters* — lexer, recursive-descent parser, static resolver, and tree-walking interpreter. Pure standard library, no runtime dependencies.
+a python implementation of the **lox** language from robert nystrom's *crafting interpreters* — lexer, recursive-descent parser, static resolver, and tree-walking interpreter. pure standard library, no runtime dependencies.
 
-## Features
+## features
 
-- First-class functions, closures, and lexical scoping
-- Classes: methods, initializers, `this`, `super`, single inheritance
+- first-class functions, closures, and lexical scoping
+- classes: methods, initializers, `this`, `super`, single inheritance
 - `for` / `while` loops, `if` / `else`, logical operators, `print`
 
-## Beyond the book ✨
+## beyond the book
 
-Extensions I designed and implemented myself, on top of the textbook:
+extensions i designed and implemented myself, on top of the textbook:
 
-- **Lambda expressions** — anonymous first-class functions:
+- **lambda expressions** — anonymous first-class functions:
   ```lox
   var add = fun (a, b) { return a + b; };
   ```
-- **Ternary operator** — `var max = a > b ? a : b;`
+- **ternary operator** — `var max = a > b ? a : b;`
 - **`break` statement** for loop control flow
-- **Static methods** — callable on the class itself, not instances:
+- **unused variable reporting** — the static resolver tracks whether each local variable is ever read and flags unused ones when its scope closes.
+- **static methods** — callable on the class itself, not instances:
   ```lox
   class Math {
     class square(n) { return n * n; }
   }
   print Math.square(3); // -> 9
   ```
-- **Getters** — methods without parentheses, auto-invoked on property access:
+- **getters** — methods without parentheses, auto-invoked on property access:
   ```lox
   class Circle {
     init(radius) { this.radius = radius; }
@@ -33,22 +34,21 @@ Extensions I designed and implemented myself, on top of the textbook:
   }
   print Circle(4).area; // -> 50.24
   ```
-- **Metaclass pattern** — a class is itself an instance. Static methods live on an auto-generated `Meta<ClassName>` class, and any instance can introspect itself at runtime via the `klass` and `methods` fields.
-- **AST code generation tool** (`tool/generate_ast.py`) — emits the AST node classes and Visitor interface from declarative type definitions, instead of writing them by hand.
-- **RPN AST printer** (`lox/ast_printer_rpn.py`) — a second visitor that renders expressions in Reverse Polish Notation, alongside the book's parenthesized printer.
-- Also: `%` modulo and the comma operator.
+- **metaclass pattern** — a class is itself an instance. static methods live on an auto-generated `Meta<ClassName>` class, and any instance can introspect itself at runtime via the `klass` and `methods` fields.
+- **ast code generation tool** (`tool/generate_ast.py`) — emits the ast node classes and visitor interface from declarative type definitions, instead of writing them by hand.
+- also: `%` modulo and the comma operator.
 
-## Running
+## running
 
 ```sh
-python lox/lox.py                 # REPL
+python lox/lox.py                 # repl
 python lox/lox.py path/to/file.lox  # run a script
 ```
 
-Requires Python 3.14+ (see `.python-version`).
+requires python 3.14+ (see `.python-version`).
 
-## Layout
+## layout
 
-- `lox/` — the interpreter: scanner, parser, resolver, interpreter, AST printers
-- `tool/` — the AST code generator
+- `lox/` — the interpreter: scanner, parser, resolver, interpreter, ast printers
+- `tool/` — the ast code generator
 - `test.lox` — exploration scripts
